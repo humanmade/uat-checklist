@@ -165,7 +165,7 @@ if ( $can_record ) {
 			. '<button type="button" class="uat-checklist__remove">%20$s</button></div>'
 			// The input stays in the page, focusable, so keyboard and screen readers use the native control.
 			. '<input type="file" class="uat-checklist__file" id="%14$s" name="%16$s" accept="%17$s" aria-describedby="%18$s">'
-			. '<label class="uat-checklist__upload wp-element-button" for="%14$s">%21$s</label>'
+			. '<label class="uat-checklist__upload" for="%14$s">%21$s</label>'
 			. '<p class="uat-checklist__hint" id="%18$s">%19$s</p>'
 			. '</div>'
 			. '<div class="uat-checklist__actions">'

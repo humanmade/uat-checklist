@@ -150,13 +150,18 @@ $popup-width: 500px;
 		@include primary-button;
 	}
 
+	// A step's two buttons span the form, and only Save result is primary: adding a screenshot is optional.
+	.uat-checklist__result .uat-checklist__save {
+		width: 100%;
+	}
+
 	.uat-checklist__upload {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		width: 100%;
 
-		@include primary-button;
+		@include secondary-button;
 	}
 
 	// The file input is hidden, so its focus and its error show on the button that labels it.

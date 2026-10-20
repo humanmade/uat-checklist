@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T22:59:28+00:00\n"
+"POT-Creation-Date: 2026-10-20T23:09:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: uat-checklist\n"
@@ -68,7 +68,7 @@ msgid "Other testers"
 msgstr ""
 
 #: blocks/checklist/render.php:130
-#: inc/admin.php:198
+#: inc/admin.php:203
 #: inc/results.php:195
 msgid "Additional comments"
 msgstr ""
@@ -115,12 +115,12 @@ msgid "%1$s marked this Fail on %2$s: %3$s"
 msgstr ""
 
 #: blocks/step/render.php:178
-#: inc/admin.php:228
+#: inc/admin.php:233
 msgid "Result"
 msgstr ""
 
 #: blocks/step/render.php:181
-#: inc/admin.php:229
+#: inc/admin.php:234
 msgid "Comment"
 msgstr ""
 
@@ -137,7 +137,7 @@ msgid "Turn on JavaScript to record a result."
 msgstr ""
 
 #: blocks/step/render.php:190
-#: inc/admin.php:230
+#: inc/admin.php:235
 #: blocks/step/edit.js:130
 #: blocks/step/edit.js:163
 msgid "Screenshot"
@@ -313,110 +313,114 @@ msgstr ""
 msgid "Lets them write checklists, mark results fixed and trash them."
 msgstr ""
 
-#: inc/admin.php:227
-#: inc/admin.php:582
+#: inc/admin.php:232
+#: inc/admin.php:587
 msgid "Step"
 msgstr ""
 
-#: inc/admin.php:231
+#: inc/admin.php:236
 #: inc/checklists.php:57
 #: inc/overview.php:440
 #: src/panel.js:62
 msgid "Checklist"
 msgstr ""
 
-#: inc/admin.php:232
+#: inc/admin.php:237
 msgid "By"
 msgstr ""
 
-#: inc/admin.php:233
+#: inc/admin.php:238
 msgid "Last saved"
 msgstr ""
 
-#: inc/admin.php:288
+#: inc/admin.php:293
 msgid "(checklist deleted)"
 msgstr ""
 
-#: inc/admin.php:320
+#: inc/admin.php:325
 #: inc/checklists.php:61
 msgid "Edit checklist"
 msgstr ""
 
-#: inc/admin.php:330
+#: inc/admin.php:335
 msgid "View instructions"
 msgstr ""
 
-#: inc/admin.php:375
+#: inc/admin.php:380
 msgid "All checklists"
 msgstr ""
 
-#: inc/admin.php:391
+#: inc/admin.php:396
 msgid "Filter by checklist"
 msgstr ""
 
-#: inc/admin.php:401
+#: inc/admin.php:406
 msgid "Latest result on each step only"
 msgstr ""
 
-#: inc/admin.php:526
-#: inc/admin.php:541
-#: inc/admin.php:575
-#: inc/admin.php:635
+#: inc/admin.php:531
+#: inc/admin.php:546
+#: inc/admin.php:580
+#: inc/admin.php:646
 msgid "Mark fixed"
 msgstr ""
 
-#: inc/admin.php:557
+#: inc/admin.php:562
 msgid "Only a Fail that is still the latest result on its step can be marked fixed."
 msgstr ""
 
-#: inc/admin.php:586
+#: inc/admin.php:591
 msgid "Failed by"
 msgstr ""
 
-#: inc/admin.php:590
+#: inc/admin.php:595
 msgid "Failed on"
 msgstr ""
 
-#: inc/admin.php:594
+#: inc/admin.php:599
 msgid "Their comment"
 msgstr ""
 
-#: inc/admin.php:607
+#: inc/admin.php:612
 msgid "Their screenshot"
 msgstr ""
 
-#: inc/admin.php:615
+#: inc/admin.php:620
 msgid "Open full size"
 msgstr ""
 
-#: inc/admin.php:615
+#: inc/admin.php:620
 #: inc/screenshots.php:180
 msgid "(opens in a new tab)"
 msgstr ""
 
-#: inc/admin.php:622
+#: inc/admin.php:627
 msgid "Note for testers"
 msgstr ""
 
-#: inc/admin.php:631
-msgid "Optional. Testers see it when they retest the step."
+#: inc/admin.php:636
+msgid "Optional. Testers see it when they retest the step, and the tester who failed it is emailed the note."
 msgstr ""
 
-#: inc/admin.php:656
+#: inc/admin.php:640
+msgid "Don't send email notification"
+msgstr ""
+
+#: inc/admin.php:669
 msgid "You cannot mark results fixed."
 msgstr ""
 
 #. translators: %s: the most characters a note can hold.
-#: inc/admin.php:671
+#: inc/admin.php:684
 #, php-format
 msgid "The note can be at most %s characters."
 msgstr ""
 
-#: inc/admin.php:684
+#: inc/admin.php:697
 msgid "This step is no longer in the checklist."
 msgstr ""
 
-#: inc/admin.php:743
+#: inc/admin.php:757
 msgid "Marked fixed. Testers now see the step as Retest."
 msgstr ""
 

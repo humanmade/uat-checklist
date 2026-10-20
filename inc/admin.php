@@ -56,6 +56,11 @@ const MARK_FIXED_PAGE = 'uat-mark-fixed';
 const FIXED_NOTICE = 'uat_fixed';
 
 /**
+ * Mark fixed form field that, when ticked, saves the note without emailing it to the tester.
+ */
+const NO_EMAIL_FIELD = 'no_email';
+
+/**
  * Wires up the module's hooks.
  *
  * @return void
@@ -628,7 +633,13 @@ function render_mark_fixed_page(): void {
 							rows="4"
 							maxlength="<?php echo esc_attr( (string) Results\COMMENT_MAX_LENGTH ); ?>"
 						></textarea>
-						<p class="description"><?php esc_html_e( 'Optional. Testers see it when they retest the step.', 'uat-checklist' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Optional. Testers see it when they retest the step, and the tester who failed it is emailed the note.', 'uat-checklist' ); ?></p>
+						<p>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( NO_EMAIL_FIELD ); ?>" value="1">
+								<?php esc_html_e( "Don't send email notification", 'uat-checklist' ); ?>
+							</label>
+						</p>
 					</td>
 				</tr>
 			</table>
@@ -642,14 +653,16 @@ function render_mark_fixed_page(): void {
  * Marks a failed step fixed: saves a Fixed result and leaves the Fail as it was.
  *
  * This is the decision; the admin-post handler only checks the nonce and reports the outcome. When the note is not
- * empty it also schedules an email to the tester who saved the Fail, so the admin form and the ability both notify.
+ * empty it also schedules an email to the tester who saved the Fail, so the admin form and the ability both notify,
+ * unless `$notify` is false.
  *
  * @param int    $result_id ID of a Fail on the step.
  * @param int    $user_id   User marking it, who must be able to manage UAT checklists.
  * @param string $note      Note for testers, already sanitised.
+ * @param bool   $notify    Whether to email the tester the note. The note shows in the panel either way.
  * @return WP_Post|WP_Error The Fixed result, or why it was refused.
  */
-function mark_fixed( int $result_id, int $user_id, string $note ): WP_Post|WP_Error {
+function mark_fixed( int $result_id, int $user_id, string $note, bool $notify = true ): WP_Post|WP_Error {
 	if ( ! user_can( $user_id, Access\CAP_MANAGE ) ) {
 		return new WP_Error(
 			'uat_checklist_forbidden',
@@ -693,7 +706,7 @@ function mark_fixed( int $result_id, int $user_id, string $note ): WP_Post|WP_Er
 		$note
 	);
 
-	if ( ! is_wp_error( $fixed ) ) {
+	if ( $notify && ! is_wp_error( $fixed ) ) {
 		Notifications\schedule_fixed_notice( $fixed, $result );
 	}
 
@@ -714,7 +727,8 @@ function handle_mark_fixed(): void {
 	$fixed = mark_fixed(
 		$result_id,
 		get_current_user_id(),
-		isset( $_POST['note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note'] ) ) : ''
+		isset( $_POST['note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note'] ) ) : '',
+		! isset( $_POST[ NO_EMAIL_FIELD ] )
 	);
 
 	if ( is_wp_error( $fixed ) ) {

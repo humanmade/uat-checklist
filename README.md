@@ -119,7 +119,8 @@ When the manager writes a note, the tester whose Fail it was also gets an email.
 checklist, quotes the tester's comment and the note, and links to retest. WP-Cron sends it shortly after the save,
 so on a site with WP-Cron disabled it goes when the system cron next runs. It goes through `wp_mail()`, so the
 site's own mailer applies. It is written in the tester's profile language, provided the site has that language
-installed. No email goes when the note is empty, or when the manager marked their own Fail. The
+installed. No email goes when the note is empty, when the manager marked their own Fail, or when they ticked
+**Don't send email notification** under the note; the note still shows in the panel. The
 `uat-checklist/mark-fixed` ability sends it too. Deactivating the plugin removes any email still waiting to go,
 since nothing would be there to send it.
 

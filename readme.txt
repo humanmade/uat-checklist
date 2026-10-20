@@ -33,6 +33,8 @@ WordPress 7.1 or later, and PHP 8.4.
 = 0.3.0 =
 * A tester can send a screenshot with a result, from **Add a screenshot** under a step's comment in the panel. The chosen image is previewed full width above the button, which then offers to replace it, with **Remove screenshot** to clear it. JPEG, PNG, GIF and WebP images are accepted, up to the site's upload limit; anything else is refused and nothing is saved.
 * The screenshot has its own column in **UAT → Results**, right of the comment. It shows large on the **Mark fixed** page, under the tester's quoted comment, and in the panel's retest notice once the step is marked fixed. It is listed in the Media Library, and deleted with its result.
+* **Save result** spans the step form as the primary button, and **Add a screenshot** above it is a secondary one.
+* **Mark fixed** has a **Don't send email notification** checkbox under the note. Ticked, the note is saved and shown in the panel, and the tester is not emailed.
 
 = 0.2.0 =
 * A step can show a screenshot uploaded in the editor. Select the step, then upload an image or choose one from the Media Library under its text; the panel shows it there, above the step's instructions. Its alternative text is under **Screenshot** in the sidebar, and **Replace** and **Remove image** are in the block toolbar.
