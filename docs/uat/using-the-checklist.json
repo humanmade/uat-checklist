@@ -1,0 +1,254 @@
+{
+	"slug": "using-the-checklist",
+	"language": "en",
+	"title": "Using the Testing checklist",
+	"subtitle": "How to open the Testing checklist panel, and how to record a result and a comment for each step.",
+	"headings": {
+		"tutorial": "Steps",
+		"examples": "Pages to try"
+	},
+	"tutorial": [
+		{
+			"h3": "About this page"
+		},
+		{
+			"p": "The Testing checklist is a panel for recording test results while you look at a page. Mark each step <strong>Pass</strong> or <strong>Fail</strong>, add a comment, and the result is saved on the site."
+		},
+		{
+			"p": "The screens in this guide show the checklist for <a href=\"{pages}/buttons/\">Buttons</a>. This page has a practice checklist of its own, which the panel opens on here. Its results do not affect the testing of any block."
+		},
+		{
+			"p": "Results recorded here help the development team find and fix issues sooner, so you can start using each feature sooner. When an issue is fixed, the development team will ask the tester to retest it against the checklist, and against any additional tests added to the page for that fix."
+		},
+		{
+			"h3": "Opening the panel"
+		},
+		{
+			"p": "The first time you open a UAT page, the panel is already open."
+		},
+		{
+			"steps": [
+				{
+					"text": "In the admin bar, click <strong>UAT</strong> (the tick icon) to open the panel. It is in the same place in wp-admin and in the block editor.",
+					"image": "admin-bar",
+					"alt": "The UAT item in the admin bar has a red outline, with a tick icon and the text UAT"
+				},
+				{
+					"text": "The panel opens on the right of the screen. At the top are the checklist picker and <strong>Close</strong>. Below them are the checklist's name, how many steps are done, any introduction to the checklist, and a short guide.",
+					"image": "panel-top",
+					"alt": "The top of the open panel: the checklist picker, Close, the checklist's name, the count and meter, Open in new window and the guide"
+				},
+				{
+					"text": "To close the panel, click <strong>Close</strong> or <strong>UAT</strong>. While the panel is open, UAT takes the site's accent colour, with an underline."
+				},
+				{
+					"text": "Point to <strong>UAT</strong> to open its menu. <strong>UAT hub page</strong> goes to the hub page, and <strong>How to use the checklist</strong> goes to this page.",
+					"image": "admin-bar-menu",
+					"alt": "The menu under UAT: UAT hub page and How to use the checklist"
+				},
+				{
+					"text": "On a phone, the admin bar shows <strong>UAT</strong> as the tick icon alone, without its label. Tap it to open the panel.",
+					"image": "admin-bar-phone",
+					"alt": "The admin bar on a 390px wide screen, with the UAT tick icon outlined in red"
+				},
+				{
+					"text": "To open another checklist, choose it from the <strong>Checklist</strong> picker at the top of the panel.",
+					"image": "picker",
+					"alt": "The Checklist picker and the Close button at the top of the panel"
+				}
+			]
+		},
+		{
+			"p": "The brackets after each name in the picker show the progress. <strong>Buttons (0 / 11 required)</strong> means none of its 11 required steps has a result yet. A checklist with no required steps shows its total instead, such as <strong>Using the Testing checklist (0 / 3)</strong>."
+		},
+		{
+			"h3": "Required steps and nice-to-have steps"
+		},
+		{
+			"p": "<strong>Finishing the required steps is enough.</strong> The steps without a tag are nice to have, for anyone with time to spare."
+		},
+		{
+			"steps": [
+				{
+					"text": "A step with a <strong>Required</strong> tag on its right must be tested.",
+					"image": "tag-required",
+					"alt": "A step row with the Required tag"
+				},
+				{
+					"text": "A step with no tag is nice to have.",
+					"image": "tag-optional",
+					"alt": "A step row with no Required tag"
+				},
+				{
+					"text": "Check your progress in the count and the meter at the top of the panel. \"0 of 11 required done, 0 of 12 in all\" means 11 of the 12 steps are required and none has a result yet. The meter follows the required steps.",
+					"image": "count-meter",
+					"alt": "Under the checklist's name: the count 0 of 11 required done, 0 of 12 in all, and the meter"
+				}
+			]
+		},
+		{
+			"h3": "Testing a step"
+		},
+		{
+			"steps": [
+				{
+					"text": "The first step without a result opens on its own. Click a row to open any other step.",
+					"image": "step-open",
+					"alt": "An open step with its expected result, the Pass and Fail choices, the comment box and Save result"
+				},
+				{
+					"text": "Read the instructions, look at the screenshot and read the expected result, then do what the steps say."
+				},
+				{
+					"text": "Check whether you saw the expected result, then choose <strong>Pass</strong> or <strong>Fail</strong> under <strong>Result</strong>.",
+					"image": "choose-pass",
+					"alt": "Pass chosen under Result, with the comment box and the Save result button below"
+				},
+				{
+					"text": "Click <strong>Save result</strong>. The step closes and the next step without a result opens."
+				},
+				{
+					"text": "A step with a result shows it even when closed. Pass is a row in the Pass colour with <strong>Pass</strong>, and Fail is a row in the Fail colour with <strong>Fail</strong>.",
+					"image": "results-closed",
+					"alt": "Three steps in the editor section. The first is a row in the Fail colour marked Fail. The second and third are rows in the Pass colour marked Pass"
+				}
+			]
+		},
+		{
+			"h3": "Writing a comment"
+		},
+		{
+			"p": "A <strong>Fail</strong> always needs a comment. Say which expected result failed and what happened instead. The comment is what the development team turns into a ticket."
+		},
+		{
+			"steps": [
+				{
+					"text": "Choose <strong>Fail</strong> and write in <strong>Comment</strong> which expected result failed and what happened instead.",
+					"image": "fail-comment",
+					"alt": "Fail chosen, with a comment saying the button does not open the link"
+				},
+				{
+					"text": "If you click <strong>Save result</strong> with the comment empty, \"Add a comment saying what went wrong.\" appears and nothing is saved."
+				},
+				{
+					"text": "A comment on a <strong>Pass</strong> is welcome too. Write anything worth noting."
+				},
+				{
+					"text": "Click <strong>Save result</strong>."
+				}
+			]
+		},
+		{
+			"p": "Every tester sees the latest result on each step, so you can carry on from where another tester stopped."
+		},
+		{
+			"h3": "Writing additional comments"
+		},
+		{
+			"p": "Anything that does not belong to one step goes in <strong>Additional comments</strong>, at the end of the checklist. Other testers can read it."
+		},
+		{
+			"steps": [
+				{
+					"text": "Scroll to the end of the checklist and click <strong>Additional comments</strong> to open it.",
+					"image": "notes-closed",
+					"alt": "The Additional comments row at the end of the checklist"
+				},
+				{
+					"text": "Write in <strong>Your comments</strong> and click <strong>Save comments</strong>. Comments from other testers appear under <strong>Other testers</strong>.",
+					"image": "notes",
+					"alt": "Additional comments open, with text in Your comments and the Save comments button"
+				}
+			]
+		},
+		{
+			"h3": "Keeping the checklist beside your work"
+		},
+		{
+			"p": "Open the panel in a window of its own to keep the checklist in view while you work in the editor or on the page you are testing."
+		},
+		{
+			"steps": [
+				{
+					"text": "Click <strong>Open in new window</strong> at the top of the panel.",
+					"image": "window-link",
+					"alt": "The Open in new window link, outlined in red, at the right end of the row with the checklist's name and count"
+				},
+				{
+					"text": "The checklist opens in a new window about 500px wide, and the panel closes in the original window. The window's title is \"Testing checklist: page name\".",
+					"image": "popout",
+					"alt": "The checklist in its own window: the picker, the name, the count and the list of steps in one column"
+				},
+				{
+					"text": "In Chrome and Edge, this window stays in front of your other windows. It belongs to the tab that opened it, and closes when that tab is closed."
+				},
+				{
+					"text": "Open the window from a UAT page, leave that tab where it is, and do your testing in another tab or window."
+				},
+				{
+					"text": "Clicking <strong>Open in new window</strong> on another UAT page does not add a window. The same window shows that page's checklist."
+				},
+				{
+					"text": "Reading the steps, saving a result and writing a comment work the same in this window. Click <strong>Close</strong> to close the window."
+				},
+				{
+					"text": "To see the whole page of instructions for a block, click <strong>Open the instructions</strong>. The page opens in a new window the size of the screen. This window is also shared, so opening another page's instructions replaces the page in it.",
+					"image": "instructions-link",
+					"alt": "The top of the new window. The Open the instructions link has a red outline"
+				}
+			]
+		},
+		{
+			"p": "<strong>Open the instructions</strong> does not show while you are on the page being tested. <strong>Open in new window</strong> does not show inside the new window."
+		}
+	],
+	"examples": [
+		{
+			"ul": [
+				"<a href=\"{pages}/buttons/\">Buttons</a>: the page used for the screens in this guide",
+				"This page's own checklist, in the panel: for practice"
+			]
+		}
+	],
+	"checklist_intro": [
+		{
+			"p": "Tickets: none."
+		},
+		{
+			"p": "These three steps are for trying the panel. All of them are nice to have. Saving a result here does not affect any other checklist."
+		}
+	],
+	"checklist": [
+		{
+			"section": "Practice",
+			"steps": [
+				{
+					"step": "Open this step, choose <strong>Pass</strong> under <strong>Result</strong>, type <em>Practice</em> in <strong>Comment</strong> and click <strong>Save result</strong>.",
+					"expected": "The row for this step turns the Pass colour and closes, and shows <strong>Pass</strong>. The next step opens.",
+					"optional": true,
+					"id": "e56353be-cb20-4abb-8429-cbdd1b7dea2b"
+				},
+				{
+					"step": "Mark a step Fail and write a comment",
+					"instructions": [
+						"Choose <strong>Fail</strong>.",
+						"Leave <strong>Comment</strong> empty and click <strong>Save result</strong>.",
+						"Type <em>Practice</em> in <strong>Comment</strong> and click <strong>Save result</strong> again."
+					],
+					"expected": [
+						"With the comment empty, \"Add a comment saying what went wrong.\" appears and nothing is saved.",
+						"With a comment, the row for this step turns the Fail colour and closes, and shows <strong>Fail</strong>."
+					],
+					"optional": true,
+					"id": "73565d93-f4bb-45ba-9c87-bdd707136417"
+				},
+				{
+					"step": "Click <strong>Open in new window</strong> in the panel.",
+					"expected": "The checklist opens in a narrow window of its own, and the panel closes in the original window.",
+					"optional": true,
+					"id": "29f0f285-61f0-4d2b-92a9-018150b0dafb"
+				}
+			]
+		}
+	]
+}

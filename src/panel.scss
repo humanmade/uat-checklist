@@ -1,0 +1,295 @@
+// The Testing checklist panel, front end and wp-admin alike. The checklist inside it is styled by
+// blocks/checklist/style.scss. In wp-admin the theme's CSS variables that stylesheet reads are scoped to the
+// panel by inc/panel.php; the front end has them on :root already.
+
+@use 'tokens' as *;
+@use 'controls' as *;
+
+// The pop-out window's width: POPUP_WIDTH in src/lib/checklist.js.
+$popup-width: 500px;
+
+// The tick, spaced from its label by core's .ab-icon margin.
+#wp-admin-bar-uat-checklist .ab-icon::before {
+	content: "\f147";
+	top: 2px;
+}
+
+// Below 783px core shows only its own top-level items, as 52px icons, and hides the rest. The UAT item joins them,
+// sized as core sizes Comments, so a tester on a phone opens the panel from the bar. Without this, panel.js finds
+// the item hidden and shows the floating button over the page, which is meant for screens with no admin bar.
+@media screen and ( max-width: 782px ) {
+
+	#wpadminbar li#wp-admin-bar-uat-checklist {
+		display: block;
+		position: static;
+	}
+
+	#wpadminbar #wp-admin-bar-uat-checklist .ab-icon::before {
+		display: block;
+		top: 0;
+		height: 46px;
+		font-size: 34px;
+		line-height: 1.38235294;
+	}
+}
+
+// The UAT item is a block of the theme's background with its accent tick and label, so it stands out on any admin
+// bar colour scheme. Three IDs, because core's focus colour for a label is
+// `#wpadminbar:not(.mobile) > #wp-toolbar a:focus span.ab-label`, and every state sets the label and icon colours
+// itself so core's blue hover and focus colours never show. Its dropdown keeps core's look.
+#wpadminbar > #wp-toolbar #wp-admin-bar-uat-checklist {
+
+	> .ab-item,
+	> .ab-item:focus,
+	> .ab-item .ab-label,
+	> .ab-item .ab-icon::before {
+		color: token( color-accent );
+	}
+
+	> .ab-item,
+	> .ab-item:focus {
+		background-color: token( color-background );
+	}
+
+	&:hover > .ab-item,
+	&.hover > .ab-item {
+		background-color: token( color-accent-tint );
+	}
+
+	// The checklist is open in its own window: the pale tint, and a window icon after the label.
+	&.is-in-window > .ab-item,
+	&.is-in-window > .ab-item:focus {
+		background-color: token( color-accent-tint );
+	}
+
+	&.is-in-window > .ab-item .ab-label::after {
+		content: "\f504";
+		margin-inline-start: 4px;
+		font: 400 16px/1 dashicons, sans-serif;
+		vertical-align: -3px;
+		color: token( color-accent );
+	}
+
+	// The panel is open: the accent with a bar along the bottom, as a selected tab.
+	&.is-panel-open > .ab-item,
+	&.is-panel-open > .ab-item:focus {
+		background-color: token( color-accent );
+		box-shadow: inset 0 -3px 0 token( color-on-accent );
+	}
+
+	&.is-panel-open > .ab-item,
+	&.is-panel-open > .ab-item .ab-label,
+	&.is-panel-open > .ab-item .ab-icon::before {
+		color: token( color-on-accent );
+	}
+
+	> .ab-item {
+
+		@include focus-ring( -4px );
+	}
+
+	&.is-panel-open > .ab-item:focus-visible {
+		outline-color: token( color-on-accent );
+	}
+}
+
+.uat-panel {
+	position: fixed;
+	z-index: 99990;
+	// panel.js measures --uat-admin-bar-depth, which counts a wrapped second row; core's height is the fallback.
+	inset-block: var( --uat-admin-bar-depth, var( --wp-admin--admin-bar--height, 0 ) ) 0;
+	inset-inline-end: 0;
+	box-sizing: border-box;
+	width: min( $panel-width, 100vw );
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	border-inline-start: 1px solid token( color-border );
+	background-color: token( color-surface );
+	box-shadow: -0.25rem 0 1.5rem token( color-shadow );
+	color: token( color-text );
+	scrollbar-color: token( color-border-hover ) transparent;
+
+	// Set here rather than inherited, since wp-admin's body type is 13px system sans and the front end's is the
+	// theme's. inc/panel.php prints the theme's font faces in wp-admin.
+	font-family: token( font-family );
+	font-size: token( font-size-l );
+	font-weight: token( font-weight-regular );
+	line-height: token( line-height );
+	letter-spacing: token( letter-spacing );
+
+	a {
+
+		@include link;
+	}
+
+	// wp-admin draws its own radio; the native one takes the Pass or Fail colour through accent-color.
+	input[type="radio"] {
+		appearance: auto;
+		border: 0;
+		box-shadow: none;
+
+		&::before {
+			content: none;
+		}
+	}
+
+	// Set by panel.js when the admin bar is not on screen.
+	&.uat-panel--no-admin-bar {
+		inset-block-start: 0;
+	}
+
+	// The pop-out window opens at this width (POPUP_FEATURES in src/lib/checklist.js), so the panel fills it,
+	// and stays phone-width if the tester widens the window.
+	.uat-window & {
+		width: 100%;
+		max-width: $popup-width;
+	}
+
+	.uat-checklist__save {
+
+		@include primary-button;
+	}
+}
+
+// While the open panel covers the whole window, the page behind it cannot be seen, so only the panel scrolls.
+// The breakpoints are the panel's widths, docked and in the pop-out.
+@media ( max-width: $panel-width ) {
+
+	html:has( > body > #uat-panel:not( [hidden] ) ) {
+		overflow: hidden;
+	}
+}
+
+@media ( max-width: $popup-width ) {
+
+	html:has( > body.uat-window > #uat-panel:not( [hidden] ) ) {
+		overflow: hidden;
+	}
+}
+
+.uat-panel__bar {
+	position: sticky;
+	z-index: 2;
+	top: 0;
+	display: flex;
+	align-items: center;
+	gap: token( space-s );
+	padding: token( space-s ) token( space-l );
+	border-block-end: 1px solid token( color-border );
+	background-color: token( color-background );
+
+	label {
+		font-weight: token( font-weight-medium );
+	}
+
+	// Styled here rather than left to wp-admin's form styles, so the picker matches on the front end.
+	select {
+
+		@include field;
+
+		flex: 1;
+		min-width: 0;
+		max-width: none;
+		padding-block: 0;
+		background-image: none;
+		appearance: auto;
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+.uat-panel__close {
+
+	@include secondary-button;
+}
+
+.uat-panel__retests {
+	padding: token( space-s ) token( space-l );
+	border-block-end: 1px solid token( color-border );
+	background-color: token( color-accent-tint-subtle );
+
+	summary {
+		font-weight: token( font-weight-medium );
+		cursor: pointer;
+
+		@include focus-ring;
+	}
+
+	.uat-panel__message {
+		font-size: token( font-size-s );
+	}
+}
+
+.uat-panel__retest-list {
+	display: grid;
+	gap: token( space-xs );
+	margin: token( space-s ) 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.uat-panel__retest {
+	display: grid;
+	gap: token( space-xs );
+	width: 100%;
+	box-sizing: border-box;
+	margin: 0;
+	padding: token( space-xs ) token( space-s );
+	border: 1px solid token( color-border );
+	border-radius: token( radius );
+	background-color: token( color-background );
+	color: token( color-text );
+	font: inherit;
+	text-align: start;
+	cursor: pointer;
+
+	&:hover {
+		border-color: token( color-accent );
+	}
+
+	&:active {
+		background-color: token( color-accent-tint );
+	}
+
+	@include focus-ring;
+}
+
+.uat-panel__retest-step {
+	font-weight: token( font-weight-medium );
+}
+
+.uat-panel__retest-checklist,
+.uat-panel__retest-fixed,
+.uat-panel__retest-note {
+	font-size: token( font-size-s );
+	color: token( color-text-muted );
+}
+
+.uat-panel__body {
+	padding: token( space-xl ) token( space-l );
+}
+
+.uat-panel__message {
+	margin: 0;
+	font-size: inherit;
+	line-height: inherit;
+	color: token( color-text-muted );
+}
+
+// Shown by panel.js only when the admin bar is not on screen.
+.uat-panel-toggle {
+	display: inline-block;
+	position: fixed;
+	z-index: 99991;
+	inset-block-end: token( space-l );
+	inset-inline-end: token( space-l );
+	box-shadow: 0 0.25rem 1rem token( color-shadow );
+	font-family: token( font-family );
+	font-size: token( font-size-l );
+
+	@include primary-button;
+
+	&[hidden],
+	&[aria-expanded="true"] {
+		display: none;
+	}
+}

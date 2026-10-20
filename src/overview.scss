@@ -1,0 +1,510 @@
+// UAT → Overview in wp-admin: the checklist header's anatomy (title, an "x of y" line, a meter) widened into a
+// page, then a table of checklists. Every value is a token from inc/styles.php. Selectors start from
+// .uat-overview so they outrank wp-admin's `.wrap h1` and its element styles.
+
+@use 'tokens' as *;
+@use 'controls' as *;
+
+// Wide enough for the table's five columns, narrow enough that a row still reads as one line.
+$overview-width: 64rem;
+
+// wp-admin's own small-screen breakpoint, where its menu collapses.
+$stack-breakpoint: 782px;
+
+// The table's meters are the summary's at a smaller step, as the panel's is.
+$meter-height: token( space-m );
+$row-meter-height: token( space-s );
+$swatch-width: 1.5rem;
+
+// Fail's hatch: the colour, crossed by a lighter line, so it never depends on telling red from green.
+$hatch-line: color-mix( in srgb, #{ token( color-fail ) } 55%, #{ token( color-background ) } );
+
+.uat-overview {
+	box-sizing: border-box;
+	max-inline-size: $overview-width;
+	margin-block-start: token( space-s );
+	padding: token( space-2-xl );
+	border: 1px solid token( color-border-subtle );
+	border-radius: token( radius );
+	background-color: token( color-background );
+	box-shadow: 0 1px 0.25rem token( color-shadow );
+	color: token( color-text );
+	font-family: token( font-family );
+	font-size: token( font-size );
+	font-weight: token( font-weight-regular );
+	line-height: token( line-height );
+	letter-spacing: token( letter-spacing );
+
+	::selection {
+		background-color: token( color-accent-tint );
+		color: token( color-text );
+	}
+
+	a {
+
+		@include link;
+	}
+
+	// Title and the Results links on one line, as the checklist header's meta row.
+	.uat-overview__header {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: token( space-s ) token( space-l );
+	}
+
+	.uat-overview__title {
+		margin: 0;
+		padding: 0;
+		color: inherit;
+		font-family: token( font-family-heading );
+		font-size: token( font-size-heading-s );
+		font-weight: token( font-weight-heading );
+		line-height: token( line-height-heading );
+		letter-spacing: token( letter-spacing-heading );
+		text-wrap: balance;
+	}
+
+	.uat-overview__links,
+	.uat-overview__row-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: token( space-xs ) token( space-m );
+		margin: 0;
+	}
+
+	.uat-overview__heading {
+		margin: 0 0 token( space-m );
+		color: inherit;
+		font-family: token( font-family-heading );
+		font-size: token( font-size-heading-xs );
+		font-weight: token( font-weight-heading );
+		line-height: token( line-height-heading );
+		letter-spacing: token( letter-spacing-heading );
+	}
+
+	.uat-overview__note {
+		max-inline-size: token( measure );
+		margin: token( space-m ) 0 0;
+		color: token( color-text-subtle );
+		font-size: token( font-size-s );
+		line-height: token( line-height-s );
+	}
+}
+
+.uat-overview__summary {
+	display: grid;
+	gap: token( space-m );
+	margin-block: token( space-xl ) token( space-4-xl );
+
+	.uat-overview__lead {
+		margin: 0;
+		color: token( color-text-muted );
+		font-size: token( font-size-l );
+		line-height: token( line-height-heading );
+	}
+}
+
+// The completed count leads at the title's size, no larger: a bigger number would outrank the page's heading.
+.uat-overview__figure {
+	color: token( color-text );
+	font-family: token( font-family-heading );
+	font-size: token( font-size-heading-s );
+	font-weight: token( font-weight-heading );
+	letter-spacing: token( letter-spacing-heading );
+}
+
+// The untested remainder is the meter's own background, edged so its extent reads at 3:1; the segments cover it.
+@mixin untested {
+	background-color: token( color-surface-strong );
+	box-shadow: inset 0 0 0 1px token( color-border-hover );
+}
+
+.uat-overview__meter {
+	display: block;
+	inline-size: 100%;
+	block-size: $meter-height;
+	border-radius: token( radius );
+	overflow: hidden;
+
+	@include untested;
+}
+
+.uat-overview__pass {
+	fill: token( color-pass );
+}
+
+.uat-overview__hatch {
+	fill: token( color-fail );
+}
+
+.uat-overview__hatch-line {
+	fill: $hatch-line;
+}
+
+// Painted, so its hover title has a target; the meter's own background shows through it.
+.uat-overview__untested {
+	fill: transparent;
+}
+
+.uat-overview__gap {
+	fill: token( color-background );
+}
+
+// The key under the meter is where its counts are read: a swatch of each segment, its label, its count. Each
+// swatch is a short length of its segment, so the outlined untested one never reads as an unticked checkbox.
+.uat-overview__key {
+	display: flex;
+	flex-wrap: wrap;
+	gap: token( space-m ) token( space-2-xl );
+	margin: 0;
+
+	dt {
+		display: flex;
+		align-items: flex-start;
+		gap: token( space-s );
+		color: token( color-text-muted );
+		font-weight: token( font-weight-medium );
+
+		// Centred on the first line, so a label that wraps keeps its swatch beside its first word.
+		&::before {
+			content: "";
+			flex: none;
+			inline-size: $swatch-width;
+			block-size: $meter-height;
+			margin-block-start: calc( ( 1lh - #{ $meter-height } ) / 2 );
+			border-radius: token( radius );
+			background: var( --uat-swatch );
+		}
+	}
+
+	dd {
+		margin: 0;
+		padding-inline-start: calc( #{ $swatch-width } + #{ token( space-s ) } );
+		font-family: token( font-family-heading );
+		font-size: token( font-size-heading-xs );
+		font-weight: token( font-weight-heading );
+		line-height: token( line-height-heading );
+	}
+}
+
+.uat-overview__key-item--pass {
+	--uat-swatch: #{ token( color-pass ) };
+}
+
+.uat-overview__key-item--fail {
+	--uat-swatch: repeating-linear-gradient( -45deg, #{ token( color-fail ) } 0 3px, #{ $hatch-line } 3px 4.25px );
+}
+
+.uat-overview__key-item--untested dt::before {
+
+	@include untested;
+}
+
+.uat-overview .uat-overview__tally {
+	margin: 0;
+	color: token( color-text-muted );
+	font-variant-numeric: tabular-nums;
+}
+
+// How many checklists have got how far: below the step counts, ruled off, since it counts checklists, not steps.
+.uat-overview__statuses {
+	margin-block-start: token( space-s );
+	padding-block-start: token( space-l );
+	border-block-start: 1px solid token( color-border-subtle );
+
+	dl {
+		display: flex;
+		flex-wrap: wrap;
+		gap: token( space-m ) token( space-2-xl );
+		margin: 0;
+	}
+
+	dt {
+		color: token( color-text-muted );
+		font-weight: token( font-weight-medium );
+	}
+
+	dd {
+		margin: 0;
+		font-family: token( font-family-heading );
+		font-size: token( font-size-heading-xs );
+		font-weight: token( font-weight-heading );
+		line-height: token( line-height-heading );
+	}
+}
+
+.uat-overview .uat-overview__subheading {
+	margin: 0 0 token( space-s );
+	color: token( color-text-muted );
+	font-family: inherit;
+	font-size: token( font-size-s );
+	font-weight: token( font-weight-medium );
+	line-height: token( line-height-s );
+}
+
+// A checklist's status, beside its name: neutral like the panel's Required tag, since colour here only ever means
+// a result. The three read apart by their edge as well as their words.
+.uat-overview__status {
+	white-space: nowrap;
+
+	@include outlined-tag;
+}
+
+.uat-overview__status--complete {
+	border-color: token( color-text );
+	color: token( color-text );
+}
+
+.uat-overview__status--not-started {
+	border-style: dashed;
+	color: token( color-text-subtle );
+}
+
+.uat-overview__table {
+	inline-size: 100%;
+	border-collapse: collapse;
+	font-size: token( font-size );
+	line-height: token( line-height );
+
+	th,
+	td {
+		padding: token( space-m ) token( space-s );
+		border-block-end: 1px solid token( color-border-subtle );
+		text-align: start;
+		vertical-align: top;
+	}
+
+	// The name takes a fixed share, so a long title wraps rather than squeezing the meters.
+	thead th:first-child {
+		inline-size: 30%;
+	}
+
+	th:first-child,
+	td:first-child {
+		padding-inline-start: 0;
+	}
+
+	th:last-child,
+	td:last-child {
+		padding-inline-end: 0;
+	}
+
+	thead th {
+		padding-block-start: 0;
+		border-block-end-color: token( color-border );
+		color: token( color-text-muted );
+		font-size: token( font-size-s );
+		font-weight: token( font-weight-medium );
+		line-height: token( line-height-s );
+	}
+
+	tbody tr:last-child > * {
+		border-block-end: 0;
+	}
+}
+
+// The name cell stays a table cell, so its border lines up with the row's; its contents stack inside it.
+.uat-overview__name {
+	font-weight: inherit;
+
+	.uat-overview__row-links {
+		margin-block-start: token( space-xs );
+		font-size: token( font-size-s );
+		line-height: token( line-height-s );
+	}
+}
+
+.uat-overview__name-line {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: token( space-xs ) token( space-s );
+}
+
+.uat-overview__name-text {
+	font-weight: token( font-weight-medium );
+	text-wrap: pretty;
+}
+
+.uat-overview__progress {
+
+	.uat-overview__meter {
+		block-size: $row-meter-height;
+		margin-block-start: token( space-xs );
+	}
+}
+
+.uat-overview__count {
+	color: token( color-text-muted );
+	font-variant-numeric: tabular-nums;
+}
+
+// Each count column shrinks to its header, in whatever language, so the meters take the width left over.
+.uat-overview__table .uat-overview__number {
+	inline-size: 1%;
+	padding-inline-start: token( space-xl );
+	text-align: end;
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+
+// The step summary's Fail badge, so a failed count in the table reads as it does in the panel.
+.uat-overview__badge {
+	display: inline-block;
+	padding: token( space-xs ) token( space-s );
+	border-radius: token( radius );
+	background-color: token( color-fail );
+	color: token( color-on-status );
+	font-size: token( font-size-s );
+	font-weight: token( font-weight-medium );
+	line-height: 1;
+}
+
+// A failed count leads to that checklist's failed results.
+.uat-overview a.uat-overview__badge {
+	color: token( color-on-status );
+	text-decoration: none;
+
+	&:hover {
+		background-color: color-mix( in srgb, #{ token( color-fail ) } 85%, #{ token( color-text ) } );
+		color: token( color-on-status );
+	}
+
+	@include focus-ring;
+}
+
+.uat-overview__empty {
+	display: grid;
+	justify-items: start;
+	gap: token( space-m );
+	margin-block-start: token( space-xl );
+
+	.uat-overview__heading,
+	.uat-overview__note {
+		margin: 0;
+	}
+}
+
+.uat-overview .uat-overview__button {
+	display: inline-flex;
+	align-items: center;
+	text-decoration: none;
+
+	@include primary-button;
+
+	&:hover {
+		color: token( color-on-accent );
+	}
+}
+
+// A table row becomes a block: the name, then each count on its own line, labelled from its column.
+@media ( max-width: $stack-breakpoint ) {
+
+	.uat-overview {
+		padding: token( space-l );
+	}
+
+	.uat-overview__summary {
+		margin-block-end: token( space-2-xl );
+	}
+
+	// The three segments on one row, in the meter's order. Each item spans the key's two rows as a subgrid, so the
+	// figures share a line even where one label wraps.
+	.uat-overview__key {
+		display: grid;
+		grid-template-columns: repeat( 3, minmax( 0, 1fr ) );
+		grid-template-rows: auto auto;
+		gap: token( space-xs ) token( space-l );
+	}
+
+	.uat-overview__key-item {
+		display: grid;
+		grid-row: span 2;
+		grid-template-rows: subgrid;
+		row-gap: token( space-xs );
+	}
+
+	// The swatch above its label, so a label takes the column's whole width: "completed" does not fit beside one.
+	.uat-overview__key dt {
+		flex-direction: column;
+		gap: token( space-xs );
+
+		&::before {
+			margin-block-start: 0;
+		}
+	}
+
+	.uat-overview__key dd {
+		padding-inline-start: 0;
+	}
+
+	// As the key: each count spans two rows as a subgrid, so the figures share a line when one label wraps.
+	.uat-overview__statuses dl {
+		display: grid;
+		grid-template-columns: repeat( 3, minmax( 0, 1fr ) );
+		gap: token( space-xs ) token( space-l );
+	}
+
+	.uat-overview__status-count {
+		display: grid;
+		grid-row: span 2;
+		grid-template-rows: subgrid;
+	}
+
+	.uat-overview__table {
+
+		thead {
+			position: absolute;
+			inline-size: 1px;
+			block-size: 1px;
+			overflow: hidden;
+			clip-path: inset( 50% );
+			white-space: nowrap;
+		}
+
+		tr {
+			display: grid;
+			gap: token( space-xs );
+			padding-block: token( space-m );
+			border-block-end: 1px solid token( color-border-subtle );
+		}
+
+		tbody tr:last-child {
+			border-block-end: 0;
+		}
+
+		th,
+		td,
+		tbody tr:last-child > * {
+			padding: 0;
+			border: 0;
+		}
+
+		.uat-overview__name {
+			margin-block-end: token( space-xs );
+		}
+
+		.uat-overview__progress,
+		.uat-overview__number {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: center;
+			gap: token( space-xs ) token( space-m );
+			inline-size: auto;
+			padding: 0;
+
+			&::before {
+				content: attr( data-label );
+				color: token( color-text-muted );
+			}
+		}
+
+		.uat-overview__progress .uat-overview__meter {
+			flex-basis: 100%;
+			margin: 0;
+		}
+	}
+}

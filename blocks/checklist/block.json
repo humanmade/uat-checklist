@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "uat-checklist/checklist",
+	"version": "0.1.0",
+	"title": "Testing checklist",
+	"category": "widgets",
+	"icon": "yes-alt",
+	"description": "An intro, then numbered test steps, grouped into sections, that logged-in testers mark Pass or Fail with a comment. Each checklist post holds one, from its template.",
+	"keywords": ["uat", "testing", "checklist"],
+	"textdomain": "uat-checklist",
+	"allowedBlocks": ["core/paragraph", "uat-checklist/section"],
+	"supports": {
+		"html": false,
+		"inserter": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": ["file:./style-index.css"],
+	"viewStyle": "file:./style-index.css",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,194 @@
+{
+	"slug": "details",
+	"language": "en",
+	"title": "Details",
+	"subtitle": "A summary line that opens to show more, such as the answer to a question.",
+	"tutorial": [
+		{
+			"h3": "What it does"
+		},
+		{
+			"p": "Details shows a short summary and hides the content under it until the reader clicks the summary. Use it for questions and answers, or for detail most readers can skip. A reader who never opens it never sees the content, so keep what every reader needs out of it."
+		},
+		{
+			"h3": "Where it already appears"
+		},
+		{
+			"p": "No template, template part or theme pattern on this site uses Details, so it appears only where an editor adds it."
+		},
+		{
+			"h3": "Adding it to a page"
+		},
+		{
+			"steps": [
+				{
+					"text": "Open the <strong>+</strong> (block inserter) at the top left, type <em>details</em> in the search field and click <strong>Details</strong>.",
+					"image": "add-block",
+					"alt": "The block inserter searched for details, with the Details tile outlined in red"
+				},
+				{
+					"text": "Or type <em>/details</em> in an empty paragraph and choose <strong>Details</strong> from the list.",
+					"image": "slash",
+					"alt": "An empty paragraph reading /details, with Details offered in the list below it"
+				},
+				{
+					"text": "The block appears with <strong>Write summary…</strong> beside a triangle. Click it and type the summary.",
+					"image": "details-empty",
+					"alt": "A Details block just added, reading Write summary… beside a triangle, with its toolbar above"
+				},
+				{
+					"text": "Click <strong>Type / to add a hidden block</strong> under the summary and type the content. Pressing Enter in the summary does not move there.",
+					"image": "details-filled",
+					"alt": "A Details block with the summary Who can test this site? and the content Anyone with an account on it. below it"
+				},
+				{
+					"text": "Save the page (Mac: Command + S, Windows: Ctrl + S)."
+				}
+			]
+		},
+		{
+			"h3": "Opening it by default"
+		},
+		{
+			"image": "details-settings",
+			"alt": "The sidebar for Details, with the Open by default switch off under Settings",
+			"float": "right"
+		},
+		{
+			"p": "A Details block starts closed on the site. To show its content when the page loads, turn on <strong>Open by default</strong> under <strong>Settings</strong> in the sidebar. The reader can still close it by clicking the summary."
+		},
+		{
+			"h3": "Child blocks"
+		},
+		{
+			"p": "Any block can go in the content, such as a paragraph, a list or an image, and more than one. The summary holds text, with <strong>Bold</strong> and <strong>Italic</strong> in its toolbar."
+		}
+	],
+	"examples": [
+		{
+			"h3": "Closed"
+		},
+		{
+			"p": "As every Details block starts. Click the summary to open it."
+		},
+		{
+			"block": "<!-- wp:details -->\n<details class=\"wp-block-details\"><summary>Who can test this site?</summary><!-- wp:paragraph -->\n<p>Anyone with an account on it. Testers sign in, open a page to test and work through its checklist.</p>\n<!-- /wp:paragraph --></details>\n<!-- /wp:details -->"
+		},
+		{
+			"h3": "Open by default"
+		},
+		{
+			"block": "<!-- wp:details {\"showContent\":true} -->\n<details class=\"wp-block-details\" open><summary>What does a Fail need?</summary><!-- wp:paragraph -->\n<p>A comment saying what went wrong. A Fail cannot be saved without one.</p>\n<!-- /wp:paragraph --></details>\n<!-- /wp:details -->"
+		},
+		{
+			"h3": "A list inside"
+		},
+		{
+			"block": "<!-- wp:details -->\n<details class=\"wp-block-details\"><summary>What to include in a report</summary><!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li>The page URL</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>A screenshot</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>What you did, what you expected and what happened</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></details>\n<!-- /wp:details -->"
+		},
+		{
+			"h3": "A long summary"
+		},
+		{
+			"block": "<!-- wp:details -->\n<details class=\"wp-block-details\"><summary>What happens to the results of a step after the checklist has been rewritten and the step has been reworded or deleted?</summary><!-- wp:paragraph -->\n<p>Rewording a step keeps its results. Deleting it leaves its results in the Results list.</p>\n<!-- /wp:paragraph --></details>\n<!-- /wp:details -->"
+		}
+	],
+	"checklist_intro": [
+		{
+			"p": "Tickets: none. This is a demonstration checklist for core's Details block on Twenty Twenty-Five."
+		}
+	],
+	"checklist": [
+		{
+			"section": "In the editor",
+			"steps": [
+				{
+					"step": "Add the block and save it",
+					"image": "details-filled",
+					"alt": "A Details block with the summary Who can test this site? and the content Anyone with an account on it. below it",
+					"instructions": [
+						"Create a new page and close <strong>Choose a pattern</strong>.",
+						"Add a <strong>Details</strong> block with <strong>+</strong> or <em>/details</em>.",
+						"Type a summary, then click <strong>Type / to add a hidden block</strong> and type the content.",
+						"Save the draft (Mac: Command + S, Windows: Ctrl + S).",
+						"Reload the page (Mac: Command + R, Windows: Ctrl + R)."
+					],
+					"expected": "After the reload the summary and the content are still there, with no \"Block contains unexpected or invalid content.\" message.",
+					"id": "edb93b05-1013-4d29-8363-dcfa704cfa4a"
+				},
+				{
+					"step": "Open it by default and add a list",
+					"image": "details-settings",
+					"alt": "The sidebar for Details, with the Open by default switch off under Settings",
+					"instructions": [
+						"In the same draft, select the Details block and turn on <strong>Open by default</strong> in the sidebar.",
+						"Add a <strong>List</strong> under the content you typed, with two items.",
+						"Save the draft (Mac: Command + S, Windows: Ctrl + S).",
+						"Preview the draft (laptop icon at the top right → <strong>Preview in new tab</strong>)."
+					],
+					"expected": [
+						"The list sits inside the block, under the first content.",
+						"In the preview the content and the list show without clicking the summary."
+					],
+					"id": "8fa8c2a6-41ea-4eb0-8ab3-7a20d8183671"
+				}
+			]
+		},
+		{
+			"section": "Front end at desktop width (a full-width laptop or desktop window)",
+			"steps": [
+				{
+					"step": "Click the summary of the first example on this page, then click it again.",
+					"expected": "The content opens under the summary, and the second click closes it.",
+					"id": "dc951f0c-bde0-49a6-9611-0d72bd925f6d"
+				},
+				{
+					"step": "Reload this page and look at the second example.",
+					"expected": "Its content shows without clicking the summary.",
+					"id": "38e5c80d-b1e0-4c52-9dd4-46485a2b81b7"
+				},
+				{
+					"step": "Compare the examples on this page with the <a href=\"{design:desktop}\">desktop design</a>.",
+					"expected": "Colours, fonts, the triangle and spacing match the design.",
+					"id": "d88bde8e-dc0a-4d03-8f30-4350d4c809de"
+				}
+			]
+		},
+		{
+			"section": "Front end at mobile width (a phone, or a window about 390px wide)",
+			"steps": [
+				{
+					"step": "Open each example on this page.",
+					"expected": "Each opens under its summary, and the page does not scroll sideways.",
+					"id": "432ae825-c34c-467f-a86c-a9d96cdee83e"
+				},
+				{
+					"step": "Compare the examples with the <a href=\"{design:mobile}\">mobile design</a>.",
+					"expected": "Colours, fonts, the triangle and spacing match the design.",
+					"id": "5ed9f907-34f6-4024-b721-49c41c7ebe01"
+				},
+				{
+					"step": "Look at the example with the long summary.",
+					"expected": "The summary wraps over several lines beside the triangle, with no text cut off.",
+					"optional": true,
+					"id": "39b3383b-b2e7-4bf9-b320-6d5d044cf299"
+				}
+			]
+		},
+		{
+			"section": "Accessibility",
+			"steps": [
+				{
+					"step": "Press Tab until the summary of the first example is selected, then press Enter twice.",
+					"expected": "The summary shows a focus outline. The first Enter opens the content, and the second closes it.",
+					"id": "d5096051-59e0-432a-b320-275f932cd29e"
+				},
+				{
+					"step": "Zoom the browser to 200% and look at the examples (Mac: Command + +, Windows: Ctrl + +).",
+					"expected": "Nothing overlaps or is cut off.",
+					"id": "f4e24820-4732-4be1-9ada-9e318e9b4c04"
+				}
+			]
+		}
+	]
+}

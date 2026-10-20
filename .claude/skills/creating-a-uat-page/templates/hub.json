@@ -1,0 +1,64 @@
+{
+	"slug": "hub",
+	"hub": true,
+	"title": "Hub page",
+	"subtitle": "How UAT testing works, with a link to every page to test.",
+	"content": [
+		{
+			"h2": "About this site"
+		},
+		{
+			"p": "This site is for testing the blocks used on [TO CONFIRM: the website being tested]. Each page listed below has a How to use the block section and live examples, and its testing checklist opens in the panel."
+		},
+		{
+			"p": "This page and the test pages it links to are left out of the site menus, and search engines do not index them."
+		},
+		{
+			"h2": "How testing works"
+		},
+		{
+			"ol": [
+				"Open a page to test from the list below.",
+				"Read How to use the block and the live examples.",
+				"Click <strong>UAT</strong> (the tick icon) in the admin bar. The <strong>Testing checklist</strong> panel opens at the side of the screen.",
+				"Work through the steps tagged <strong>Required</strong> from the top. For each one, choose <strong>Pass</strong> or <strong>Fail</strong> and click <strong>Save result</strong>.",
+				"Do the steps without the tag when you have time. Once every Required step has a result, testing that page is done.",
+				"When you choose <strong>Fail</strong>, write what happened in <strong>Comment</strong>. A Fail cannot be saved without one.",
+				"For anything that does not fit a single step, write it in <strong>Additional comments</strong> at the end of the panel."
+			]
+		},
+		{
+			"p": "The panel is explained step by step, with screenshots, in <a href=\"{pages}/using-the-checklist/\">Using the Testing checklist</a>."
+		},
+		{
+			"p": "Every tester sees the latest saved result on each step."
+		},
+		{
+			"h2": "Reporting an issue no step covers"
+		},
+		{
+			"p": "A problem with a checklist step is recorded in the checklist, as above. When something goes wrong that no step covers, during UAT or after it, email [TO CONFIRM: who receives reports, and their address]. Include these three things:"
+		},
+		{
+			"ul": [
+				"<strong>The page URL</strong>: the address of the page where it happened, copied from the browser's address bar.",
+				"<strong>A screenshot</strong>: an image of the screen showing the issue.",
+				"<strong>The issue</strong>: what you did, what you expected, and what happened instead."
+			]
+		},
+		{
+			"p": "To take a screenshot on a Mac, press Command + Shift + 4 and drag over the area. On Windows, press the Windows key + Shift + S, drag over the area, then paste it with Ctrl + V."
+		},
+		{
+			"p": "Adding your browser and device (for example Chrome on Windows, or Safari on iPhone) makes the cause quicker to find."
+		},
+		{
+			"h2": "Pages to test"
+		},
+		{
+			"ul": [
+				"<a href=\"{pages}/[TO CONFIRM: slug]/\">[TO CONFIRM: page title]</a>"
+			]
+		}
+	]
+}

@@ -1,0 +1,10 @@
+// Reads the design tokens inc/styles.php declares from the active theme's theme.json, so no stylesheet in the
+// plugin holds a colour, size or font of its own.
+
+// The docked panel's width. A step's screenshot is never wider, on the page or in the panel.
+$panel-width: 30rem;
+
+@function token( $name ) {
+
+	@return var( --hm-uat-#{ $name } );
+}

@@ -1,0 +1,320 @@
+{
+	"slug": "cta",
+	"title": "Call to action",
+	"subtitle": "The band that closes a page: a heading, a supporting line and one button.",
+	"tutorial": [
+		{
+			"h3": "What it does"
+		},
+		{
+			"p": "A Call to action goes at the end of a page and points the reader to what to look at next. Examples are the careers site and the list of press releases. It has a heading, a supporting line and one button."
+		},
+		{
+			"h3": "Where it already appears"
+		},
+		{
+			"ul": [
+				"the end of <a href=\"{site}/career/\">Careers</a>: pointing to the careers site",
+				"the end of every press release (the <strong>Single Posts</strong> template), for example <a href=\"{site}/example-press-release/\">this press release</a>",
+				"the page shown for an address that does not exist (the <strong>Page: 404</strong> template)"
+			]
+		},
+		{
+			"h3": "Adding it to a page"
+		},
+		{
+			"steps": [
+				{
+					"text": "Open the <strong>+</strong> (block inserter) at the top left, type <em>call to action</em> in the search field and click <strong>Call to action</strong>. You can also type <em>/cta</em> in the page.",
+					"image": "add-cta",
+					"alt": "The block inserter searched for call to action, with the Call to action tile outlined in red"
+				},
+				{
+					"text": "The placeholders <strong>Call to action heading</strong>, <strong>Supporting line</strong> and <strong>Button label</strong> appear. Click each one and type.",
+					"image": "cta-empty",
+					"alt": "A Call to action just added, with the placeholders Call to action heading, Supporting line and Button label and the toolbar above"
+				},
+				{
+					"text": "The band with its text filled in. In the editor the button runs the full width of the band. On the site at desktop width it sits to the right of the text.",
+					"image": "cta-filled",
+					"alt": "A Call to action filled in: a heading, a supporting line and a button whose arrow points out of a box"
+				},
+				{
+					"text": "Save the page (Mac: Command + S, Windows: Ctrl + S)."
+				}
+			]
+		},
+		{
+			"h3": "Setting the button link"
+		},
+		{
+			"p": "A button with text but no address still shows on the site, and does nothing when clicked. A link to another website opens in a new tab."
+		},
+		{
+			"steps": [
+				{
+					"text": "Click <strong>Button link</strong> in the toolbar, type the address and press Enter. The link appears under the field.",
+					"image": "button-link",
+					"alt": "The window Button link opens, with the address that was set and the icons Edit link, Remove link and Copy link below it"
+				},
+				{
+					"text": "To open it in a new tab, click the pencil icon (<strong>Edit link</strong>). Open <strong>Advanced</strong> if it is closed, tick <strong>Open in new tab</strong> and click <strong>Apply</strong>. The button's arrow changes to one pointing out of a box.",
+					"image": "button-link-tab",
+					"alt": "The field Edit link opens, with Open in new tab ticked under Advanced, and the Cancel and Apply buttons"
+				}
+			]
+		},
+		{
+			"h3": "Heading level and anchor"
+		},
+		{
+			"steps": [
+				{
+					"text": "Click <strong>H2</strong> in the toolbar to choose H2, H3 or H4 as the heading level.",
+					"image": "heading-level",
+					"alt": "The list Change level opens from the toolbar: Heading 2, Heading 3 and Heading 4, with Heading 2 selected"
+				},
+				{
+					"text": "To give the band an ID, open <strong>Advanced</strong> in the sidebar and type in <strong>HTML anchor</strong>. It is the only panel in the sidebar.",
+					"image": "anchor-panel",
+					"alt": "The Advanced panel in the sidebar, with the HTML anchor and Additional CSS class fields"
+				},
+				{
+					"text": "Save the page (Mac: Command + S, Windows: Ctrl + S)."
+				}
+			]
+		},
+		{
+			"h3": "Adding it from a pattern"
+		},
+		{
+			"p": "A pattern is a way to add a block with sample text already in it. The <strong>Call to action</strong> pattern adds the band with the Career Opportunities & Open Positions heading, a line pointing to the careers site, and a <strong>Careers Site</strong> button. For a careers band, start from it rather than writing the text from nothing. To decide the heading and text yourself, build from an empty band as above."
+		},
+		{
+			"p": "Clicking a band added from the pattern selects the whole pattern, and it cannot be changed as it is. To change its text or settings, click <strong>Edit pattern</strong>, and click <strong>Exit pattern</strong> when you finish. The change applies to this page only."
+		},
+		{
+			"steps": [
+				{
+					"text": "In the <strong>+</strong> (block inserter) at the top left, open the <strong>Patterns</strong> tab and type <em>call to action</em> in the search field. The <strong>Call to action</strong> pattern is the preview on the left (outlined in red).",
+					"image": "pattern-insert",
+					"alt": "The block inserter's Patterns tab searched for call to action. The Call to action preview on the left is outlined in red"
+				},
+				{
+					"text": "Click the band that was added, and the sidebar shows the pattern's name and description. Click <strong>Edit pattern</strong>.",
+					"image": "pattern-locked",
+					"alt": "The sidebar with the Call to action pattern selected: its name, its description and the Edit pattern button"
+				},
+				{
+					"text": "The bar at the top reads \"Back Call to action · Pattern\", and the blocks inside can be edited. Rewrite the heading and text.",
+					"image": "pattern-editing-bar",
+					"alt": "The bar at the top of the screen: Back Call to action · Pattern"
+				},
+				{
+					"text": "When you finish, click <strong>Exit pattern</strong> in the sidebar.",
+					"image": "pattern-exit",
+					"alt": "The sidebar while the pattern is being edited, with the Exit pattern button"
+				},
+				{
+					"text": "Save the page (Mac: Command + S, Windows: Ctrl + S)."
+				}
+			]
+		},
+		{
+			"h3": "Checking it in the Site Editor"
+		},
+		{
+			"p": "The band at the end of each press release is a pattern called <strong>Press release call to action</strong>, placed by the theme in the Single Posts and Page: 404 templates. Its text is set by the theme, so ask the site team to change it."
+		},
+		{
+			"steps": [
+				{
+					"text": "Open <strong>Appearance → Editor</strong>, choose <strong>Templates</strong> and open <strong>Single Posts</strong> (outlined in red).",
+					"image": "site-editor-templates",
+					"alt": "The template list in the Site Editor, with Single Posts outlined in red"
+				},
+				{
+					"text": "Open <strong>List View</strong> and select Press release call to action, below <strong>Content</strong>. It sits between the content and the footer.",
+					"image": "site-editor-single",
+					"alt": "The Single Posts template in the Site Editor, with Press release call to action selected from List View"
+				}
+			]
+		},
+		{
+			"p": "The toolbar and the sidebar show <strong>Edit pattern</strong>. Do not click it. It opens the band for editing, and saving afterwards changes the band on every press release. If you click it by mistake, click <strong>Exit pattern</strong> and close without saving."
+		},
+		{
+			"h3": "Child blocks"
+		},
+		{
+			"p": "None. No other block can go inside the band."
+		}
+	],
+	"examples": [
+		{
+			"h3": "Pointing to the careers site"
+		},
+		{
+			"p": "As on Careers. It opens another website in a new tab."
+		},
+		{
+			"block": "<!-- wp:my-theme/cta {\"title\":\"Careers and open positions\",\"body\":\"For current openings and how to apply, please visit our careers site.\",\"buttonText\":\"Careers site\",\"buttonUrl\":\"https://careers.example.com/\",\"buttonOpensInNewTab\":true} /-->"
+		},
+		{
+			"h3": "A link within this site"
+		},
+		{
+			"p": "The button's arrow points straight ahead."
+		},
+		{
+			"block": "<!-- wp:my-theme/cta {\"title\":\"Latest press releases\",\"body\":\"The latest news and information about our activities.\",\"buttonText\":\"View all press releases\",\"buttonUrl\":\"{site}/newsroom/\"} /-->"
+		},
+		{
+			"h3": "A long heading and supporting line"
+		},
+		{
+			"block": "<!-- wp:my-theme/cta {\"title\":\"For questions about the business and services of Example Securities, please contact our enquiries desk\",\"body\":\"Our staff answer questions on weekdays from 9:00 to 17:00. Depending on the question, a reply may take some time.\",\"buttonText\":\"Go to the enquiries desk\",\"buttonUrl\":\"{site}/company-profile/\"} /-->"
+		}
+	],
+	"checklist_intro": [
+		{
+			"p": "Jira tickets: PROJ-52, PROJ-60"
+		}
+	],
+	"checklist": [
+		{
+			"section": "In the editor",
+			"steps": [
+				{
+					"step": "Add the block and save it",
+					"image": "button-link-tab",
+					"alt": "The field Edit link opens, with Open in new tab ticked under Advanced, and the Cancel and Apply buttons",
+					"instructions": [
+						"Create a new page and close <strong>Choose a pattern</strong>.",
+						"Add a <strong>Call to action</strong> block with <strong>+</strong> or <em>/cta</em>.",
+						"Fill in the heading, the supporting line and the button label.",
+						"Set <strong>Button link</strong> to <em>https://careers.example.com/</em>.",
+						"Tick <strong>Open in new tab</strong> (pencil icon → <strong>Advanced</strong>).",
+						"Save the draft (Mac: Command + S, Windows: Ctrl + S).",
+						"Reload the page (Mac: Command + R, Windows: Ctrl + R)."
+					],
+					"expected": [
+						"With <strong>Open in new tab</strong> set, the button's arrow changes to one pointing out of a box.",
+						"After the reload your text is still there, with no \"Block contains unexpected or invalid content.\" message."
+					]
+				},
+				{
+					"step": "Edit the saved block",
+					"instructions": [
+						"Change the heading and the supporting line.",
+						"Set the heading to <strong>H3</strong> in the toolbar.",
+						"Change <strong>Button link</strong> to <em>/uat-en/newsroom/</em> and untick <strong>Open in new tab</strong>.",
+						"Save the draft (Mac: Command + S, Windows: Ctrl + S).",
+						"Reload the page (Mac: Command + R, Windows: Ctrl + R)."
+					],
+					"expected": [
+						"H2, H3 and H4 are the only levels offered.",
+						"The button's arrow goes back to a straight arrow.",
+						"After the reload every change is still there."
+					]
+				},
+				{
+					"step": "Add it from the pattern",
+					"image": "pattern-locked",
+					"alt": "The sidebar with the Call to action pattern selected: its name, its description and the Edit pattern button",
+					"instructions": [
+						"Create a new page and close <strong>Choose a pattern</strong>.",
+						"Search for <em>call to action</em> and add the <strong>Call to action</strong> pattern under the tile.",
+						"Click <strong>Edit pattern</strong>, rewrite the heading, then click <strong>Exit pattern</strong>.",
+						"Save the draft (Mac: Command + S, Windows: Ctrl + S).",
+						"Reload the page (Mac: Command + R, Windows: Ctrl + R)."
+					],
+					"expected": [
+						"A band with the Career Opportunities & Open Positions heading, a line of text and a Careers Site button is added.",
+						"After the reload the new heading is still there, with no \"Block contains unexpected or invalid content.\" message."
+					]
+				}
+			]
+		},
+		{
+			"section": "Site Editor",
+			"steps": [
+				{
+					"step": "In <strong>Appearance → Editor</strong> → <strong>Templates</strong>, open <strong>Single Posts</strong> and find Press release call to action in List View. Do not click <strong>Edit pattern</strong>.",
+					"expected": "It sits below <strong>Content</strong> and above the footer, and reads Latest press releases.",
+					"optional": true
+				},
+				{
+					"step": "Go back without saving and open the <strong>Page: 404</strong> template.",
+					"expected": "The same band sits below the page-not-found message.",
+					"optional": true
+				}
+			]
+		},
+		{
+			"section": "Front end at desktop width (a full-width laptop or desktop window)",
+			"steps": [
+				{
+					"step": "Preview your draft (laptop icon at the top right → <strong>Preview in new tab</strong>).",
+					"expected": "The heading and supporting line sit on the left, with the button on the right."
+				},
+				{
+					"step": "Compare your draft's preview with the <a href=\"{design:desktop}\">desktop design</a>.",
+					"expected": "Colours, fonts, spacing and the button arrow match the design."
+				},
+				{
+					"step": "Click the button.",
+					"expected": "The Newsroom opens in the same tab."
+				},
+				{
+					"step": "Click the button in the first example on this page.",
+					"expected": "The careers site opens in a new tab."
+				},
+				{
+					"step": "Open a <a href=\"{site}/example-press-release/\">press release</a> and scroll to the end.",
+					"expected": "The band reads Latest press releases."
+				},
+				{
+					"step": "Look at the example with the long heading on this page.",
+					"expected": "The text wraps, with the button still beside it.",
+					"optional": true
+				}
+			]
+		},
+		{
+			"section": "Front end at mobile width (a phone, or a window about 390px wide)",
+			"steps": [
+				{
+					"step": "View the live examples on this page.",
+					"expected": "The button sits under the text at full width, and the page does not scroll sideways."
+				},
+				{
+					"step": "Compare the examples with the <a href=\"{design:mobile}\">mobile design</a>.",
+					"expected": "Colours, fonts, spacing and the button arrow match the design."
+				},
+				{
+					"step": "Look at the example with the long heading.",
+					"expected": "The heading and supporting line wrap over several lines, with no text cut off.",
+					"optional": true
+				}
+			]
+		},
+		{
+			"section": "Accessibility",
+			"steps": [
+				{
+					"step": "Press Tab until the button in the first example on this page is selected, then press Enter.",
+					"expected": "The button shows a focus outline, and Enter opens the careers site in a new tab."
+				},
+				{
+					"step": "Zoom the browser to 200% and look at the examples (Mac: Command + +, Windows: Ctrl + +).",
+					"expected": "Nothing overlaps or is cut off."
+				},
+				{
+					"step": "In Chrome, right-click the heading in your draft's preview and choose <strong>Inspect</strong>.",
+					"expected": "The highlighted line starts with &lt;h3."
+				}
+			]
+		}
+	]
+}

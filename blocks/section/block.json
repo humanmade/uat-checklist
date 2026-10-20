@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "uat-checklist/section",
+	"version": "0.1.0",
+	"title": "Checklist section",
+	"category": "widgets",
+	"icon": "editor-ol",
+	"description": "A titled group of test steps, such as Editor or Front end at mobile width.",
+	"textdomain": "uat-checklist",
+	"parent": ["uat-checklist/checklist"],
+	"allowedBlocks": ["uat-checklist/step"],
+	"attributes": {
+		"title": { "type": "string", "default": "" }
+	},
+	"supports": {
+		"html": false,
+		"reusable": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

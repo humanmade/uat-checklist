@@ -1,0 +1,64 @@
+name: JS Code Quality
+
+# The build is a gate, not just the linters: dependency extraction resolves every
+# `@wordpress/*` import at compile time, so an import that does not exist passes
+# ESLint and fails here.
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - 'src/**'
+      - 'blocks/**'
+      - 'webpack.config.js'
+      - '.claude/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  js:
+    name: Lint and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      # Each gate runs even when an earlier one failed, so one PR round trip
+      # reports every finding rather than the first.
+      - name: ESLint
+        if: ${{ always() }}
+        run: npm run lint:js
+
+      - name: Stylelint
+        if: ${{ always() }}
+        run: npm run lint:style
+
+      - name: package.json
+        if: ${{ always() }}
+        run: npm run lint:pkg-json
+
+      - name: Markdown
+        if: ${{ always() }}
+        run: npm run lint:md
+
+      - name: Build
+        if: ${{ always() }}
+        run: npm run build

@@ -1,0 +1,46 @@
+# Keeps development files out of everything the plugin is distributed as: the archive GitHub generates for a tag
+# (which is what `composer require` downloads), the zip attached to each release, and the `release` branch itself.
+# .github/strip-dev-files.sh applies it there by asking `git archive` what survives, so the branch cannot drift
+# from the archives.
+#
+# Mirrors .distignore, which covers the remaining packaging route (`wp dist-archive`, run by hand). The two lists
+# have to be changed together.
+#
+# Patterns are matched the way git archive matches them, so a directory entry such as /tests covers what is
+# inside it. `git check-attr` does not agree, and is the wrong tool for reading this file back.
+#
+# build/ is absent on purpose, and so are composer.json and languages/. See .distignore.
+
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.distignore export-ignore
+/.editorconfig export-ignore
+/.nvmrc export-ignore
+/.github export-ignore
+
+/.phpcs.xml export-ignore
+/phpstan.neon.dist export-ignore
+/.wp-env.json export-ignore
+/eslint.config.js export-ignore
+/prettier.config.js export-ignore
+/.prettierignore export-ignore
+/.stylelintrc.json export-ignore
+/webpack.config.js export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+/composer.lock export-ignore
+/bin export-ignore
+
+/AGENTS.md export-ignore
+/CLAUDE.md export-ignore
+/docs export-ignore
+/.claude export-ignore
+/PRODUCT.md export-ignore
+/.impeccable export-ignore
+
+# Compiled to build/, which is what ships. build/blocks/ holds each block's copied block.json and render.php.
+/src export-ignore
+/blocks export-ignore
+
+/stubs export-ignore
+/tests export-ignore

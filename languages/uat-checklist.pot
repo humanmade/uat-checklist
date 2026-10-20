@@ -1,0 +1,919 @@
+# Copyright (C) 2026 Human Made
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: UAT Checklist 0.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/humanmade/uat-checklist/issues\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Human Made <support@humanmade.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-20T04:00:51+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: uat-checklist\n"
+
+#. Plugin Name of the plugin
+#: uat-checklist.php
+msgid "UAT Checklist"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: uat-checklist.php
+msgid "https://github.com/humanmade/uat-checklist"
+msgstr ""
+
+#. Description of the plugin
+#: uat-checklist.php
+msgid "Testing checklists for user acceptance testing: testers mark each step Pass or Fail, and the results are stored on the site."
+msgstr ""
+
+#. Author of the plugin
+#: uat-checklist.php
+msgid "Human Made"
+msgstr ""
+
+#. Author URI of the plugin
+#: uat-checklist.php
+msgid "https://humanmade.com"
+msgstr ""
+
+#. translators: 1: required steps with a result, 2: required steps, 3: steps with a result, 4: steps.
+#: blocks/checklist/render.php:43
+#, php-format
+msgid "%1$s of %2$s required done, %3$s of %4$s in all"
+msgstr ""
+
+#. translators: 1: number of steps with a result, 2: number of steps.
+#: blocks/checklist/render.php:51
+#, php-format
+msgid "%1$s of %2$s done"
+msgstr ""
+
+#: blocks/checklist/render.php:64
+msgid "Open the instructions"
+msgstr ""
+
+#: blocks/checklist/render.php:65
+msgid "(opens in a new window)"
+msgstr ""
+
+#: blocks/checklist/render.php:73
+msgid "Open in new window"
+msgstr ""
+
+#: blocks/checklist/render.php:111
+msgid "Other testers"
+msgstr ""
+
+#: blocks/checklist/render.php:130
+#: inc/admin.php:149
+#: inc/results.php:195
+msgid "Additional comments"
+msgstr ""
+
+#: blocks/checklist/render.php:135
+msgid "Your comments"
+msgstr ""
+
+#: blocks/checklist/render.php:138
+msgid "For anything that does not fit a single step. Other testers can read it."
+msgstr ""
+
+#: blocks/checklist/render.php:139
+msgid "Save comments"
+msgstr ""
+
+#: blocks/checklist/render.php:141
+msgid "Turn on JavaScript to save a comment."
+msgstr ""
+
+#: blocks/checklist/render.php:162
+msgid "Open a step, mark it Pass or Fail, then save it. A Fail needs a comment saying what went wrong. Every tester sees the latest result on each step."
+msgstr ""
+
+#: blocks/step/render.php:58
+#: blocks/step/edit.js:62
+msgid "Expected result"
+msgstr ""
+
+#: blocks/step/render.php:62
+msgid "If one or more expected results fail, mark the step Fail. In the comment, say which one and what happened instead."
+msgstr ""
+
+#. translators: 1: date and time the step was marked fixed, 2: name of the developer who marked it.
+#: blocks/step/render.php:108
+#, php-format
+msgid "Marked fixed on %1$s by %2$s."
+msgstr ""
+
+#. translators: 1: name of the tester, 2: date and time of the Fail, 3: the tester's comment.
+#: blocks/step/render.php:123
+#, php-format
+msgid "%1$s marked this Fail on %2$s: %3$s"
+msgstr ""
+
+#: blocks/step/render.php:165
+#: inc/admin.php:179
+msgid "Result"
+msgstr ""
+
+#: blocks/step/render.php:168
+#: inc/admin.php:180
+msgid "Comment"
+msgstr ""
+
+#: blocks/step/render.php:171
+msgid "Required when the step fails."
+msgstr ""
+
+#: blocks/step/render.php:172
+msgid "Save result"
+msgstr ""
+
+#: blocks/step/render.php:174
+msgid "Turn on JavaScript to record a result."
+msgstr ""
+
+#: blocks/step/render.php:184
+msgid "Required"
+msgstr ""
+
+#: blocks/step/render.php:187
+msgid "Retest"
+msgstr ""
+
+#: inc/abilities.php:66
+#: inc/access.php:118
+msgid "UAT checklists"
+msgstr ""
+
+#: inc/abilities.php:67
+msgid "Testing checklists, how far testing has got, and the steps that failed."
+msgstr ""
+
+#: inc/abilities.php:84
+msgid "Checklist ID."
+msgstr ""
+
+#: inc/abilities.php:90
+msgid "Get testing progress"
+msgstr ""
+
+#: inc/abilities.php:91
+msgid "Returns how many steps each published checklist has, and how many have passed, failed, wait for a retest or have not been tested, by each step's latest result from any tester. The totals cover every published checklist."
+msgstr ""
+
+#: inc/abilities.php:121
+msgid "Get a checklist"
+msgstr ""
+
+#: inc/abilities.php:122
+msgid "Returns one checklist's title, intro and sections, and each step with the latest result on it. Pass this back to save-checklist, changed, to edit the checklist."
+msgstr ""
+
+#: inc/abilities.php:138
+msgid "List open failures"
+msgstr ""
+
+#: inc/abilities.php:139
+msgid "Returns every step whose latest result is a Fail, with the tester's comment and the result ID that mark-fixed takes. Covers every published checklist, or the one given."
+msgstr ""
+
+#: inc/abilities.php:163
+msgid "Mark a failure fixed"
+msgstr ""
+
+#: inc/abilities.php:164
+msgid "Marks a failed step fixed, so testers see it tagged Retest. The Fail stays on record, and the step counts as not completed until a tester passes or fails it again. Takes a result ID from list-failures."
+msgstr ""
+
+#: inc/abilities.php:174
+msgid "ID of the Fail, from list-failures."
+msgstr ""
+
+#: inc/abilities.php:179
+msgid "What was fixed. Testers see it when they retest the step."
+msgstr ""
+
+#: inc/abilities.php:205
+msgid "Save a checklist"
+msgstr ""
+
+#: inc/abilities.php:206
+msgid "Creates a checklist, or replaces an existing one's title, intro and sections. To edit one, read it with get-checklist and keep each step's id: a step keeps its results only through its id. Leave the id out for a new step. A step left out is removed."
+msgstr ""
+
+#: inc/abilities.php:216
+msgid "Checklist to replace. Leave it out to create one."
+msgstr ""
+
+#: inc/abilities.php:221
+msgid "Title testers pick the checklist by."
+msgstr ""
+
+#: inc/abilities.php:226
+msgid "Publish to show it to testers. A new checklist is a draft unless this says otherwise; an existing one keeps its status."
+msgstr ""
+
+#: inc/abilities.php:333
+msgid "HTML: strong, em and links are kept."
+msgstr ""
+
+#: inc/abilities.php:341
+msgid "The step's id from get-checklist. Leave it out for a new step."
+msgstr ""
+
+#: inc/abilities.php:349
+msgid "What the tester checks, or a scenario's short title."
+msgstr ""
+
+#: inc/abilities.php:355
+msgid "The one expected result."
+msgstr ""
+
+#: inc/abilities.php:358
+msgid "A scenario's expected results, used instead of expected."
+msgstr ""
+
+#: inc/abilities.php:363
+msgid "A scenario's numbered actions."
+msgstr ""
+
+#: inc/abilities.php:367
+msgid "False for a nice-to-have step. Defaults to true."
+msgstr ""
+
+#: inc/abilities.php:371
+msgid "Screenshot shown above the instructions."
+msgstr ""
+
+#: inc/abilities.php:375
+msgid "The screenshot's alternative text."
+msgstr ""
+
+#: inc/abilities.php:381
+msgid "The latest result from any tester; fixed means it waits for a retest, empty means untested. save-checklist ignores it."
+msgstr ""
+
+#: inc/abilities.php:390
+msgid "Paragraphs above the sections, such as the ticket the checklist tests."
+msgstr ""
+
+#: inc/abilities.php:404
+msgid "Section title, such as In the editor or Mobile width."
+msgstr ""
+
+#: inc/abilities.php:534
+msgid "There is no checklist with that ID."
+msgstr ""
+
+#. translators: %s: a step ID.
+#: inc/abilities.php:778
+#, php-format
+msgid "Step id %s is not a step of this checklist, or is given twice. Leave the id out to add a new step."
+msgstr ""
+
+#: inc/access.php:121
+msgid "Access"
+msgstr ""
+
+#: inc/access.php:132
+msgid "Full access to UAT checklists"
+msgstr ""
+
+#: inc/access.php:138
+msgid "Their email address gives them full access."
+msgstr ""
+
+#: inc/access.php:139
+msgid "Lets them write checklists, mark results fixed and trash them."
+msgstr ""
+
+#: inc/admin.php:178
+#: inc/admin.php:527
+msgid "Step"
+msgstr ""
+
+#: inc/admin.php:181
+#: inc/checklists.php:57
+#: inc/overview.php:440
+#: src/panel.js:62
+msgid "Checklist"
+msgstr ""
+
+#: inc/admin.php:182
+msgid "By"
+msgstr ""
+
+#: inc/admin.php:183
+msgid "Last saved"
+msgstr ""
+
+#: inc/admin.php:233
+msgid "(checklist deleted)"
+msgstr ""
+
+#: inc/admin.php:265
+#: inc/checklists.php:61
+msgid "Edit checklist"
+msgstr ""
+
+#: inc/admin.php:275
+msgid "View instructions"
+msgstr ""
+
+#: inc/admin.php:320
+msgid "All checklists"
+msgstr ""
+
+#: inc/admin.php:336
+msgid "Filter by checklist"
+msgstr ""
+
+#: inc/admin.php:346
+msgid "Latest result on each step only"
+msgstr ""
+
+#: inc/admin.php:471
+#: inc/admin.php:486
+#: inc/admin.php:520
+#: inc/admin.php:556
+msgid "Mark fixed"
+msgstr ""
+
+#: inc/admin.php:502
+msgid "Only a Fail that is still the latest result on its step can be marked fixed."
+msgstr ""
+
+#: inc/admin.php:531
+msgid "Failed by"
+msgstr ""
+
+#: inc/admin.php:535
+msgid "Failed on"
+msgstr ""
+
+#: inc/admin.php:539
+msgid "Their comment"
+msgstr ""
+
+#: inc/admin.php:543
+msgid "Note for testers"
+msgstr ""
+
+#: inc/admin.php:552
+msgid "Optional. Testers see it when they retest the step."
+msgstr ""
+
+#: inc/admin.php:577
+msgid "You cannot mark results fixed."
+msgstr ""
+
+#. translators: %s: the most characters a note can hold.
+#: inc/admin.php:592
+#, php-format
+msgid "The note can be at most %s characters."
+msgstr ""
+
+#: inc/admin.php:605
+msgid "This step is no longer in the checklist."
+msgstr ""
+
+#: inc/admin.php:664
+msgid "Marked fixed. Testers now see the step as Retest."
+msgstr ""
+
+#. translators: %s: the checklist's title.
+#: inc/blocks.php:179
+#, php-format
+msgid "Testing checklist: %s"
+msgstr ""
+
+#: inc/checklists.php:56
+#: inc/checklists.php:59
+#: inc/overview.php:416
+msgid "Checklists"
+msgstr ""
+
+#. translators: Admin bar label beside the tick icon. Keep it as short as the English.
+#: inc/checklists.php:58
+#: inc/overview.php:48
+#: inc/panel.php:85
+msgid "UAT"
+msgstr ""
+
+#: inc/checklists.php:60
+#: inc/overview.php:69
+#: inc/overview.php:70
+#: inc/overview.php:271
+msgid "Add checklist"
+msgstr ""
+
+#: inc/checklists.php:62
+msgid "New checklist"
+msgstr ""
+
+#: inc/checklists.php:63
+msgid "Search checklists"
+msgstr ""
+
+#: inc/checklists.php:64
+msgid "No checklists yet."
+msgstr ""
+
+#: inc/checklists.php:65
+msgid "No checklists in the trash."
+msgstr ""
+
+#: inc/checklists.php:141
+msgid "Sorry, you are not allowed to read checklists."
+msgstr ""
+
+#. translators: %s: the tester's display name.
+#: inc/notifications.php:107
+#, php-format
+msgid "Hi %s,"
+msgstr ""
+
+#. translators: 1: the name of the person who marked the step fixed, 2: the checklist's title.
+#: inc/notifications.php:113
+#, php-format
+msgid "%1$s marked a step you failed on %2$s as fixed."
+msgstr ""
+
+#. translators: %s: the checklist's title.
+#: inc/notifications.php:119
+#, php-format
+msgid "A step you failed on %s has been marked fixed."
+msgstr ""
+
+#. translators: %s: the step's text.
+#: inc/notifications.php:124
+#, php-format
+msgid "Step: %s"
+msgstr ""
+
+#: inc/notifications.php:129
+msgid "Your comment when it failed:"
+msgstr ""
+
+#: inc/notifications.php:134
+msgid "Their note:"
+msgstr ""
+
+#. translators: %s: the address of the checklist, where the step can be retested.
+#: inc/notifications.php:139
+#, php-format
+msgid "Retest it here: %s"
+msgstr ""
+
+#. translators: 1: the site's title, 2: the step's text.
+#: inc/notifications.php:145
+#, php-format
+msgid "[%1$s] Ready to retest: %2$s"
+msgstr ""
+
+#: inc/overview.php:47
+#: inc/overview.php:59
+#: inc/overview.php:246
+msgid "Testing overview"
+msgstr ""
+
+#: inc/overview.php:60
+msgid "Overview"
+msgstr ""
+
+#: inc/overview.php:168
+#: inc/overview.php:343
+#: inc/overview.php:442
+#: inc/overview.php:538
+msgid "Passed"
+msgstr ""
+
+#: inc/overview.php:174
+#: inc/overview.php:344
+#: inc/overview.php:443
+#: inc/overview.php:541
+msgid "Failed"
+msgstr ""
+
+#: inc/overview.php:180
+#: inc/overview.php:345
+#: inc/overview.php:444
+#: inc/overview.php:544
+msgid "Not completed"
+msgstr ""
+
+#. translators: 1: Passed, Failed or Not completed, 2: steps in that state, 3: steps in all.
+#: inc/overview.php:193
+#, php-format
+msgid "%1$s: %2$s of %3$s"
+msgstr ""
+
+#: inc/overview.php:236
+msgid "View all results"
+msgstr ""
+
+#: inc/overview.php:238
+msgid "View failed results"
+msgstr ""
+
+#: inc/overview.php:279
+msgid "No checklists are published yet"
+msgstr ""
+
+#: inc/overview.php:280
+msgid "Testers find a checklist in the UAT panel once it is published, and its steps are counted here from then on."
+msgstr ""
+
+#: inc/overview.php:301
+msgid "The published checklists have no steps yet. Add steps to a checklist to start counting."
+msgstr ""
+
+#. translators: %s: share of the required tests with a result, such as 73. Keep the %% after it, which prints a percent sign.
+#: inc/overview.php:311
+#, php-format
+msgid "%s%% of required tests completed"
+msgstr ""
+
+#. translators: 1: required tests with a result, 2: required tests, 3: tests with a result, 4: tests in all.
+#: inc/overview.php:318
+#, php-format
+msgid "%1$s of %2$s required, %3$s of %4$s test in all"
+msgid_plural "%1$s of %2$s required, %3$s of %4$s tests in all"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: steps a developer has marked fixed that testers have not retested yet.
+#: inc/overview.php:334
+#, php-format
+msgid "%s step needs a retest"
+msgid_plural "%s steps need a retest"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/overview.php:361
+msgid "Every checklist"
+msgstr ""
+
+#: inc/overview.php:384
+msgid "Fully tested"
+msgstr ""
+
+#: inc/overview.php:385
+msgid "In progress"
+msgstr ""
+
+#: inc/overview.php:386
+msgid "Not started"
+msgstr ""
+
+#: inc/overview.php:387
+msgid "No steps yet"
+msgstr ""
+
+#: inc/overview.php:439
+msgid "By checklist"
+msgstr ""
+
+#: inc/overview.php:441
+#: inc/overview.php:535
+msgid "Completed"
+msgstr ""
+
+#: inc/overview.php:447
+msgid "Each step counts once, by its latest result from any tester, as the panel shows it. A checklist is fully tested once every required step has a result, and the percentages count required steps only. Draft checklists are counted once they are published."
+msgstr ""
+
+#: inc/overview.php:465
+msgid "View results"
+msgstr ""
+
+#. translators: 1: required tests with a result, 2: required tests, 3: their share as a percentage, such as 75. Keep the %% after 3, which prints a percent sign.
+#: inc/overview.php:476
+#, php-format
+msgid "%1$s of %2$s required, %3$s%%"
+msgstr ""
+
+#. translators: 1: number of failed steps, 2: the checklist's title.
+#: inc/overview.php:493
+#, php-format
+msgid "%1$s failed step in %2$s. View its failed results."
+msgid_plural "%1$s failed steps in %2$s. View their failed results."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: steps a developer has marked fixed that testers have not retested yet.
+#: inc/overview.php:518
+#, php-format
+msgid "%s to retest"
+msgstr ""
+
+#: inc/overview.php:532
+#: src/checklist-editor.js:31
+msgid "(no title)"
+msgstr ""
+
+#: inc/panel.php:83
+#: src/lib/checklist.js:77
+#: src/panel.js:54
+#: src/panel.js:108
+msgid "Testing checklist"
+msgstr ""
+
+#: inc/panel.php:107
+msgid "UAT hub page"
+msgstr ""
+
+#: inc/panel.php:122
+msgid "How to use the checklist"
+msgstr ""
+
+#: inc/rest.php:209
+msgid "This checklist could not be found."
+msgstr ""
+
+#: inc/rest.php:277
+msgid "This step is no longer in the checklist. Reload the page and try again."
+msgstr ""
+
+#: inc/rest.php:285
+#: src/lib/step-form.js:110
+msgid "Add a comment saying what went wrong."
+msgstr ""
+
+#: inc/rest.php:293
+msgid "Too many results saved in the last minute. Wait a moment, then save again."
+msgstr ""
+
+#: inc/rest.php:347
+msgid "Comment removed."
+msgstr ""
+
+#: inc/results.php:113
+msgid "UAT results"
+msgstr ""
+
+#: inc/results.php:114
+msgid "UAT result"
+msgstr ""
+
+#: inc/results.php:115
+msgid "Results"
+msgstr ""
+
+#: inc/results.php:116
+msgid "Search results"
+msgstr ""
+
+#: inc/results.php:117
+msgid "No results recorded yet."
+msgstr ""
+
+#: inc/results.php:118
+msgid "No results in the trash."
+msgstr ""
+
+#. translators: %s: number of passed results.
+#: inc/results.php:158
+#, php-format
+msgid "Pass <span class=\"count\">(%s)</span>"
+msgid_plural "Pass <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of failed results.
+#: inc/results.php:171
+#, php-format
+msgid "Fail <span class=\"count\">(%s)</span>"
+msgid_plural "Fail <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of results marked fixed.
+#: inc/results.php:184
+#, php-format
+msgid "Fixed <span class=\"count\">(%s)</span>"
+msgid_plural "Fixed <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of additional comments.
+#: inc/results.php:197
+#, php-format
+msgid "Additional comments <span class=\"count\">(%s)</span>"
+msgid_plural "Additional comments <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/results.php:223
+msgid "Pass"
+msgstr ""
+
+#: inc/results.php:224
+msgid "Fail"
+msgstr ""
+
+#: inc/results.php:225
+msgid "Fixed"
+msgstr ""
+
+#: inc/results.php:499
+msgid "The result could not be saved."
+msgstr ""
+
+#. translators: %s: date and time the step was marked fixed.
+#: inc/results.php:555
+#: inc/retests.php:143
+#: src/lib/retests.js:32
+#, php-format,js-format
+msgid "Marked fixed on %s."
+msgstr ""
+
+#. translators: 1: Pass or Fail, 2: date and time the result was saved.
+#: inc/results.php:560
+#, php-format
+msgid "Saved as %1$s on %2$s."
+msgstr ""
+
+#: inc/results.php:670
+msgid "The comment could not be saved."
+msgstr ""
+
+#. translators: %s: date and time the comment was saved.
+#: inc/results.php:682
+#, php-format
+msgid "Saved on %s."
+msgstr ""
+
+#: inc/retests.php:53
+msgid "Ready to retest"
+msgstr ""
+
+#. translators: %s: how many steps.
+#: inc/retests.php:108
+#, php-format
+msgid "%s step you failed has been fixed. Retest it to close it."
+msgid_plural "%s steps you failed have been fixed. Retest them to close them."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: name of the person who marked the step fixed, 2: date and time.
+#: inc/retests.php:147
+#: src/lib/retests.js:39
+#, php-format,js-format
+msgid "Marked fixed by %1$s on %2$s."
+msgstr ""
+
+#: blocks/checklist/edit.js:21
+msgid "Introduce the checklist: its tickets, and what it tests."
+msgstr ""
+
+#: blocks/section/edit.js:34
+msgid "Section title, for example Editor"
+msgstr ""
+
+#: blocks/step/edit.js:139
+msgid "What the tester does"
+msgstr ""
+
+#: blocks/step/edit.js:152
+msgid "What they should see"
+msgstr ""
+
+#: src/checklist-editor.js:71
+msgid "Instructions page"
+msgstr ""
+
+#: src/checklist-editor.js:74
+msgid "Page"
+msgstr ""
+
+#: src/checklist-editor.js:75
+msgid "Optional. The panel links to this page, and opens this checklist on it."
+msgstr ""
+
+#: src/lib/note-form.js:29
+msgid "The comment could not be saved. Check your connection and try again."
+msgstr ""
+
+#. translators: %d: number of steps ready to retest.
+#: src/lib/retests.js:111
+#, js-format
+msgid "Ready to retest (%d)"
+msgstr ""
+
+#: src/lib/retests.js:134
+msgid "Steps ready to retest could not be loaded."
+msgstr ""
+
+#: src/lib/step-form.js:54
+msgid "Saving…"
+msgstr ""
+
+#: src/lib/step-form.js:100
+msgid "Choose Pass or Fail first."
+msgstr ""
+
+#: src/lib/step-form.js:127
+msgid "The result could not be saved. Check your connection and try again."
+msgstr ""
+
+#: src/panel.js:66
+msgid "Loading…"
+msgstr ""
+
+#: src/panel.js:71
+msgid "Close"
+msgstr ""
+
+#. translators: 1: checklist name, 2: required steps with a result, 3: required steps.
+#: src/panel.js:137
+#, js-format
+msgid "%1$s (%2$d / %3$d required)"
+msgstr ""
+
+#. translators: 1: checklist name, 2: steps with a result, 3: steps.
+#: src/panel.js:146
+#, js-format
+msgid "%1$s (%2$d / %3$d)"
+msgstr ""
+
+#: src/panel.js:194
+msgid "(open in a window)"
+msgstr ""
+
+#: src/panel.js:246
+msgid "Loading checklist…"
+msgstr ""
+
+#: src/panel.js:266
+msgid "The checklist could not be loaded. Check your connection and try again."
+msgstr ""
+
+#: src/panel.js:305
+msgid "Loading checklists…"
+msgstr ""
+
+#: src/panel.js:314
+msgid "None yet"
+msgstr ""
+
+#: src/panel.js:318
+msgid "No testing checklists yet. Add one under UAT → Checklists in wp-admin."
+msgstr ""
+
+#: src/panel.js:342
+msgid "Checklists not loaded"
+msgstr ""
+
+#: src/panel.js:347
+msgid "The checklists could not be loaded. Check your connection and try again."
+msgstr ""
+
+#: blocks/checklist/block.json
+msgctxt "block title"
+msgid "Testing checklist"
+msgstr ""
+
+#: blocks/checklist/block.json
+msgctxt "block description"
+msgid "An intro, then numbered test steps, grouped into sections, that logged-in testers mark Pass or Fail with a comment. Each checklist post holds one, from its template."
+msgstr ""
+
+#: blocks/checklist/block.json
+msgctxt "block keyword"
+msgid "uat"
+msgstr ""
+
+#: blocks/checklist/block.json
+msgctxt "block keyword"
+msgid "testing"
+msgstr ""
+
+#: blocks/checklist/block.json
+msgctxt "block keyword"
+msgid "checklist"
+msgstr ""
+
+#: blocks/section/block.json
+msgctxt "block title"
+msgid "Checklist section"
+msgstr ""
+
+#: blocks/section/block.json
+msgctxt "block description"
+msgid "A titled group of test steps, such as Editor or Front end at mobile width."
+msgstr ""
+
+#: blocks/step/block.json
+msgctxt "block title"
+msgid "Checklist step"
+msgstr ""
+
+#: blocks/step/block.json
+msgctxt "block description"
+msgid "One test step and its expected result. Testers mark it Pass or Fail and can add a comment."
+msgstr ""

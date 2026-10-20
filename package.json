@@ -1,0 +1,64 @@
+{
+	"name": "uat-checklist",
+	"version": "0.1.0",
+	"description": "Testing checklists for user acceptance testing: testers mark each step Pass or Fail, and the results are stored on the site.",
+	"author": "Human Made Limited",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"wordpress-plugin",
+		"gutenberg",
+		"block-editor",
+		"uat",
+		"testing"
+	],
+	"homepage": "https://github.com/humanmade/uat-checklist",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/humanmade/uat-checklist.git"
+	},
+	"bugs": {
+		"url": "https://github.com/humanmade/uat-checklist/issues"
+	},
+	"engines": {
+		"node": ">=24"
+	},
+	"private": true,
+	"devDependencies": {
+		"@playwright/test": "~1.63.0",
+		"@wordpress/env": "^11.0.0",
+		"@wordpress/eslint-plugin": "^26.0.0",
+		"@wordpress/prettier-config": "^4.55.0",
+		"@wordpress/scripts": "^35.0.0",
+		"@wordpress/stylelint-config": "^25.0.0",
+		"@wp-playground/cli": "^3.1.56",
+		"copy-webpack-plugin": "^14.0.0",
+		"playwright": "^1.63.0",
+		"stylelint-scss": "^7.2.0"
+	},
+	"scripts": {
+		"build": "wp-scripts build",
+		"check:version": "bash .github/check-version-bump.sh",
+		"env:cli": "npx @wordpress/env run cli",
+		"env:db": "npx @wordpress/env run cli -- mysql -uroot -ppassword wordpress --host=mysql",
+		"env:destroy": "npx @wordpress/env destroy",
+		"env:logs": "npx @wordpress/env logs development | grep -v -E '\"(GET|OPTIONS|HEAD|POST|PUT)'",
+		"env:start": "npx @wordpress/env start",
+		"env:stop": "npx @wordpress/env stop",
+		"format": "wp-scripts format",
+		"i18n": "bin/i18n",
+		"lint:js": "wp-scripts lint-js src blocks webpack.config.js tests/e2e .claude/skills/creating-a-uat-page/scripts",
+		"lint:js:fix": "wp-scripts lint-js src blocks webpack.config.js tests/e2e .claude/skills/creating-a-uat-page/scripts --fix",
+		"lint:md": "wp-scripts lint-md-docs README.md AGENTS.md .claude",
+		"lint:php": "composer phpcs",
+		"lint:pkg-json": "wp-scripts lint-pkg-json ./package.json",
+		"lint:style": "wp-scripts lint-style \"src/**/*.scss\" \"blocks/**/*.scss\"",
+		"lint:style:fix": "wp-scripts lint-style \"src/**/*.scss\" \"blocks/**/*.scss\" --fix",
+		"start": "wp-scripts start",
+		"test": "npm run test:php && npm run test:sh",
+		"test:php": "php tests/test-version.php",
+		"test:e2e": "playwright test --config tests/e2e/playwright.config.js",
+		"test:sh": "bash tests/test-version-bump.sh",
+		"test:wp": "npx @wordpress/env run cli --env-cwd=wp-content/plugins/$(basename \"$PWD\") -- wp eval-file tests/wp/run.php"
+	}
+}
