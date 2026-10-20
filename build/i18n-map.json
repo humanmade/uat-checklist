@@ -1,0 +1,50 @@
+{
+	"blocks/checklist/edit.js": [
+		"build/blocks/checklist/index.js"
+	],
+	"blocks/checklist/index.js": [
+		"build/blocks/checklist/index.js"
+	],
+	"blocks/section/edit.js": [
+		"build/blocks/section/index.js"
+	],
+	"blocks/section/index.js": [
+		"build/blocks/section/index.js"
+	],
+	"blocks/step/edit.js": [
+		"build/blocks/step/index.js"
+	],
+	"blocks/step/index.js": [
+		"build/blocks/step/index.js"
+	],
+	"src/checklist-editor.js": [
+		"build/checklist-editor.js"
+	],
+	"src/guide.js": [
+		"build/guide.js"
+	],
+	"src/lib/checklist.js": [
+		"build/panel.js"
+	],
+	"src/lib/note-form.js": [
+		"build/panel.js"
+	],
+	"src/lib/panel.js": [
+		"build/panel.js"
+	],
+	"src/lib/retests.js": [
+		"build/panel.js"
+	],
+	"src/lib/step-form.js": [
+		"build/panel.js"
+	],
+	"src/lib/window-presence.js": [
+		"build/panel.js"
+	],
+	"src/overview.js": [
+		"build/overview.js"
+	],
+	"src/panel.js": [
+		"build/panel.js"
+	]
+}

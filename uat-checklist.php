@@ -3,7 +3,7 @@
  * Plugin Name:       UAT Checklist
  * Plugin URI:        https://github.com/humanmade/uat-checklist
  * Description:       Testing checklists for user acceptance testing: testers mark each step Pass or Fail, and the results are stored on the site.
- * Version:           0.1.0
+ * Version:           0.1.2
  * Requires at least: 7.1
  * Requires PHP:      8.4
  * Author:            Human Made
@@ -23,7 +23,7 @@ namespace HM\UAT_Checklist;
 defined( 'ABSPATH' ) || exit;
 
 // Asset cache-busting fallback.
-const VERSION = '0.1.0';
+const VERSION = '0.1.2';
 
 const PATH = __DIR__ . '/';
 

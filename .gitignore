@@ -1,8 +1,0 @@
-.DS_Store
-node_modules
-
-/build/
-/vendor/
-/docs/video/out/
-/tests/e2e/.auth/
-/tests/e2e/test-results/
