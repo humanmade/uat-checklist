@@ -277,6 +277,9 @@ file is read.
 Each block's `block.json` carries a `version` too. It is not part of this set: `Blocks\version_styles()`
 replaces it with the build hash.
 
+A bump also changes the POT's `Project-Id-Version`, which `bin/i18n pot` reads from the plugin header. Run it
+after the bump, or the Translations check fails.
+
 Whether this branch has bumped already is answered by git: compare `git show main:uat-checklist.php` with the
 working tree. `npm run check:version` reads committed, modified and untracked changes, and decides from
 `.gitattributes` plus the `COMPILED_ROOTS` list (`src` and `blocks`) whether any of them ship. A change that
