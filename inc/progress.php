@@ -23,6 +23,26 @@ use WP_Query;
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * A checklist with no steps.
+ */
+const STATUS_EMPTY = 'empty';
+
+/**
+ * A checklist with steps and not one result.
+ */
+const STATUS_NOT_STARTED = 'not-started';
+
+/**
+ * A checklist with some results, and a required step still without one.
+ */
+const STATUS_IN_PROGRESS = 'in-progress';
+
+/**
+ * A checklist whose every required step has a result: the point at which the panel tells a tester they may stop.
+ */
+const STATUS_COMPLETE = 'complete';
+
+/**
  * Returns the published checklists by title, as many as the panel's picker lists.
  *
  * @return WP_Post[] Checklists.
@@ -74,26 +94,6 @@ function latest_results( int $checklist_id, array $step_ids ): array {
 		array_flip( $step_ids )
 	);
 }
-
-/**
- * A checklist with no steps.
- */
-const STATUS_EMPTY = 'empty';
-
-/**
- * A checklist with steps and not one result.
- */
-const STATUS_NOT_STARTED = 'not-started';
-
-/**
- * A checklist with some results, and a required step still without one.
- */
-const STATUS_IN_PROGRESS = 'in-progress';
-
-/**
- * A checklist whose every required step has a result: the point at which the panel tells a tester they may stop.
- */
-const STATUS_COMPLETE = 'complete';
 
 /**
  * Returns the counts for each published checklist, by title.

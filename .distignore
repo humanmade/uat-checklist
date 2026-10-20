@@ -10,6 +10,9 @@
 #
 # composer.json is deliberately NOT listed either. It carries `type: wordpress-plugin`, which is what lets this be
 # installed as a composer dependency.
+#
+# AGENTS.md, CLAUDE.md (a symlink to it) and .claude/ ship as well, so the agent instructions and the
+# creating-a-uat-page skill come with the installed plugin.
 
 # Version control and CI
 .git
@@ -38,11 +41,8 @@ bin
 node_modules
 vendor
 
-# Internal notes and agent tooling, not user documentation
-AGENTS.md
-CLAUDE.md
+# Internal notes and design records, not user documentation
 docs
-.claude
 PRODUCT.md
 .impeccable
 

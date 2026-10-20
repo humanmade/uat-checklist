@@ -9,7 +9,8 @@
 # Patterns are matched the way git archive matches them, so a directory entry such as /tests covers what is
 # inside it. `git check-attr` does not agree, and is the wrong tool for reading this file back.
 #
-# build/ is absent on purpose, and so are composer.json and languages/. See .distignore.
+# build/ is absent on purpose, and so are composer.json, languages/, AGENTS.md, CLAUDE.md and .claude/. See
+# .distignore.
 
 /.gitattributes export-ignore
 /.gitignore export-ignore
@@ -31,10 +32,7 @@
 /composer.lock export-ignore
 /bin export-ignore
 
-/AGENTS.md export-ignore
-/CLAUDE.md export-ignore
 /docs export-ignore
-/.claude export-ignore
 /PRODUCT.md export-ignore
 /.impeccable export-ignore
 

@@ -8,27 +8,21 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 test.use({ storageState: storageState(USERS.manager) });
 
 /**
- * Opens a checklist in the editor once its steps are in the block editor, with the welcome guide off so nothing
- * covers the sidebar.
+ * Opens a checklist in the editor once its steps are drawn in the canvas. auth.setup.js has turned the welcome guide
+ * off on the server.
  *
  * @param {import('@playwright/test').Page} page Page.
  * @param {number}                          id   Checklist ID.
  */
 async function openEditor(page, id) {
 	await page.goto(`/wp-admin/post.php?post=${id}&action=edit`);
-	// Waits on the blocks the tests act on: a post ID in the editor store does not show they have reached the block
-	// editor's store.
-	await page.waitForFunction(
-		() =>
-			window.wp?.data
-				?.select('core/block-editor')
-				?.getBlocksByName('uat-checklist/step').length > 0
-	);
-	await page.evaluate(() =>
-		window.wp.data
-			.dispatch('core/preferences')
-			.set('core/edit-post', 'welcomeGuide', false)
-	);
+	// Waits for a step drawn in the canvas, not one in the store: a section takes its insert rules only when it
+	// renders, so until then the editor silently refuses a step inserted into it.
+	await page
+		.frameLocator('[name="editor-canvas"]')
+		.getByRole('document', { name: 'Block: Checklist step' })
+		.first()
+		.waitFor();
 }
 
 test('a step added or duplicated in the editor gets an ID of its own, and the original keeps its ID', async ({
@@ -72,9 +66,14 @@ test('a step added or duplicated in the editor gets an ID of its own, and the or
 	const ids = await stepIds();
 	expect(ids[0]).toBe(original);
 
-	await page.evaluate(() =>
-		window.wp.data.dispatch('core/editor').savePost()
-	);
+	await page
+		.getByRole('region', { name: 'Editor top bar' })
+		.getByRole('button', { name: 'Save', exact: true })
+		.click();
+	await page
+		.getByRole('button', { name: 'Dismiss this notice' })
+		.filter({ hasText: 'updated' })
+		.waitFor();
 	const saved = (await site.getChecklist(id)).content.raw;
 	for (const stepId of ids) {
 		expect(saved).toContain(`"stepId":"${stepId}"`);
@@ -95,12 +94,26 @@ test('the Instructions page setting saves the page chosen', async ({
 	}
 	await page.getByRole('combobox', { name: 'Page' }).fill('Checkout instr');
 	await page.getByRole('option', { name: 'Checkout instructions' }).click();
-	await page.getByRole('button', { name: 'Save', exact: true }).click();
-
-	await expect
-		.poll(
-			async () =>
-				(await site.getChecklist(id)).meta._uat_instructions_page
+	expect(
+		await page.evaluate(
+			() =>
+				window.wp.data
+					.select('core/editor')
+					.getEditedPostAttribute('meta')._uat_instructions_page
 		)
-		.toBe(instructions.id);
+	).toBe(instructions.id);
+
+	await page
+		.getByRole('region', { name: 'Editor top bar' })
+		.getByRole('button', { name: 'Save', exact: true })
+		.click();
+	// Waits on the editor's own notice, as Gutenberg's tests do, rather than polling the REST API for a fixed five
+	// seconds a slow save outlasts.
+	await page
+		.getByRole('button', { name: 'Dismiss this notice' })
+		.filter({ hasText: 'updated' })
+		.waitFor();
+	expect((await site.getChecklist(id)).meta._uat_instructions_page).toBe(
+		instructions.id
+	);
 });
