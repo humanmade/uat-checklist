@@ -149,6 +149,26 @@ $popup-width: 500px;
 
 		@include primary-button;
 	}
+
+	.uat-checklist__upload {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+
+		@include primary-button;
+	}
+
+	// The file input is hidden, so its focus and its error show on the button that labels it.
+	.uat-checklist__file:focus-visible + .uat-checklist__upload {
+		outline: 2px solid token( color-accent );
+		outline-offset: 2px;
+	}
+
+	.uat-checklist__file[aria-invalid="true"] + .uat-checklist__upload {
+		outline: 2px solid token( color-fail );
+		outline-offset: 2px;
+	}
 }
 
 // While the open panel covers the whole window, the page behind it cannot be seen, so only the panel scrolls.

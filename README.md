@@ -96,7 +96,7 @@ failures the overview counted, and not a Fail another tester has since passed.
 comments** above the list filter it, and the checklist dropdown limits it to one. **Latest result on each step
 only** leaves the one result per step the panel and the overview go by. The counts beside the statuses are core's,
 and still count every result. **Move to Trash** clears results, for example before a retest round. Results cannot
-be edited. A tester's screenshot shows under their comment, linked to the full image.
+be edited. A tester's screenshot has its own **Screenshot** column, right of **Comment**, linked to the full image.
 
 Deleting a checklist permanently, from the trash, deletes its results, their screenshots and testers' additional
 comments with it. A checklist in the trash keeps them, so restoring it brings its history back.
@@ -108,8 +108,8 @@ the latest from anyone is what every tester sees.
 
 Once a failed step is fixed, a UAT manager clicks **Mark fixed** under that Fail in **Results**, and may add a note
 for the testers. It shows only while the step's latest result is a Fail, and it covers every tester's Fail on the
-step. Marking it saves a **Fixed** result of its own and leaves the Fail as it was. The page it opens shows the
-tester's comment, with their screenshot when they sent one.
+step. Marking it saves a **Fixed** result of its own and leaves the Fail as it was. The page it opens quotes the
+tester's comment, and shows their screenshot large, with a link to the full size, when they sent one.
 
 While a Fixed is the step's latest result, the panel tags the step **Retest** and opens it first, with the note,
 the failure it fixed and that failure's screenshot. The tester's next Pass or Fail decides the step, and the overview counts the step as not

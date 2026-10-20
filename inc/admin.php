@@ -106,17 +106,48 @@ function style_results_screens(): void {
 		}
 
 		.uat-checklist__screenshot {
-			margin: 8px 0 0;
+			margin: 0;
 		}
 
 		.uat-checklist__screenshot img {
 			display: block;
+			box-sizing: border-box;
 			max-width: 100%;
 			height: auto;
+			border: 1px solid color-mix( in srgb, currentColor 20%, transparent );
 		}
 
-		.column-uat_comment .uat-checklist__screenshot img {
-			max-width: 150px;
+		.column-uat_screenshot {
+			width: 144px;
+		}
+
+		/* Set apart from the rows above as the tester's own words, with the red edge core gives an error notice. */
+		.uat-fixed-comment {
+			box-sizing: border-box;
+			max-width: 65ch;
+			margin: 0;
+			padding: 12px 16px;
+			border: 1px solid #c3c4c7;
+			border-inline-start: 4px solid #d63638;
+			background-color: #fff;
+		}
+
+		.uat-fixed-comment p {
+			margin: 0 0 1em;
+			font-size: 14px;
+			line-height: 1.6;
+		}
+
+		.uat-fixed-comment p:last-child {
+			margin-block-end: 0;
+		}
+
+		.uat-fixed-screenshot img {
+			max-width: min( 100%, 640px );
+		}
+
+		.uat-fixed-screenshot p {
+			margin: 8px 0 0;
 		}
 		CSS;
 
@@ -192,13 +223,14 @@ function deny_editing( array $caps, string $cap, int $user_id, array $args ): ar
  */
 function columns( array $columns ): array {
 	return [
-		'cb'          => $columns['cb'] ?? '',
-		'title'       => __( 'Step', 'uat-checklist' ),
-		'uat_result'  => __( 'Result', 'uat-checklist' ),
-		'uat_comment' => __( 'Comment', 'uat-checklist' ),
-		'uat_page'    => __( 'Checklist', 'uat-checklist' ),
-		'author'      => __( 'By', 'uat-checklist' ),
-		'uat_saved'   => __( 'Last saved', 'uat-checklist' ),
+		'cb'             => $columns['cb'] ?? '',
+		'title'          => __( 'Step', 'uat-checklist' ),
+		'uat_result'     => __( 'Result', 'uat-checklist' ),
+		'uat_comment'    => __( 'Comment', 'uat-checklist' ),
+		'uat_screenshot' => __( 'Screenshot', 'uat-checklist' ),
+		'uat_page'       => __( 'Checklist', 'uat-checklist' ),
+		'author'         => __( 'By', 'uat-checklist' ),
+		'uat_saved'      => __( 'Last saved', 'uat-checklist' ),
 	];
 }
 
@@ -225,6 +257,9 @@ function render_column( string $column, int $post_id ): void {
 
 		case 'uat_comment':
 			echo nl2br( esc_html( $result->post_content ) );
+			break;
+
+		case 'uat_screenshot':
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built by Screenshots\markup() from esc_url(), esc_html__() and wp_get_attachment_image().
 			echo Screenshots\markup( $result, 'medium' );
 			break;
@@ -558,13 +593,31 @@ function render_mark_fixed_page(): void {
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Their comment', 'uat-checklist' ); ?></th>
 					<td>
-						<?php
-						echo nl2br( esc_html( $result->post_content ) );
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built by Screenshots\markup() from esc_url(), esc_html__() and wp_get_attachment_image().
-						echo Screenshots\markup( $result, 'medium' );
-						?>
+						<blockquote class="uat-fixed-comment">
+							<?php
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by esc_html() before wpautop() adds the paragraphs.
+							echo wpautop( esc_html( $result->post_content ) );
+							?>
+						</blockquote>
 					</td>
 				</tr>
+				<?php $screenshot = Screenshots\of( $result ); ?>
+				<?php if ( $screenshot !== null ) : ?>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Their screenshot', 'uat-checklist' ); ?></th>
+						<td class="uat-fixed-screenshot">
+							<?php
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built by Screenshots\markup() from esc_url(), esc_html__() and wp_get_attachment_image().
+							echo Screenshots\markup( $result, 'large' );
+							?>
+							<p>
+								<a href="<?php echo esc_url( (string) wp_get_attachment_url( $screenshot->ID ) ); ?>" target="_blank" rel="noopener">
+									<?php esc_html_e( 'Open full size', 'uat-checklist' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)', 'uat-checklist' ); ?></span>
+								</a>
+							</p>
+						</td>
+					</tr>
+				<?php endif; ?>
 				<tr>
 					<th scope="row"><label for="uat-fixed-note"><?php esc_html_e( 'Note for testers', 'uat-checklist' ); ?></label></th>
 					<td>

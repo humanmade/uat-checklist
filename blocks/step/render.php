@@ -128,7 +128,7 @@ if ( $saved && $is_retest ) {
 					$failure->post_content
 				)
 			)
-			. '</p>' . Screenshots\markup( $failure, 'medium' ) : '' )
+			. '</p>' . Screenshots\markup( $failure, 'large' ) : '' )
 		. '</div>';
 }
 
@@ -159,9 +159,15 @@ if ( $can_record ) {
 			. '<textarea class="uat-checklist__comment" id="%5$s" name="comment" rows="2" maxlength="%7$d"'
 			. ' aria-describedby="%8$s"></textarea>'
 			. '<p class="uat-checklist__hint" id="%8$s">%9$s</p>'
-			. '<label class="uat-checklist__label" for="%14$s">%15$s</label>'
+			. '<div class="uat-checklist__attach">'
+			. '<span class="uat-checklist__label">%15$s</span>'
+			. '<div class="uat-checklist__preview" hidden>'
+			. '<button type="button" class="uat-checklist__remove">%20$s</button></div>'
+			// The input stays in the page, focusable, so keyboard and screen readers use the native control.
 			. '<input type="file" class="uat-checklist__file" id="%14$s" name="%16$s" accept="%17$s" aria-describedby="%18$s">'
+			. '<label class="uat-checklist__upload wp-element-button" for="%14$s">%21$s</label>'
 			. '<p class="uat-checklist__hint" id="%18$s">%19$s</p>'
+			. '</div>'
 			. '<div class="uat-checklist__actions">'
 			. '<button type="submit" class="uat-checklist__save wp-element-button">%10$s</button>'
 			. '<p class="uat-checklist__status" role="status">%11$s</p></div>'
@@ -191,7 +197,9 @@ if ( $can_record ) {
 				__( 'Optional. A JPEG, PNG, GIF or WebP image of up to %s.', 'uat-checklist' ),
 				size_format( wp_max_upload_size() )
 			)
-		)
+		),
+		esc_html__( 'Remove screenshot', 'uat-checklist' ),
+		esc_html__( 'Add a screenshot', 'uat-checklist' )
 	);
 }
 

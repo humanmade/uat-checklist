@@ -11,6 +11,8 @@ const FORM = '.uat-checklist__result';
 const ROUTE = '/uat-checklist/v1/results';
 // Mirrors Screenshots\FIELD in inc/screenshots.php.
 const SCREENSHOT_FIELD = 'screenshot';
+const PREVIEW = '.uat-checklist__preview';
+const UPLOAD = '.uat-checklist__upload';
 
 /**
  * Shows a message in the form's status line, styled as an error when `isError` is set.
@@ -113,6 +115,101 @@ function screenshotProblem(input, file, max) {
 }
 
 /**
+ * Removes the screenshot preview, frees its image, and sets the upload button back to adding one.
+ *
+ * @param {HTMLFormElement} form Step result form.
+ */
+function clearPreview(form) {
+	const preview = form.querySelector(PREVIEW);
+	const image = preview.querySelector('img');
+
+	if (image) {
+		window.URL.revokeObjectURL(image.src);
+		image.remove();
+	}
+
+	preview.hidden = true;
+	form.querySelector(UPLOAD).textContent = __(
+		'Add a screenshot',
+		'uat-checklist'
+	);
+}
+
+/**
+ * Reports why a chosen screenshot cannot be sent, and clears it and its preview.
+ *
+ * @param {HTMLFormElement} form    Step result form.
+ * @param {string}          message The problem.
+ */
+function refuse(form, message) {
+	const input = form.elements[SCREENSHOT_FIELD];
+
+	report(form.querySelector('.uat-checklist__status'), message, true);
+	input.setAttribute('aria-invalid', 'true');
+	input.value = '';
+	clearPreview(form);
+}
+
+/**
+ * Shows a chosen screenshot full width above the upload button, which then offers to replace it.
+ *
+ * @param {HTMLFormElement} form Step result form.
+ * @param {File}            file Chosen image.
+ */
+function showPreview(form, file) {
+	const preview = form.querySelector(PREVIEW);
+	const image = form.ownerDocument.createElement('img');
+
+	clearPreview(form);
+	// The type checked so far comes from the file's name; an image the browser cannot draw is not one.
+	image.addEventListener('error', () =>
+		refuse(
+			form,
+			__('Choose a JPEG, PNG, GIF or WebP image.', 'uat-checklist')
+		)
+	);
+	image.src = window.URL.createObjectURL(file);
+	image.alt = __('The screenshot you chose', 'uat-checklist');
+	preview.prepend(image);
+	preview.hidden = false;
+	form.querySelector(UPLOAD).textContent = __(
+		'Replace screenshot',
+		'uat-checklist'
+	);
+}
+
+/**
+ * Previews the file just chosen, or reports why it cannot be sent and clears it, so only a file the server would
+ * take is ever previewed or sent.
+ *
+ * @param {HTMLFormElement} form Step result form.
+ */
+function choose(form) {
+	const input = form.elements[SCREENSHOT_FIELD];
+	const file = input.files[0];
+
+	input.removeAttribute('aria-invalid');
+
+	if (!file) {
+		clearPreview(form);
+		return;
+	}
+
+	const problem = screenshotProblem(
+		input,
+		file,
+		Number(form.dataset.maxUpload)
+	);
+
+	if (problem) {
+		refuse(form, problem);
+		return;
+	}
+
+	showPreview(form, file);
+}
+
+/**
  * Validates the form, posts it, and reports the outcome in the form's status line.
  *
  * @param {HTMLFormElement} form Step result form.
@@ -145,19 +242,8 @@ async function save(form) {
 		return;
 	}
 
-	const input = form.elements[SCREENSHOT_FIELD];
-	const file = input.files[0];
-	const problem = file
-		? screenshotProblem(input, file, Number(form.dataset.maxUpload))
-		: '';
-
-	if (problem) {
-		report(status, problem, true);
-		input.setAttribute('aria-invalid', 'true');
-		input.focus();
-		return;
-	}
-
+	// Already checked when it was chosen, by choose().
+	const file = form.elements[SCREENSHOT_FIELD].files[0];
 	const body = new window.FormData();
 	body.append('checklist_id', form.dataset.checklistId);
 	body.append('step_id', form.dataset.stepId);
@@ -205,9 +291,19 @@ export default function bindStepForms(root) {
 		form.hidden = false;
 		syncRequired(form);
 		form.addEventListener('input', () => syncRequired(form));
-		form.elements[SCREENSHOT_FIELD].addEventListener('change', (event) =>
-			event.target.removeAttribute('aria-invalid')
+		const input = form.elements[SCREENSHOT_FIELD];
+
+		input.addEventListener('change', () => choose(form));
+		form.querySelector('.uat-checklist__remove').addEventListener(
+			'click',
+			() => {
+				input.value = '';
+				clearPreview(form);
+				input.focus();
+			}
 		);
+		// A save resets the form, which empties the file field but leaves the preview.
+		form.addEventListener('reset', () => clearPreview(form));
 		form.addEventListener('submit', (event) => {
 			event.preventDefault();
 			save(form);
