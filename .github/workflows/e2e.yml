@@ -1,0 +1,57 @@
+name: Browser tests
+
+# Unfiltered by path, like wp-tests.yml: the panel's behaviour depends on PHP, JavaScript and
+# block.json together, so no paths list could tell which change reaches it.
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright on Playground
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      # Playground mounts this checkout as the plugin, and blocks register from build/ only.
+      - name: Build
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # No step starts Playground: the config's webServer boots it with the WordPress and PHP
+      # versions from .wp-env.json. The runner sets CI, which stops it reusing a server already
+      # on the port and reports failures as annotations on the PR.
+      - name: Run the browser suite
+        run: npm run test:e2e
+
+      # The config keeps a trace for each failed test only. Open one with `npx playwright show-trace`.
+      - name: Upload traces
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-traces
+          path: tests/e2e/test-results/
+          retention-days: 14
+          if-no-files-found: ignore

@@ -280,7 +280,8 @@ replaces it with the build hash.
 Whether this branch has bumped already is answered by git: compare `git show main:uat-checklist.php` with the
 working tree. `npm run check:version` reads committed, modified and untracked changes, and decides from
 `.gitattributes` plus the `COMPILED_ROOTS` list (`src` and `blocks`) whether any of them ship. A change that
-ships nothing gets no bump. Patch for fixes, minor for new behaviour, major for a break.
+ships nothing gets no bump. `AGENTS.md`, `CLAUDE.md` and `.claude/` ship, so an edit to any of them needs one.
+Patch for fixes, minor for new behaviour, major for a break.
 
 ## Releases
 
@@ -291,6 +292,10 @@ tags `release`, builds the zip with `git archive --prefix=uat-checklist/`, and c
 cleanly and does nothing.
 
 `languages/` ships, compiled. `src/` and `blocks/` are export-ignored and still ship, compiled into `build/`.
+
+`AGENTS.md`, `CLAUDE.md` (a symlink to it) and `.claude/` ship as they are, so the agent instructions and the
+creating-a-uat-page skill come with the installed plugin. `docs/`, `PRODUCT.md` and `.impeccable/` are
+export-ignored and do not ship. `.gitattributes` and `.distignore` list the same paths and change together.
 
 ## Commands
 
