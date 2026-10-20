@@ -4,7 +4,7 @@ Tags: testing, uat, checklist, blocks, qa
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.4
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,9 @@ Every interface string is translatable. A Japanese translation ships in `languag
 WordPress 7.1 or later, and PHP 8.4.
 
 == Changelog ==
+
+= 0.1.2 =
+* The checklist status constants in the progress code are declared before the functions that use them. No change in behaviour.
 
 = 0.1.1 =
 * The plugin now ships with its agent instructions (`AGENTS.md`, `CLAUDE.md`) and its `.claude/` folder, which holds the skill that builds UAT pages from specs.
