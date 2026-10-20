@@ -1,5 +1,6 @@
 /*
- * Logs in each of the blueprint's users once and saves the session for the tests to start from.
+ * Logs in each of the blueprint's users once, turns the editor's welcome guide off, and saves the session for the
+ * tests to start from.
  */
 import { expect, test as setup } from '@playwright/test';
 
@@ -19,6 +20,24 @@ for (const user of Object.values(USERS)) {
 			// A refused login answers 200 with the form again, so only the redirect into wp-admin shows it worked.
 			expect(response.url()).toMatch(/\/wp-admin\//);
 		}).toPass({ timeout: 60_000 });
+
+		// Saved on the server, as Gutenberg's setPreferences() does, so the editor preloads it. Set in the page instead,
+		// it is overwritten when the editor's own fetch of a new user's preferences lands, and the guide reopens.
+		const nonce = await (
+			await request.get('/wp-admin/admin-ajax.php?action=rest-nonce')
+		).text();
+		const saved = await request.put('/wp-json/wp/v2/users/me', {
+			headers: { 'X-WP-Nonce': nonce },
+			data: {
+				meta: {
+					persisted_preferences: {
+						'core/edit-post': { welcomeGuide: false },
+					},
+				},
+			},
+		});
+		expect(saved.ok()).toBe(true);
+
 		await request.storageState({ path: storageState(user) });
 	});
 }
