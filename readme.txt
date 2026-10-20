@@ -4,7 +4,7 @@ Tags: testing, uat, checklist, blocks, qa
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.4
-Stable tag: 0.1.3
+Stable tag: 0.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,9 @@ Every interface string is translatable. A Japanese translation ships in `languag
 WordPress 7.1 or later, and PHP 8.4.
 
 == Changelog ==
+
+= 0.2.0 =
+* A step can show a screenshot uploaded in the editor. Select the step, then upload an image or choose one from the Media Library under its text; the panel shows it there, above the step's instructions. Its alternative text is under **Screenshot** in the sidebar, and **Replace** and **Remove image** are in the block toolbar.
 
 = 0.1.3 =
 * `AGENTS.md` says to regenerate the translation template after a version bump, since the template's version comes from the plugin header.

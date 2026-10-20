@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: UAT Checklist 0.1.0\n"
+"Project-Id-Version: UAT Checklist 0.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/humanmade/uat-checklist/issues\n"
 "Last-Translator: Human Made <support@humanmade.com>\n"
 "Language-Team: Human Made <support@humanmade.com>\n"
@@ -62,7 +62,7 @@ msgid "Turn on JavaScript to record a result."
 msgstr "結果を記録するには JavaScript を有効にしてください。"
 
 #: blocks/step/render.php:58
-#: blocks/step/edit.js:62
+#: blocks/step/edit.js:74
 msgid "Expected result"
 msgstr "期待される結果"
 
@@ -162,11 +162,11 @@ msgstr "%2$s に「%1$s」として保存しました。"
 msgid "Section title, for example Editor"
 msgstr "セクションのタイトル (例: エディター)"
 
-#: blocks/step/edit.js:139
+#: blocks/step/edit.js:247
 msgid "What the tester does"
 msgstr "テスターが行う操作"
 
-#: blocks/step/edit.js:152
+#: blocks/step/edit.js:266
 msgid "What they should see"
 msgstr "表示されるべき内容"
 
@@ -909,3 +909,24 @@ msgstr "再テスト待ち (%d)"
 #: src/lib/retests.js:134
 msgid "Steps ready to retest could not be loaded."
 msgstr "再テスト待ちのステップを読み込めませんでした。"
+
+#: blocks/step/edit.js:130
+#: blocks/step/edit.js:163
+msgid "Screenshot"
+msgstr "スクリーンショット"
+
+#: blocks/step/edit.js:131
+msgid "Optional. Shown under the step’s text in the panel."
+msgstr "任意。パネルでステップのテキストの下に表示されます。"
+
+#: blocks/step/edit.js:159
+msgid "Remove image"
+msgstr "画像を削除"
+
+#: blocks/step/edit.js:165
+msgid "Alternative text"
+msgstr "代替テキスト"
+
+#: blocks/step/edit.js:166
+msgid "Describe what the screenshot shows, for testers who cannot see it."
+msgstr "画像を見られないテスターのために、スクリーンショットの内容を説明してください。"

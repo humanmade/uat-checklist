@@ -1,9 +1,23 @@
 /*
- * A checklist in the block editor: the step IDs results are stored against, and the Instructions page setting.
+ * A checklist in the block editor: the step IDs results are stored against, the Instructions page setting, and a
+ * step's screenshot.
  */
-import { expect, storageState, test, USERS } from './utils';
+import {
+	expect,
+	openChecklist,
+	panelStep,
+	storageState,
+	test,
+	USERS,
+} from './utils';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+// A 1×1 PNG, enough for WordPress to accept the upload and make an attachment of it.
+const PNG = Buffer.from(
+	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+	'base64'
+);
 
 test.use({ storageState: storageState(USERS.manager) });
 
@@ -116,4 +130,50 @@ test('the Instructions page setting saves the page chosen', async ({
 	expect((await site.getChecklist(id)).meta._uat_instructions_page).toBe(
 		instructions.id
 	);
+});
+
+test('a screenshot uploaded to a step is saved with its alt text and shows in the panel', async ({
+	page,
+	site,
+}) => {
+	const name = `uat-step-shot-${Date.now()}`;
+	site.deleteUploadsNamed(name);
+	const {
+		id,
+		stepIds: [stepId],
+	} = await site.createChecklist('Screenshot', ['Open the menu']);
+	await openEditor(page, id);
+
+	const canvas = page.frameLocator('[name="editor-canvas"]');
+	await canvas
+		.getByRole('document', { name: 'Block: Checklist step' })
+		.click();
+	await canvas.locator('input[type="file"]').setInputFiles({
+		name: `${name}.png`,
+		mimeType: 'image/png',
+		buffer: PNG,
+	});
+	// The upload shows a temporary blob: URL first; the saved file's URL replaces it once the upload lands.
+	await expect(canvas.locator('.uat-checklist__figure img')).toHaveAttribute(
+		'src',
+		/\/wp-content\/uploads\//
+	);
+	await page.getByLabel('Alternative text').fill('The menu, open');
+
+	await page
+		.getByRole('region', { name: 'Editor top bar' })
+		.getByRole('button', { name: 'Save', exact: true })
+		.click();
+	await page
+		.getByRole('button', { name: 'Dismiss this notice' })
+		.filter({ hasText: 'updated' })
+		.waitFor();
+	const saved = (await site.getChecklist(id)).content.raw;
+	expect(saved).toMatch(/"imageUrl":"[^"]*\/wp-content\/uploads\/[^"]+"/);
+	expect(saved).toContain('"imageAlt":"The menu, open"');
+
+	await openChecklist(page, id);
+	const image = panelStep(page, stepId).locator('.uat-checklist__figure img');
+	await expect(image).toHaveAttribute('src', /\/wp-content\/uploads\//);
+	await expect(image).toHaveAttribute('alt', 'The menu, open');
 });

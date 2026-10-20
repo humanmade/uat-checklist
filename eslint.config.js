@@ -38,6 +38,7 @@ module.exports = [
 		settings: {
 			'import/core-modules': [
 				'@wordpress/api-fetch',
+				'@wordpress/blob',
 				'@wordpress/block-editor',
 				'@wordpress/blocks',
 				'@wordpress/components',
@@ -47,6 +48,7 @@ module.exports = [
 				'@wordpress/element',
 				'@wordpress/html-entities',
 				'@wordpress/i18n',
+				'@wordpress/notices',
 				'@wordpress/plugins',
 			],
 		},

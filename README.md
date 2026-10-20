@@ -48,6 +48,11 @@ A step is required unless its `required` attribute is false. The panel tags requ
 with them, so a tester can finish those and stop. Each step gets a `stepId` UUID when it is added, and its
 results are stored against it: rewording a step keeps them, and deleting the step leaves them in **Results**.
 
+A step can show one screenshot, for a control that is hard to find. Select the step, then upload an image or
+choose one from the Media Library in the space under its text. The panel shows it in the same place, above the
+step's instructions. Write what it shows under **Screenshot** in the sidebar, for testers who cannot see it.
+**Replace** and **Remove image** are in the block toolbar.
+
 Writing steps by hand suits a short checklist. To generate checklists from JSON specs, optionally with a page
 of instructions, screenshots and live examples for each, use the `creating-a-uat-page` skill in
 `.claude/skills/`. It reaches WordPress through WP-CLI on any host and writes in the site's own language.

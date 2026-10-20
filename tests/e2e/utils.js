@@ -48,6 +48,7 @@ export const test = base.extend({
 			await request.get('/wp-admin/admin-ajax.php?action=rest-nonce')
 		).text();
 		const created = [];
+		const uploads = [];
 
 		const rest = async (method, route, data) => {
 			const response = await request.fetch(`/wp-json/wp/v2/${route}`, {
@@ -112,14 +113,36 @@ export const test = base.extend({
 
 			getChecklist: (id) =>
 				rest('GET', `uat-checklists/${id}?context=edit`),
+
+			/**
+			 * Deletes after the test every upload whose title holds the given text. An upload made in the editor
+			 * never passes through this fixture, so it is found by name once the test is over.
+			 *
+			 * @param {string} name Text the upload's title holds.
+			 */
+			deleteUploadsNamed: (name) => uploads.push(name),
 		});
+
+		const searches = await Promise.allSettled(
+			uploads.map((name) =>
+				rest(
+					'GET',
+					`media?search=${encodeURIComponent(name)}&_fields=id`
+				)
+			)
+		);
+		for (const { value = [] } of searches) {
+			created.push(...value.map(({ id }) => `media/${id}`));
+		}
 
 		// Every delete is tried and the request disposed before a failed delete fails the test.
 		const deletes = await Promise.allSettled(
 			created.map((route) => rest('DELETE', `${route}?force=true`))
 		);
 		await request.dispose();
-		const failed = deletes.find(({ status }) => status === 'rejected');
+		const failed = [...searches, ...deletes].find(
+			({ status }) => status === 'rejected'
+		);
 
 		if (failed) {
 			throw failed.reason;
