@@ -6,16 +6,19 @@ import { expect, test as setup } from '@playwright/test';
 import { PASSWORD, storageState, USERS } from './utils';
 
 for (const user of Object.values(USERS)) {
-	setup(`log in as ${user}`, async ({ page }) => {
-		await page.goto('/wp-login.php');
-		const username = page.getByLabel('Username or Email Address');
-		// wp-login.php focuses and selects the username 200ms after its script runs. Landing mid-fill, that sends
-		// the password into the username and leaves the required password empty, so the form never submits.
-		await expect(username).toBeFocused();
-		await username.fill(user);
-		await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
-		await page.getByRole('button', { name: 'Log In' }).click();
-		await page.waitForURL(/\/wp-admin\//);
-		await page.context().storageState({ path: storageState(user) });
+	setup(`log in as ${user}`, async ({ request }) => {
+		setup.setTimeout(90_000);
+		// Retried, as Gutenberg's setupRest() retries its login: Playground answers requests, and so passes the
+		// webServer check, once WordPress boots and before the blueprint has created this user.
+		await expect(async () => {
+			// Posts the form's fields, as Gutenberg's login helper does. Filling the form races its 200ms autofocus,
+			// which can send the password into the username.
+			const response = await request.post('/wp-login.php', {
+				form: { log: user, pwd: PASSWORD },
+			});
+			// A refused login answers 200 with the form again, so only the redirect into wp-admin shows it worked.
+			expect(response.url()).toMatch(/\/wp-admin\//);
+		}).toPass({ timeout: 60_000 });
+		await request.storageState({ path: storageState(user) });
 	});
 }

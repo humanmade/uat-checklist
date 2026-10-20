@@ -95,12 +95,26 @@ test('the Instructions page setting saves the page chosen', async ({
 	}
 	await page.getByRole('combobox', { name: 'Page' }).fill('Checkout instr');
 	await page.getByRole('option', { name: 'Checkout instructions' }).click();
-	await page.getByRole('button', { name: 'Save', exact: true }).click();
-
-	await expect
-		.poll(
-			async () =>
-				(await site.getChecklist(id)).meta._uat_instructions_page
+	expect(
+		await page.evaluate(
+			() =>
+				window.wp.data
+					.select('core/editor')
+					.getEditedPostAttribute('meta')._uat_instructions_page
 		)
-		.toBe(instructions.id);
+	).toBe(instructions.id);
+
+	await page
+		.getByRole('region', { name: 'Editor top bar' })
+		.getByRole('button', { name: 'Save', exact: true })
+		.click();
+	// Waits on the editor's own notice, as Gutenberg's tests do, rather than polling the REST API for a fixed five
+	// seconds a slow save outlasts.
+	await page
+		.getByRole('button', { name: 'Dismiss this notice' })
+		.filter({ hasText: 'updated' })
+		.waitFor();
+	expect((await site.getChecklist(id)).meta._uat_instructions_page).toBe(
+		instructions.id
+	);
 });
