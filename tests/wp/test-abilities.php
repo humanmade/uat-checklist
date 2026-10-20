@@ -309,6 +309,46 @@ try {
 				'uat_checklist_not_fixable'
 			);
 
+			// A tester's Fail, since a manager's own is never emailed whatever notify says.
+			hm_test_as_user(
+				'subscriber',
+				static function ( int $tester ) use ( $manager, $saved, $first ): void {
+					/*
+					 * Saves a fresh Fail, marks it fixed through the ability as the manager, and reports whether the
+					 * email was scheduled.
+					 */
+					$emails = static function ( array $input ) use ( $tester, $manager, $saved, $first ): bool {
+						$fail = Results\save( $saved['id'], $tester, $first['id'], 'Add the block', 'fail', 'Broken.' );
+
+						wp_set_current_user( $manager );
+
+						try {
+							return hm_test_unscheduling(
+								Notifications\FIXED_EVENT,
+								static function () use ( $fail, $input ): bool {
+									$fixed = hm_test_ability( 'mark-fixed', [ 'result_id' => $fail->ID ] + $input );
+
+									return is_array( $fixed ) && is_int(
+										wp_next_scheduled( Notifications\FIXED_EVENT, [ $fixed['fixed_result_id'], $fail->ID ] )
+									);
+								}
+							);
+						} finally {
+							wp_set_current_user( $tester );
+						}
+					};
+
+					check(
+						'mark-fixed with notify false schedules no email, and without it schedules one',
+						[
+							$emails( [ 'note' => 'Patched quietly.', 'notify' => false ] ),
+							$emails( [ 'note' => 'Patched again.' ] ),
+						],
+						[ false, true ]
+					);
+				}
+			);
+
 			$reworded = $saved['sections'];
 
 			$reworded[0]['steps'][0]['step'] = 'Insert the block and save it';

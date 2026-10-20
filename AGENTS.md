@@ -129,9 +129,11 @@ each request (`Progress\awaiting_retest()`). Nothing extra is stored, so a step 
 next saves a Pass or Fail. It shows in three places, because login sends a Subscriber to the Profile screen and
 never the dashboard: a dashboard widget, a notice on the Profile screen, and the top of the panel. Separately, a
 Mark fixed with a note emails the tester whose Fail it was, from a single `wp_schedule_single_event()` so the
-redirect never waits on mail and a mail failure cannot fail the save. No email goes when the note is empty or the
-manager marked their own Fail. Deactivating the plugin unschedules every queued email
-(`Notifications\unschedule_all()`): with the plugin inactive, cron would drop them unsent.
+redirect never waits on mail and a mail failure cannot fail the save. No email goes when the note is empty, when the
+manager marked their own Fail, or when the manager chose not to send one: **Don't send email notification** on the
+Mark fixed form, or `notify` false on the `mark-fixed` ability. Both reach `Admin\mark_fixed()`'s `$notify`, which
+defaults to true. The note is saved and shown in the panel either way. Deactivating the plugin unschedules every
+queued email (`Notifications\unschedule_all()`): with the plugin inactive, cron would drop them unsent.
 
 The slug starts `<user ID>-<step ID>`. WordPress adds `-2`, `-3` to repeats, so the step ID is the 36 characters
 after the first hyphen (`Results\step_id_of()`); a step ID is always a 36-character UUID. Everything else is in

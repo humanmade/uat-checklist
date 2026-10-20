@@ -121,7 +121,7 @@ so on a site with WP-Cron disabled it goes when the system cron next runs. It go
 site's own mailer applies. It is written in the tester's profile language, provided the site has that language
 installed. No email goes when the note is empty, when the manager marked their own Fail, or when they ticked
 **Don't send email notification** under the note; the note still shows in the panel. The
-`uat-checklist/mark-fixed` ability sends it too. Deactivating the plugin removes any email still waiting to go,
+`uat-checklist/mark-fixed` ability sends it too, unless it is given `notify` false. Deactivating the plugin removes any email still waiting to go,
 since nothing would be there to send it.
 
 **Ready to retest** lists each tester's own Fails that have since been marked fixed, with or without a note. It
@@ -244,7 +244,7 @@ managers. **Full access to UAT checklists** on a profile does not open the abili
 | `uat-checklist/get-progress`   | The overview's counts, site-wide and for each published checklist   |
 | `uat-checklist/get-checklist`  | One checklist's sections and steps, with each step's latest result  |
 | `uat-checklist/list-failures`  | Every step whose latest result is a Fail, with the tester's comment |
-| `uat-checklist/mark-fixed`     | **Mark fixed** on one of those Fails, with an optional note         |
+| `uat-checklist/mark-fixed`     | **Mark fixed** on one of those Fails, with an optional note, emailed unless `notify` is false |
 | `uat-checklist/save-checklist` | Creates a checklist, or replaces one's sections and steps           |
 
 No ability saves a Pass or a Fail: testers do that in the panel. `save-checklist` keeps a step's results when the

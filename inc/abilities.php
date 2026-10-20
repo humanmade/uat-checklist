@@ -177,7 +177,14 @@ function register_abilities(): void {
 						'type'        => 'string',
 						'maxLength'   => Results\COMMENT_MAX_LENGTH,
 						'description' => __(
-							'What was fixed. Testers see it when they retest the step.',
+							'What was fixed. Testers see it when they retest the step, and the tester who failed it is emailed the note.',
+							'uat-checklist'
+						),
+					],
+					'notify'    => [
+						'type'        => 'boolean',
+						'description' => __(
+							'False to save the note without emailing it to the tester. Defaults to true.',
 							'uat-checklist'
 						),
 					],
@@ -678,14 +685,15 @@ function describe_failure( WP_Post $checklist, string $section, array $step, WP_
 /**
  * Marks a failed step fixed, through the same decision as the Results list's Mark fixed.
  *
- * @param array{result_id: int, note?: string} $input Input.
+ * @param array{result_id: int, note?: string, notify?: bool} $input Input.
  * @return array{fixed_result_id: int, checklist_id: int, step_id: string}|WP_Error The Fixed result.
  */
 function mark_fixed( array $input ): array|WP_Error {
 	$fixed = Admin\mark_fixed(
 		$input['result_id'],
 		get_current_user_id(),
-		sanitize_textarea_field( $input['note'] ?? '' )
+		sanitize_textarea_field( $input['note'] ?? '' ),
+		$input['notify'] ?? true
 	);
 
 	if ( is_wp_error( $fixed ) ) {
