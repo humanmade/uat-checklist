@@ -72,9 +72,14 @@ test('a step added or duplicated in the editor gets an ID of its own, and the or
 	const ids = await stepIds();
 	expect(ids[0]).toBe(original);
 
-	await page.evaluate(() =>
-		window.wp.data.dispatch('core/editor').savePost()
-	);
+	await page
+		.getByRole('region', { name: 'Editor top bar' })
+		.getByRole('button', { name: 'Save', exact: true })
+		.click();
+	await page
+		.getByRole('button', { name: 'Dismiss this notice' })
+		.filter({ hasText: 'updated' })
+		.waitFor();
 	const saved = (await site.getChecklist(id)).content.raw;
 	for (const stepId of ids) {
 		expect(saved).toContain(`"stepId":"${stepId}"`);
