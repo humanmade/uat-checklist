@@ -4,7 +4,7 @@ Tags: testing, uat, checklist, blocks, qa
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.4
-Stable tag: 0.1.2
+Stable tag: 0.1.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,9 @@ Every interface string is translatable. A Japanese translation ships in `languag
 WordPress 7.1 or later, and PHP 8.4.
 
 == Changelog ==
+
+= 0.1.3 =
+* `AGENTS.md` says to regenerate the translation template after a version bump, since the template's version comes from the plugin header.
 
 = 0.1.2 =
 * The checklist status constants in the progress code are declared before the functions that use them. No change in behaviour.
