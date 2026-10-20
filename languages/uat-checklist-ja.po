@@ -39,35 +39,35 @@ msgstr "%2$s 件中 %1$s 件完了"
 msgid "Open in new window"
 msgstr "新しいウィンドウで開く"
 
-#: blocks/step/render.php:165
-#: inc/admin.php:179
+#: blocks/step/render.php:172
+#: inc/admin.php:197
 msgid "Result"
 msgstr "結果"
 
-#: blocks/step/render.php:168
-#: inc/admin.php:180
+#: blocks/step/render.php:175
+#: inc/admin.php:198
 msgid "Comment"
 msgstr "コメント"
 
-#: blocks/step/render.php:171
+#: blocks/step/render.php:178
 msgid "Required when the step fails."
 msgstr "「不合格」の場合は必須です。"
 
-#: blocks/step/render.php:172
+#: blocks/step/render.php:179
 msgid "Save result"
 msgstr "結果を保存"
 
-#: blocks/step/render.php:174
+#: blocks/step/render.php:181
 msgid "Turn on JavaScript to record a result."
 msgstr "結果を記録するには JavaScript を有効にしてください。"
 
-#: blocks/step/render.php:58
+#: blocks/step/render.php:60
 #: blocks/step/edit.js:74
 msgid "Expected result"
 msgstr "期待される結果"
 
-#: inc/admin.php:178
-#: inc/admin.php:527
+#: inc/admin.php:196
+#: inc/admin.php:547
 msgid "Step"
 msgstr "ステップ"
 
@@ -75,7 +75,7 @@ msgstr "ステップ"
 msgid "Page"
 msgstr "ページ"
 
-#: inc/admin.php:183
+#: inc/admin.php:201
 msgid "Last saved"
 msgstr "最終保存日時"
 
@@ -93,16 +93,16 @@ msgstr "テストチェックリスト"
 msgid "UAT"
 msgstr "UAT"
 
-#: inc/rest.php:209
+#: inc/rest.php:210
 msgid "This checklist could not be found."
 msgstr "このチェックリストが見つかりませんでした。"
 
-#: inc/rest.php:285
-#: src/lib/step-form.js:110
+#: inc/rest.php:286
+#: src/lib/step-form.js:140
 msgid "Add a comment saying what went wrong."
 msgstr "問題の内容をコメントに記入してください。"
 
-#: inc/rest.php:293
+#: inc/rest.php:294
 msgid "Too many results saved in the last minute. Wait a moment, then save again."
 msgstr "直近1分間に保存した結果が多すぎます。少し待ってから、もう一度保存してください。"
 
@@ -170,19 +170,19 @@ msgstr "テスターが行う操作"
 msgid "What they should see"
 msgstr "表示されるべき内容"
 
-#: src/lib/step-form.js:100
+#: src/lib/step-form.js:130
 msgid "Choose Pass or Fail first."
 msgstr "先に「合格」または「不合格」を選択してください。"
 
-#: src/lib/step-form.js:54
+#: src/lib/step-form.js:56
 msgid "Saving…"
 msgstr "保存中…"
 
-#: src/lib/step-form.js:127
+#: src/lib/step-form.js:175
 msgid "The result could not be saved. Check your connection and try again."
 msgstr "結果を保存できませんでした。接続を確認して、もう一度お試しください。"
 
-#: inc/admin.php:181
+#: inc/admin.php:199
 #: inc/checklists.php:57
 #: inc/overview.php:440
 #: src/panel.js:62
@@ -266,7 +266,7 @@ msgid "Other testers"
 msgstr "他のテスター"
 
 #: blocks/checklist/render.php:130
-#: inc/admin.php:149
+#: inc/admin.php:167
 #: inc/results.php:195
 msgid "Additional comments"
 msgstr "追加コメント"
@@ -287,7 +287,7 @@ msgstr "コメントを保存"
 msgid "Turn on JavaScript to save a comment."
 msgstr "コメントを保存するには JavaScript を有効にしてください。"
 
-#: inc/rest.php:347
+#: inc/rest.php:367
 msgid "Comment removed."
 msgstr "コメントを削除しました。"
 
@@ -334,7 +334,7 @@ msgstr "UAT ハブページ"
 msgid "(opens in a new window)"
 msgstr "（新しいウィンドウで開きます）"
 
-#: blocks/step/render.php:62
+#: blocks/step/render.php:64
 msgid "If one or more expected results fail, mark the step Fail. In the comment, say which one and what happened instead."
 msgstr "期待される結果のうち 1 つでも満たされない場合は「不合格」にしてください。コメントには、どの結果か、実際にどうなったかを書いてください。"
 
@@ -344,7 +344,7 @@ msgstr "期待される結果のうち 1 つでも満たされない場合は「
 msgid "%1$s of %2$s required done, %3$s of %4$s in all"
 msgstr "必須 %1$s / %2$s 件完了・全体 %3$s / %4$s 件"
 
-#: blocks/step/render.php:184
+#: blocks/step/render.php:204
 msgid "Required"
 msgstr "必須"
 
@@ -378,24 +378,24 @@ msgstr ""
 msgid "Testing checklists for user acceptance testing: testers mark each step Pass or Fail, and the results are stored on the site."
 msgstr "受け入れテスト（UAT）用のテストチェックリスト。テスターが各ステップを「合格」または「不合格」にし、結果はサイトに保存されます。"
 
-#: inc/admin.php:233
+#: inc/admin.php:253
 msgid "(checklist deleted)"
 msgstr "(削除済みのチェックリスト)"
 
-#: inc/admin.php:265
+#: inc/admin.php:285
 #: inc/checklists.php:61
 msgid "Edit checklist"
 msgstr "チェックリストを編集"
 
-#: inc/admin.php:275
+#: inc/admin.php:295
 msgid "View instructions"
 msgstr "使い方のページを表示"
 
-#: inc/admin.php:320
+#: inc/admin.php:340
 msgid "All checklists"
 msgstr "すべてのチェックリスト"
 
-#: inc/admin.php:336
+#: inc/admin.php:356
 msgid "Filter by checklist"
 msgstr "チェックリストで絞り込み"
 
@@ -432,7 +432,7 @@ msgstr "ゴミ箱にチェックリストはありません。"
 msgid "Sorry, you are not allowed to read checklists."
 msgstr "チェックリストを閲覧する権限がありません。"
 
-#: inc/rest.php:277
+#: inc/rest.php:278
 msgid "This step is no longer in the checklist. Reload the page and try again."
 msgstr "このステップはチェックリストから削除されています。ページを再読み込みして、もう一度お試しください。"
 
@@ -545,7 +545,7 @@ msgid "%1$s failed step in %2$s. View its failed results."
 msgid_plural "%1$s failed steps in %2$s. View their failed results."
 msgstr[0] "%2$s の不合格ステップ %1$s 件。不合格の結果を表示します。"
 
-#: inc/admin.php:346
+#: inc/admin.php:366
 msgid "Latest result on each step only"
 msgstr "各ステップの最新の結果のみ"
 
@@ -591,18 +591,18 @@ msgid "%1$s of %2$s required, %3$s%%"
 msgstr "必須 %2$s 件中 %1$s 件、%3$s%%"
 
 #. translators: 1: date and time the step was marked fixed, 2: name of the developer who marked it.
-#: blocks/step/render.php:108
+#: blocks/step/render.php:110
 #, php-format
 msgid "Marked fixed on %1$s by %2$s."
 msgstr "%1$s に %2$s が修正済みにしました。"
 
 #. translators: 1: name of the tester, 2: date and time of the Fail, 3: the tester's comment.
-#: blocks/step/render.php:123
+#: blocks/step/render.php:125
 #, php-format
 msgid "%1$s marked this Fail on %2$s: %3$s"
 msgstr "%1$s が %2$s に不合格にしました: %3$s"
 
-#: blocks/step/render.php:187
+#: blocks/step/render.php:207
 msgid "Retest"
 msgstr "再テスト"
 
@@ -627,56 +627,56 @@ msgstr "メールアドレスによりフルアクセスが付与されていま
 msgid "Lets them write checklists, mark results fixed and trash them."
 msgstr "チェックリストの作成、結果の修正済みへの変更、結果のゴミ箱への移動ができるようになります。"
 
-#: inc/admin.php:182
+#: inc/admin.php:200
 msgid "By"
 msgstr "実施者"
 
-#: inc/admin.php:471
-#: inc/admin.php:486
-#: inc/admin.php:520
-#: inc/admin.php:556
+#: inc/admin.php:491
+#: inc/admin.php:506
+#: inc/admin.php:540
+#: inc/admin.php:582
 msgid "Mark fixed"
 msgstr "修正済みにする"
 
-#: inc/admin.php:502
+#: inc/admin.php:522
 msgid "Only a Fail that is still the latest result on its step can be marked fixed."
 msgstr "ステップの最新の結果が不合格の場合のみ、修正済みにできます。"
 
-#: inc/admin.php:531
+#: inc/admin.php:551
 msgid "Failed by"
 msgstr "不合格にした人"
 
-#: inc/admin.php:535
+#: inc/admin.php:555
 msgid "Failed on"
 msgstr "不合格にした日時"
 
-#: inc/admin.php:539
+#: inc/admin.php:559
 msgid "Their comment"
 msgstr "コメント"
 
-#: inc/admin.php:543
+#: inc/admin.php:569
 msgid "Note for testers"
 msgstr "テスター向けのメモ"
 
-#: inc/admin.php:552
+#: inc/admin.php:578
 msgid "Optional. Testers see it when they retest the step."
 msgstr "任意です。ステップを再テストするときにテスターに表示されます。"
 
-#: inc/admin.php:577
+#: inc/admin.php:603
 msgid "You cannot mark results fixed."
 msgstr "結果を修正済みにする権限がありません。"
 
 #. translators: %s: the most characters a note can hold.
-#: inc/admin.php:592
+#: inc/admin.php:618
 #, php-format
 msgid "The note can be at most %s characters."
 msgstr "メモは %s 文字以内で入力してください。"
 
-#: inc/admin.php:605
+#: inc/admin.php:631
 msgid "This step is no longer in the checklist."
 msgstr "このステップはチェックリストにありません。"
 
-#: inc/admin.php:664
+#: inc/admin.php:690
 msgid "Marked fixed. Testers now see the step as Retest."
 msgstr "修正済みにしました。テスターにはこのステップが再テストとして表示されます。"
 
@@ -910,6 +910,7 @@ msgstr "再テスト待ち (%d)"
 msgid "Steps ready to retest could not be loaded."
 msgstr "再テスト待ちのステップを読み込めませんでした。"
 
+#: blocks/step/render.php:184
 #: blocks/step/edit.js:130
 #: blocks/step/edit.js:163
 msgid "Screenshot"
@@ -930,3 +931,37 @@ msgstr "代替テキスト"
 #: blocks/step/edit.js:166
 msgid "Describe what the screenshot shows, for testers who cannot see it."
 msgstr "画像を見られないテスターのために、スクリーンショットの内容を説明してください。"
+
+#. translators: %s: the largest file size the site accepts, such as 2 MB.
+#: blocks/step/render.php:191
+#, php-format
+msgid "Optional. A JPEG, PNG, GIF or WebP image of up to %s."
+msgstr "任意。%s までの JPEG、PNG、GIF、WebP 画像。"
+
+#: inc/rest.php:330
+msgid "The screenshot could not be saved."
+msgstr "スクリーンショットを保存できませんでした。"
+
+#. translators: %s: the largest file size the site accepts, such as 2 MB.
+#: inc/screenshots.php:72
+#, php-format
+msgid "The screenshot is larger than %s. Choose a smaller image."
+msgstr "スクリーンショットが %s を超えています。もっと小さい画像を選択してください。"
+
+#. translators: %s: name of the tester who attached the screenshot.
+#: inc/screenshots.php:164
+#, php-format
+msgid "Screenshot from %s"
+msgstr "%s のスクリーンショット"
+
+#: inc/screenshots.php:180
+msgid "(opens in a new tab)"
+msgstr "（新しいタブで開きます）"
+
+#: src/lib/step-form.js:102
+msgid "Choose a JPEG, PNG, GIF or WebP image."
+msgstr "JPEG、PNG、GIF、WebP のいずれかの画像を選択してください。"
+
+#: src/lib/step-form.js:106
+msgid "The screenshot is too large. Choose a smaller image."
+msgstr "スクリーンショットが大きすぎます。もっと小さい画像を選択してください。"

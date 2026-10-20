@@ -9,6 +9,8 @@ import { SAVED_EVENT } from './checklist';
 
 const FORM = '.uat-checklist__result';
 const ROUTE = '/uat-checklist/v1/results';
+// Mirrors Screenshots\FIELD in inc/screenshots.php.
+const SCREENSHOT_FIELD = 'screenshot';
 
 /**
  * Shows a message in the form's status line, styled as an error when `isError` is set.
@@ -41,7 +43,7 @@ export function isSaving(form) {
  *
  * @param {HTMLFormElement} form    Form being saved.
  * @param {string}          path    REST route.
- * @param {Object}          data    Request body.
+ * @param {Object|FormData} data    Request body: an object is sent as JSON, FormData as it is, for a file.
  * @param {string}          failure Message shown when the request fails without one of its own.
  * @return {Promise<?Object>} The response, or null when the request failed.
  */
@@ -54,7 +56,11 @@ export async function post(form, path, data, failure) {
 	report(status, __('Saving…', 'uat-checklist'));
 
 	try {
-		const response = await apiFetch({ path, method: 'POST', data });
+		const response = await apiFetch({
+			path,
+			method: 'POST',
+			...(data instanceof window.FormData ? { body: data } : { data }),
+		});
 
 		report(status, response.message);
 		return response;
@@ -80,6 +86,30 @@ function syncRequired(form) {
 	if (!failing || comment.value.trim() !== '') {
 		comment.removeAttribute('aria-invalid');
 	}
+}
+
+/**
+ * Returns why a chosen screenshot cannot be sent, or '' when it can. The server checks the same limits; this saves
+ * uploading a file it would refuse.
+ *
+ * @param {HTMLInputElement} input File field, whose `accept` lists the image types the server takes.
+ * @param {File}             file  Chosen file.
+ * @param {number}           max   Largest size the server accepts, in bytes.
+ * @return {string} The problem, or ''.
+ */
+function screenshotProblem(input, file, max) {
+	if (!input.accept.split(',').includes(file.type)) {
+		return __('Choose a JPEG, PNG, GIF or WebP image.', 'uat-checklist');
+	}
+
+	if (file.size > max) {
+		return __(
+			'The screenshot is too large. Choose a smaller image.',
+			'uat-checklist'
+		);
+	}
+
+	return '';
 }
 
 /**
@@ -115,15 +145,33 @@ async function save(form) {
 		return;
 	}
 
+	const input = form.elements[SCREENSHOT_FIELD];
+	const file = input.files[0];
+	const problem = file
+		? screenshotProblem(input, file, Number(form.dataset.maxUpload))
+		: '';
+
+	if (problem) {
+		report(status, problem, true);
+		input.setAttribute('aria-invalid', 'true');
+		input.focus();
+		return;
+	}
+
+	const body = new window.FormData();
+	body.append('checklist_id', form.dataset.checklistId);
+	body.append('step_id', form.dataset.stepId);
+	body.append('status', result);
+	body.append('comment', comment);
+
+	if (file) {
+		body.append(SCREENSHOT_FIELD, file);
+	}
+
 	const response = await post(
 		form,
 		ROUTE,
-		{
-			checklist_id: Number(form.dataset.checklistId),
-			step_id: form.dataset.stepId,
-			status: result,
-			comment,
-		},
+		body,
 		__(
 			'The result could not be saved. Check your connection and try again.',
 			'uat-checklist'
@@ -157,6 +205,9 @@ export default function bindStepForms(root) {
 		form.hidden = false;
 		syncRequired(form);
 		form.addEventListener('input', () => syncRequired(form));
+		form.elements[SCREENSHOT_FIELD].addEventListener('change', (event) =>
+			event.target.removeAttribute('aria-invalid')
+		);
 		form.addEventListener('submit', (event) => {
 			event.preventDefault();
 			save(form);

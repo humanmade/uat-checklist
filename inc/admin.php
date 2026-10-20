@@ -22,6 +22,7 @@ use HM\UAT_Checklist\Overview;
 use HM\UAT_Checklist\Progress;
 use HM\UAT_Checklist\REST;
 use HM\UAT_Checklist\Results;
+use HM\UAT_Checklist\Screenshots;
 use WP_Error;
 use WP_Post;
 use WP_Query;
@@ -67,7 +68,7 @@ function bootstrap(): void {
 	add_action( 'restrict_manage_posts', __NAMESPACE__ . '\\render_checklist_filter' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\filter_by_checklist' );
 	add_action( 'load-edit.php', __NAMESPACE__ . '\\label_notes' );
-	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\style_latest_filter' );
+	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\style_results_screens' );
 	add_filter( 'post_row_actions', __NAMESPACE__ . '\\row_actions', 10, 2 );
 	add_action( 'admin_menu', __NAMESPACE__ . '\\add_mark_fixed_page' );
 	add_action( 'admin_post_' . MARK_FIXED_ACTION, __NAMESPACE__ . '\\handle_mark_fixed' );
@@ -75,15 +76,18 @@ function bootstrap(): void {
 }
 
 /**
- * On the results list only, sets the latest-only checkbox in line with the filter bar's controls.
+ * On the results list and the Mark fixed page only, sets the latest-only checkbox in line with the filter bar's
+ * controls, and fits a tester's screenshot under their comment.
  *
  * Core floats those controls and sizes them, and leaves a label beside them unaligned and touching the Filter
- * button.
+ * button. A screenshot's figure would otherwise take the browser's default margins.
  *
  * @return void
  */
-function style_latest_filter(): void {
-	if ( get_current_screen()?->id !== 'edit-' . Results\POST_TYPE ) {
+function style_results_screens(): void {
+	$screens = [ 'edit-' . Results\POST_TYPE, get_plugin_page_hookname( MARK_FIXED_PAGE, '' ) ];
+
+	if ( ! in_array( get_current_screen()?->id, $screens, true ) ) {
 		return;
 	}
 
@@ -99,6 +103,20 @@ function style_latest_filter(): void {
 
 		.uat-latest-filter input {
 			margin: 0;
+		}
+
+		.uat-checklist__screenshot {
+			margin: 8px 0 0;
+		}
+
+		.uat-checklist__screenshot img {
+			display: block;
+			max-width: 100%;
+			height: auto;
+		}
+
+		.column-uat_comment .uat-checklist__screenshot img {
+			max-width: 150px;
 		}
 		CSS;
 
@@ -207,6 +225,8 @@ function render_column( string $column, int $post_id ): void {
 
 		case 'uat_comment':
 			echo nl2br( esc_html( $result->post_content ) );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built by Screenshots\markup() from esc_url(), esc_html__() and wp_get_attachment_image().
+			echo Screenshots\markup( $result, 'medium' );
 			break;
 
 		case 'uat_page':
@@ -537,7 +557,13 @@ function render_mark_fixed_page(): void {
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Their comment', 'uat-checklist' ); ?></th>
-					<td><?php echo nl2br( esc_html( $result->post_content ) ); ?></td>
+					<td>
+						<?php
+						echo nl2br( esc_html( $result->post_content ) );
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built by Screenshots\markup() from esc_url(), esc_html__() and wp_get_attachment_image().
+						echo Screenshots\markup( $result, 'medium' );
+						?>
+					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="uat-fixed-note"><?php esc_html_e( 'Note for testers', 'uat-checklist' ); ?></label></th>

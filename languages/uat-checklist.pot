@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: UAT Checklist 0.2.0\n"
+"Project-Id-Version: UAT Checklist 0.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/humanmade/uat-checklist/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Human Made <support@humanmade.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T08:49:16+00:00\n"
+"POT-Creation-Date: 2026-10-20T09:24:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: uat-checklist\n"
@@ -68,7 +68,7 @@ msgid "Other testers"
 msgstr ""
 
 #: blocks/checklist/render.php:130
-#: inc/admin.php:149
+#: inc/admin.php:167
 #: inc/results.php:195
 msgid "Additional comments"
 msgstr ""
@@ -93,54 +93,66 @@ msgstr ""
 msgid "Open a step, mark it Pass or Fail, then save it. A Fail needs a comment saying what went wrong. Every tester sees the latest result on each step."
 msgstr ""
 
-#: blocks/step/render.php:58
+#: blocks/step/render.php:60
 #: blocks/step/edit.js:74
 msgid "Expected result"
 msgstr ""
 
-#: blocks/step/render.php:62
+#: blocks/step/render.php:64
 msgid "If one or more expected results fail, mark the step Fail. In the comment, say which one and what happened instead."
 msgstr ""
 
 #. translators: 1: date and time the step was marked fixed, 2: name of the developer who marked it.
-#: blocks/step/render.php:108
+#: blocks/step/render.php:110
 #, php-format
 msgid "Marked fixed on %1$s by %2$s."
 msgstr ""
 
 #. translators: 1: name of the tester, 2: date and time of the Fail, 3: the tester's comment.
-#: blocks/step/render.php:123
+#: blocks/step/render.php:125
 #, php-format
 msgid "%1$s marked this Fail on %2$s: %3$s"
 msgstr ""
 
-#: blocks/step/render.php:165
-#: inc/admin.php:179
+#: blocks/step/render.php:172
+#: inc/admin.php:197
 msgid "Result"
 msgstr ""
 
-#: blocks/step/render.php:168
-#: inc/admin.php:180
+#: blocks/step/render.php:175
+#: inc/admin.php:198
 msgid "Comment"
 msgstr ""
 
-#: blocks/step/render.php:171
+#: blocks/step/render.php:178
 msgid "Required when the step fails."
 msgstr ""
 
-#: blocks/step/render.php:172
+#: blocks/step/render.php:179
 msgid "Save result"
 msgstr ""
 
-#: blocks/step/render.php:174
+#: blocks/step/render.php:181
 msgid "Turn on JavaScript to record a result."
 msgstr ""
 
 #: blocks/step/render.php:184
+#: blocks/step/edit.js:130
+#: blocks/step/edit.js:163
+msgid "Screenshot"
+msgstr ""
+
+#. translators: %s: the largest file size the site accepts, such as 2 MB.
+#: blocks/step/render.php:191
+#, php-format
+msgid "Optional. A JPEG, PNG, GIF or WebP image of up to %s."
+msgstr ""
+
+#: blocks/step/render.php:204
 msgid "Required"
 msgstr ""
 
-#: blocks/step/render.php:187
+#: blocks/step/render.php:207
 msgid "Retest"
 msgstr ""
 
@@ -291,97 +303,97 @@ msgstr ""
 msgid "Lets them write checklists, mark results fixed and trash them."
 msgstr ""
 
-#: inc/admin.php:178
-#: inc/admin.php:527
+#: inc/admin.php:196
+#: inc/admin.php:547
 msgid "Step"
 msgstr ""
 
-#: inc/admin.php:181
+#: inc/admin.php:199
 #: inc/checklists.php:57
 #: inc/overview.php:440
 #: src/panel.js:62
 msgid "Checklist"
 msgstr ""
 
-#: inc/admin.php:182
+#: inc/admin.php:200
 msgid "By"
 msgstr ""
 
-#: inc/admin.php:183
+#: inc/admin.php:201
 msgid "Last saved"
 msgstr ""
 
-#: inc/admin.php:233
+#: inc/admin.php:253
 msgid "(checklist deleted)"
 msgstr ""
 
-#: inc/admin.php:265
+#: inc/admin.php:285
 #: inc/checklists.php:61
 msgid "Edit checklist"
 msgstr ""
 
-#: inc/admin.php:275
+#: inc/admin.php:295
 msgid "View instructions"
 msgstr ""
 
-#: inc/admin.php:320
+#: inc/admin.php:340
 msgid "All checklists"
 msgstr ""
 
-#: inc/admin.php:336
+#: inc/admin.php:356
 msgid "Filter by checklist"
 msgstr ""
 
-#: inc/admin.php:346
+#: inc/admin.php:366
 msgid "Latest result on each step only"
 msgstr ""
 
-#: inc/admin.php:471
-#: inc/admin.php:486
-#: inc/admin.php:520
-#: inc/admin.php:556
+#: inc/admin.php:491
+#: inc/admin.php:506
+#: inc/admin.php:540
+#: inc/admin.php:582
 msgid "Mark fixed"
 msgstr ""
 
-#: inc/admin.php:502
+#: inc/admin.php:522
 msgid "Only a Fail that is still the latest result on its step can be marked fixed."
 msgstr ""
 
-#: inc/admin.php:531
+#: inc/admin.php:551
 msgid "Failed by"
 msgstr ""
 
-#: inc/admin.php:535
+#: inc/admin.php:555
 msgid "Failed on"
 msgstr ""
 
-#: inc/admin.php:539
+#: inc/admin.php:559
 msgid "Their comment"
 msgstr ""
 
-#: inc/admin.php:543
+#: inc/admin.php:569
 msgid "Note for testers"
 msgstr ""
 
-#: inc/admin.php:552
+#: inc/admin.php:578
 msgid "Optional. Testers see it when they retest the step."
 msgstr ""
 
-#: inc/admin.php:577
+#: inc/admin.php:603
 msgid "You cannot mark results fixed."
 msgstr ""
 
 #. translators: %s: the most characters a note can hold.
-#: inc/admin.php:592
+#: inc/admin.php:618
 #, php-format
 msgid "The note can be at most %s characters."
 msgstr ""
 
-#: inc/admin.php:605
+#: inc/admin.php:631
 msgid "This step is no longer in the checklist."
 msgstr ""
 
-#: inc/admin.php:664
+#: inc/admin.php:690
 msgid "Marked fixed. Testers now see the step as Retest."
 msgstr ""
 
@@ -631,24 +643,28 @@ msgstr ""
 msgid "How to use the checklist"
 msgstr ""
 
-#: inc/rest.php:209
+#: inc/rest.php:210
 msgid "This checklist could not be found."
 msgstr ""
 
-#: inc/rest.php:277
+#: inc/rest.php:278
 msgid "This step is no longer in the checklist. Reload the page and try again."
 msgstr ""
 
-#: inc/rest.php:285
-#: src/lib/step-form.js:110
+#: inc/rest.php:286
+#: src/lib/step-form.js:140
 msgid "Add a comment saying what went wrong."
 msgstr ""
 
-#: inc/rest.php:293
+#: inc/rest.php:294
 msgid "Too many results saved in the last minute. Wait a moment, then save again."
 msgstr ""
 
-#: inc/rest.php:347
+#: inc/rest.php:330
+msgid "The screenshot could not be saved."
+msgstr ""
+
+#: inc/rest.php:367
 msgid "Comment removed."
 msgstr ""
 
@@ -767,17 +783,28 @@ msgstr[1] ""
 msgid "Marked fixed by %1$s on %2$s."
 msgstr ""
 
+#. translators: %s: the largest file size the site accepts, such as 2 MB.
+#: inc/screenshots.php:72
+#, php-format
+msgid "The screenshot is larger than %s. Choose a smaller image."
+msgstr ""
+
+#. translators: %s: name of the tester who attached the screenshot.
+#: inc/screenshots.php:164
+#, php-format
+msgid "Screenshot from %s"
+msgstr ""
+
+#: inc/screenshots.php:180
+msgid "(opens in a new tab)"
+msgstr ""
+
 #: blocks/checklist/edit.js:21
 msgid "Introduce the checklist: its tickets, and what it tests."
 msgstr ""
 
 #: blocks/section/edit.js:34
 msgid "Section title, for example Editor"
-msgstr ""
-
-#: blocks/step/edit.js:130
-#: blocks/step/edit.js:163
-msgid "Screenshot"
 msgstr ""
 
 #: blocks/step/edit.js:131
@@ -830,15 +857,23 @@ msgstr ""
 msgid "Steps ready to retest could not be loaded."
 msgstr ""
 
-#: src/lib/step-form.js:54
+#: src/lib/step-form.js:56
 msgid "Saving…"
 msgstr ""
 
-#: src/lib/step-form.js:100
+#: src/lib/step-form.js:102
+msgid "Choose a JPEG, PNG, GIF or WebP image."
+msgstr ""
+
+#: src/lib/step-form.js:106
+msgid "The screenshot is too large. Choose a smaller image."
+msgstr ""
+
+#: src/lib/step-form.js:130
 msgid "Choose Pass or Fail first."
 msgstr ""
 
-#: src/lib/step-form.js:127
+#: src/lib/step-form.js:175
 msgid "The result could not be saved. Check your connection and try again."
 msgstr ""
 

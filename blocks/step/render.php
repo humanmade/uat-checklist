@@ -4,7 +4,8 @@
  *
  * The summary carries the number, the step, a Required tag on a required step and a Pass, Fail or Retest badge. The
  * body carries the numbered instructions of a scenario step, the expected result or results, when the latest result
- * is Fixed a notice saying what was fixed and what failed, and, for a logged-in tester, the result form.
+ * is Fixed a notice saying what was fixed and what failed, with the Fail's screenshot, and, for a logged-in tester,
+ * the result form.
  * Every step shares one `details` name, so opening a step closes the others in
  * browsers that support exclusive accordions; older ones open them independently.
  *
@@ -24,6 +25,7 @@ declare( strict_types = 1 );
 namespace HM\UAT_Checklist\Blocks;
 
 use HM\UAT_Checklist\Results;
+use HM\UAT_Checklist\Screenshots;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -126,7 +128,7 @@ if ( $saved && $is_retest ) {
 					$failure->post_content
 				)
 			)
-			. '</p>' : '' )
+			. '</p>' . Screenshots\markup( $failure, 'medium' ) : '' )
 		. '</div>';
 }
 
@@ -144,17 +146,22 @@ if ( $can_record ) {
 		);
 	}
 
-	$comment_id = 'uat-comment-' . $step_id;
-	$hint_id    = 'uat-hint-' . $step_id;
+	$comment_id         = 'uat-comment-' . $step_id;
+	$hint_id            = 'uat-hint-' . $step_id;
+	$screenshot_id      = 'uat-screenshot-' . $step_id;
+	$screenshot_hint_id = 'uat-screenshot-hint-' . $step_id;
 
 	$form = sprintf(
-		'<form class="uat-checklist__result" data-checklist-id="%1$d" data-step-id="%2$s" hidden>'
+		'<form class="uat-checklist__result" data-checklist-id="%1$d" data-step-id="%2$s" data-max-upload="%13$d" hidden>'
 			. '<fieldset class="uat-checklist__choices">'
 			. '<legend class="uat-checklist__label">%3$s</legend>%4$s</fieldset>'
 			. '<label class="uat-checklist__label" for="%5$s">%6$s</label>'
 			. '<textarea class="uat-checklist__comment" id="%5$s" name="comment" rows="2" maxlength="%7$d"'
 			. ' aria-describedby="%8$s"></textarea>'
 			. '<p class="uat-checklist__hint" id="%8$s">%9$s</p>'
+			. '<label class="uat-checklist__label" for="%14$s">%15$s</label>'
+			. '<input type="file" class="uat-checklist__file" id="%14$s" name="%16$s" accept="%17$s" aria-describedby="%18$s">'
+			. '<p class="uat-checklist__hint" id="%18$s">%19$s</p>'
 			. '<div class="uat-checklist__actions">'
 			. '<button type="submit" class="uat-checklist__save wp-element-button">%10$s</button>'
 			. '<p class="uat-checklist__status" role="status">%11$s</p></div>'
@@ -171,7 +178,20 @@ if ( $can_record ) {
 		esc_html__( 'Required when the step fails.', 'uat-checklist' ),
 		esc_html__( 'Save result', 'uat-checklist' ),
 		$saved && ! $is_retest ? esc_html( Results\describe( $saved ) ) : '',
-		esc_html__( 'Turn on JavaScript to record a result.', 'uat-checklist' )
+		esc_html__( 'Turn on JavaScript to record a result.', 'uat-checklist' ),
+		wp_max_upload_size(),
+		esc_attr( $screenshot_id ),
+		esc_html__( 'Screenshot', 'uat-checklist' ),
+		esc_attr( Screenshots\FIELD ),
+		esc_attr( implode( ',', array_values( Screenshots\MIMES ) ) ),
+		esc_attr( $screenshot_hint_id ),
+		esc_html(
+			sprintf(
+				/* translators: %s: the largest file size the site accepts, such as 2 MB. */
+				__( 'Optional. A JPEG, PNG, GIF or WebP image of up to %s.', 'uat-checklist' ),
+				size_format( wp_max_upload_size() )
+			)
+		)
 	);
 }
 
@@ -223,6 +243,6 @@ printf(
 	$expected_markup,
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every value in the form is escaped where sprintf() receives it.
 	$form,
-	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above from esc_html() and esc_html__().
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above from esc_html(), esc_html__() and Screenshots\markup().
 	$notice
 );

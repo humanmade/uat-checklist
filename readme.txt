@@ -4,7 +4,7 @@ Tags: testing, uat, checklist, blocks, qa
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.4
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,10 @@ Every interface string is translatable. A Japanese translation ships in `languag
 WordPress 7.1 or later, and PHP 8.4.
 
 == Changelog ==
+
+= 0.3.0 =
+* A tester can send a screenshot with a result, from the **Screenshot** field under a step's comment in the panel. JPEG, PNG, GIF and WebP images are accepted, up to the site's upload limit; anything else is refused and nothing is saved.
+* The screenshot shows under the tester's comment in **UAT → Results**, on the **Mark fixed** page, and in the panel's retest notice once the step is marked fixed. It is listed in the Media Library, and deleted with its result.
 
 = 0.2.0 =
 * A step can show a screenshot uploaded in the editor. Select the step, then upload an image or choose one from the Media Library under its text; the panel shows it there, above the step's instructions. Its alternative text is under **Screenshot** in the sidebar, and **Replace** and **Remove image** are in the block toolbar.

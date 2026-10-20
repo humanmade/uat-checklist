@@ -2,8 +2,8 @@
 
 A user acceptance testing panel for any WordPress site. Write a checklist under **UAT → Checklists**, and every
 logged-in member of the site works through it from **UAT** in the admin bar, on any screen, marking each step
-Pass or Fail with a comment. Results are saved on the site, and administrators read them under **UAT →
-Results**. A page of instructions for a checklist is optional.
+Pass or Fail with a comment and, optionally, a screenshot. Results are saved on the site, and administrators
+read them under **UAT → Results**. A page of instructions for a checklist is optional.
 
 The panel and the checklist take their colours, fonts, corners and spacing from the active theme's theme.json,
 so on any site they look like that site. Every value the theme does not set has a fallback, and both are
@@ -96,10 +96,10 @@ failures the overview counted, and not a Fail another tester has since passed.
 comments** above the list filter it, and the checklist dropdown limits it to one. **Latest result on each step
 only** leaves the one result per step the panel and the overview go by. The counts beside the statuses are core's,
 and still count every result. **Move to Trash** clears results, for example before a retest round. Results cannot
-be edited.
+be edited. A tester's screenshot shows under their comment, linked to the full image.
 
-Deleting a checklist permanently, from the trash, deletes its results and testers' additional comments with it. A
-checklist in the trash keeps them, so restoring it brings its history back.
+Deleting a checklist permanently, from the trash, deletes its results, their screenshots and testers' additional
+comments with it. A checklist in the trash keeps them, so restoring it brings its history back.
 
 Every save is a new result, so nothing a tester saved is overwritten: a step's results read as its history, and
 the latest from anyone is what every tester sees.
@@ -108,10 +108,11 @@ the latest from anyone is what every tester sees.
 
 Once a failed step is fixed, a UAT manager clicks **Mark fixed** under that Fail in **Results**, and may add a note
 for the testers. It shows only while the step's latest result is a Fail, and it covers every tester's Fail on the
-step. Marking it saves a **Fixed** result of its own and leaves the Fail as it was.
+step. Marking it saves a **Fixed** result of its own and leaves the Fail as it was. The page it opens shows the
+tester's comment, with their screenshot when they sent one.
 
-While a Fixed is the step's latest result, the panel tags the step **Retest** and opens it first, with the note
-and the failure it fixed. The tester's next Pass or Fail decides the step, and the overview counts the step as not
+While a Fixed is the step's latest result, the panel tags the step **Retest** and opens it first, with the note,
+the failure it fixed and that failure's screenshot. The tester's next Pass or Fail decides the step, and the overview counts the step as not
 completed until then.
 
 When the manager writes a note, the tester whose Fail it was also gets an email. It names the step and the
@@ -213,12 +214,16 @@ site.
 | `GET checklists`                | Every published checklist, with progress, for the picker                      |
 | `GET checklists/<checklist ID>` | One checklist, rendered for the current tester                                |
 | `GET retests`                   | The current user's Fails marked fixed and not yet retested (Ready to retest)  |
-| `POST results`                  | Saves `checklist_id`, `step_id`, `status` (`pass` or `fail`) and `comment`    |
+| `POST results`                  | Saves `checklist_id`, `step_id`, `status` (`pass` or `fail`), `comment` and an optional `screenshot` file |
 | `POST notes`                    | Saves `checklist_id` and `comment` as additional comments; empty deletes them |
 
 A comment is required with `fail` and capped at 2,000 characters. The step text stored is read from the
 checklist, not from the request. One user can save 30 results a minute; past that, `POST results` answers 429
 until the minute has passed.
+
+`screenshot` makes `POST results` a multipart request. Any member who can save a result can send one, including
+a Subscriber, who cannot use the Media Library. It must be a JPEG, PNG, GIF or WebP image, checked by its content,
+no larger than the site's upload limit. A file that fails either check is refused with a 400 and nothing is saved.
 
 Checklists are also at core's `/wp-json/wp/v2/uat-checklists`, which the block editor reads and saves through.
 Core would serve a published checklist there to anyone; the plugin refuses every request to it from a user who
@@ -266,6 +271,10 @@ One `uat_result` post per save, never updated, in post columns only:
 
 Additional comments use the status `uat-note`, one post per tester per checklist, under the slug
 `note-<checklist ID>-<user ID>`.
+
+A screenshot sent with a result is an image attachment whose `post_parent` is the result and whose author is the
+tester, so it is listed in the Media Library. Deleting the result for good, alone or with its checklist, deletes the
+screenshot and its file.
 
 ## Restoring media after a database move
 

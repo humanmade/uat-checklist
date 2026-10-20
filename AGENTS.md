@@ -22,6 +22,7 @@ this plugin's. `README.md` is the user documentation; this file is for working o
 | `inc/blocks.php`        | Registers the blocks from `build/blocks/`, finds steps in content, the pop-out view |
 | `inc/checklists.php`    | The `uat_checklist` post type, its instructions page, and its core REST lockdown   |
 | `inc/results.php`       | The `uat_result` post type, its statuses, and reading and saving results           |
+| `inc/screenshots.php`   | A tester's screenshot on a result: the upload, its attachment, its markup, its deletion |
 | `inc/rest.php`          | The five REST routes the panel uses                                                |
 | `inc/admin.php`         | The **Results** list: columns, filters, **Mark fixed**, no edit screen             |
 | `inc/notifications.php` | The email to a tester when their Fail is marked fixed with a note, sent from a single cron event |
@@ -144,6 +145,14 @@ so loading whole histories there would grow with every save on the site.
 `REST\save_result()` refuses a user's save past `RATE_LIMIT` in `RATE_WINDOW` with a 429, and stores nothing. It
 counts from `post_date_gmt`, so no counter is kept. Only the panel's route is limited: Mark fixed, from the Results
 list or the `mark-fixed` ability, saves through `Results` without it.
+
+A tester's screenshot is not in the result's columns. It is an image attachment whose `post_parent` is the result,
+so a result keeps the one it was saved with and a retest brings its own. `REST\save_result()` takes it through
+`Screenshots\store()` before saving the result, so a refused file stores nothing, and the route accepts it from any
+member who can record, Subscribers included, because core's media route would need `upload_files`.
+`wp_handle_upload()` checks the type by content, but only for a file that arrived in an HTTP POST, which is why the
+type check is tested in `tests/e2e/` and not in `tests/wp/`. `Screenshots\delete_with_result()` deletes it on
+`before_delete_post`: core would otherwise move it to the checklist and orphan the file.
 
 Stored comments, notes and step text are HTML-safe, not raw: `sanitize_textarea_field()` stores a lone `<` as
 `&lt;`, and kses stores `&` as `&amp;` for a user without `unfiltered_html`. HTML output escapes them, and

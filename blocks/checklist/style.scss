@@ -433,6 +433,15 @@
 	}
 }
 
+.uat-checklist__file {
+	max-width: 100%;
+	font: inherit;
+
+	&[aria-invalid="true"] {
+		outline: 2px solid token( color-fail );
+	}
+}
+
 .uat-checklist__comment {
 	width: 100%;
 	resize: vertical;
