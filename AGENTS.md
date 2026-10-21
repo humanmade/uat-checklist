@@ -148,8 +148,15 @@ so loading whole histories there would grow with every save on the site.
 counts from `post_date_gmt`, so no counter is kept. Only the panel's route is limited: Mark fixed, from the Results
 list or the `mark-fixed` ability, saves through `Results` without it.
 
+While a step's latest result is a Pass or a Fail, from anyone, the panel's form opens filled in from it: the choice,
+the comment, and the screenshot in the preview. A save sends what is there, so an edited comment is saved as a new
+result. Once the latest is Fixed, the form starts blank and the retest notice shows the Fail instead.
+
 A tester's screenshot is not in the result's columns. It is an image attachment whose `post_parent` is the result,
-so a result keeps the one it was saved with and a retest brings its own. `REST\save_result()` takes it through
+so each result has its own. A save with no new file carries the previous screenshot over as a copy of the file,
+attached to the new result: the form's `screenshot_from` names the result it came from, and `Screenshots\carry_over()`
+copies it only while that result is still the step's latest, so a stale form or a retest never brings an old
+screenshot along. `REST\save_result()` takes a new file through
 `Screenshots\store()` before saving the result, so a refused file stores nothing, and the route accepts it from any
 member who can record, Subscribers included, because core's media route would need `upload_files`.
 `wp_handle_upload()` checks the type by content, but only for a file that arrived in an HTTP POST, which is why the
@@ -157,7 +164,8 @@ type check is tested in `tests/e2e/` and not in `tests/wp/`. `Screenshots\delete
 `before_delete_post`: core would otherwise move it to the checklist and orphan the file.
 
 Uploads are capped at `Screenshots\max_bytes()` each and `Screenshots\daily_limit()` per tester, counted from the
-attachments' `post_date_gmt` as the rate limit counts results, so nothing extra is stored. `Screenshots\store()`
+attachments' `post_date_gmt` as the rate limit counts results. A carried-over copy is not an upload, so it holds
+`Screenshots\COPIED_FROM` meta and `uploaded_today()` leaves it out; the rate limit still bounds copies. `Screenshots\store()`
 rewrites a JPEG through GD alone (`strip_metadata()`): Imagick, core's first choice, keeps EXIF when it saves an image
 at its own size, and only strips it when it resizes. wp-env has no usable Imagick, so the tests cannot tell the two
 apart; keep the GD-only filter. It also turns `image_editor_output_format` off for that save, at `PHP_INT_MAX`:

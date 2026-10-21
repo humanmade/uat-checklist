@@ -3,5 +3,5 @@
 		'wp-api-fetch',
 		'wp-i18n'
 	),
-	'version' => '55676ef410b5cfecdfed'
+	'version' => '3902d9548b50d9156cd9'
 );

@@ -102,7 +102,9 @@ Deleting a checklist permanently, from the trash, deletes its results, their scr
 comments with it. A checklist in the trash keeps them, so restoring it brings its history back.
 
 Every save is a new result, so nothing a tester saved is overwritten: a step's results read as its history, and
-the latest from anyone is what every tester sees.
+the latest from anyone is what every tester sees. The panel's form opens filled in with that latest Pass or Fail,
+its comment and its screenshot, so a tester can add to the comment and save again. Once the step is marked fixed,
+the form starts blank for the retest.
 
 ## Marking a failure fixed
 
@@ -218,7 +220,7 @@ site.
 | `GET checklists`                | Every published checklist, with progress, for the picker                      |
 | `GET checklists/<checklist ID>` | One checklist, rendered for the current tester                                |
 | `GET retests`                   | The current user's Fails marked fixed and not yet retested (Ready to retest)  |
-| `POST results`                  | Saves `checklist_id`, `step_id`, `status` (`pass` or `fail`), `comment` and an optional `screenshot` file |
+| `POST results`                  | Saves `checklist_id`, `step_id`, `status` (`pass` or `fail`), `comment`, an optional `screenshot` file, and an optional `screenshot_from` result whose screenshot to keep |
 | `POST notes`                    | Saves `checklist_id` and `comment` as additional comments; empty deletes them |
 
 A comment is required with `fail` and capped at 2,000 characters. The step text stored is read from the
@@ -277,8 +279,9 @@ Additional comments use the status `uat-note`, one post per tester per checklist
 `note-<checklist ID>-<user ID>`.
 
 A screenshot sent with a result is an image attachment whose `post_parent` is the result and whose author is the
-tester, so it is listed in the Media Library. Deleting the result for good, alone or with its checklist, deletes the
-screenshot and its file.
+tester, so it is listed in the Media Library. Saving again without choosing a new image keeps the screenshot: the new
+result gets a copy of the file, which does not count toward the day's limit. Deleting the result for good, alone or
+with its checklist, deletes the screenshot and its file.
 
 A screenshot can be up to 20 MB, or the site's upload limit when that is lower, and a tester can add 50 in a day; a
 filter changes each. Past the day's limit, the result can still be saved without one. A JPEG is saved again without

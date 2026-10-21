@@ -58,6 +58,11 @@ const DAY_WINDOW = DAY_IN_SECONDS;
 const CACHE_GROUP = 'hm_uat_checklist_screenshots';
 
 /**
+ * Meta key on a screenshot copied from an earlier result, holding the attachment it was copied from.
+ */
+const COPIED_FROM = '_uat_copied_from';
+
+/**
  * Wires up the module's hooks.
  *
  * @return void
@@ -101,7 +106,8 @@ function daily_limit(): int {
 /**
  * Counts the screenshots a user has uploaded to results in the last day.
  *
- * Counted from the attachments themselves, as the rate limit counts results, so nothing extra is stored.
+ * Counted from the attachments themselves, as the rate limit counts results. A screenshot carried over to a new result
+ * is not counted: the tester chose no file.
  *
  * @param int $user_id User ID.
  * @return int Screenshots.
@@ -114,8 +120,10 @@ function uploaded_today( int $user_id ): int {
 		$wpdb->prepare(
 			"SELECT COUNT(*) FROM {$wpdb->posts} AS screenshot
 			INNER JOIN {$wpdb->posts} AS result ON result.ID = screenshot.post_parent
+			LEFT JOIN {$wpdb->postmeta} AS copied ON copied.post_id = screenshot.ID AND copied.meta_key = %s
 			WHERE screenshot.post_type = 'attachment' AND screenshot.post_author = %d
-			AND screenshot.post_date_gmt >= %s AND result.post_type = %s",
+			AND screenshot.post_date_gmt >= %s AND result.post_type = %s AND copied.meta_id IS NULL",
+			COPIED_FROM,
 			$user_id,
 			gmdate( 'Y-m-d H:i:s', time() - DAY_WINDOW ),
 			Results\POST_TYPE
@@ -280,6 +288,83 @@ function attach( array $upload, WP_Post $result ): int|WP_Error {
 }
 
 /**
+ * Gives a new result a copy of an earlier result's screenshot, for a save that kept it rather than choosing another.
+ *
+ * A copy of the file, not a second attachment of it, because each result deletes its screenshot's file with it. The
+ * caller checks the earlier result is still the step's latest.
+ *
+ * @param WP_Post $source Earlier result.
+ * @param WP_Post $result New result.
+ * @return int|WP_Error|null The copy's attachment ID, or null when the earlier result has no screenshot.
+ */
+function carry_over( WP_Post $source, WP_Post $result ): int|WP_Error|null {
+	$screenshot = of( $source );
+
+	if ( $screenshot === null ) {
+		return null;
+	}
+
+	$path    = (string) get_attached_file( $screenshot->ID );
+	$uploads = wp_upload_dir();
+
+	if ( ! is_file( $path ) || $uploads['error'] !== false ) {
+		return new WP_Error( 'uat_checklist_screenshot_not_copied', 'The earlier screenshot\'s file could not be read.' );
+	}
+
+	$name = wp_unique_filename( $uploads['path'], wp_basename( $path ) );
+	$copy = trailingslashit( $uploads['path'] ) . $name;
+
+	if ( ! copy( $path, $copy ) ) {
+		return new WP_Error( 'uat_checklist_screenshot_not_copied', 'The earlier screenshot could not be copied.' );
+	}
+
+	$attachment_id = attach(
+		[
+			'file' => $copy,
+			'url'  => trailingslashit( $uploads['url'] ) . $name,
+			'type' => $screenshot->post_mime_type,
+		],
+		$result
+	);
+
+	if ( is_wp_error( $attachment_id ) ) {
+		wp_delete_file( $copy );
+
+		return $attachment_id;
+	}
+
+	add_post_meta( $attachment_id, COPIED_FROM, $screenshot->ID, true );
+
+	return $attachment_id;
+}
+
+/**
+ * Returns the address of a result's screenshot at the panel's preview size, or '' when it has none.
+ *
+ * @param WP_Post $result Result.
+ * @return string URL.
+ */
+function preview_url( WP_Post $result ): string {
+	$screenshot = of( $result );
+
+	return $screenshot === null ? '' : (string) wp_get_attachment_image_url( $screenshot->ID, 'large' );
+}
+
+/**
+ * Returns the alternative text for a result's screenshot, naming the tester who attached it.
+ *
+ * @param WP_Post $result Result.
+ * @return string Plain text.
+ */
+function alt_text( WP_Post $result ): string {
+	return sprintf(
+		/* translators: %s: name of the tester who attached the screenshot. */
+		__( 'Screenshot from %s', 'uat-checklist' ),
+		get_the_author_meta( 'display_name', (int) $result->post_author )
+	);
+}
+
+/**
  * Finds the screenshots of many results in one query, so of() then reads each from the request's cache.
  *
  * For a list of results, which would otherwise query once a row.
@@ -367,11 +452,7 @@ function markup( WP_Post $result, string $size ): string {
 		$size,
 		false,
 		[
-			'alt'     => sprintf(
-				/* translators: %s: name of the tester who attached the screenshot. */
-				__( 'Screenshot from %s', 'uat-checklist' ),
-				get_the_author_meta( 'display_name', (int) $result->post_author )
-			),
+			'alt'     => alt_text( $result ),
 			'loading' => 'lazy',
 		]
 	);

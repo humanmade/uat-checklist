@@ -4,7 +4,7 @@ Tags: testing, uat, checklist, blocks, qa
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.4
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,10 @@ Every interface string is translatable. A Japanese translation ships in `languag
 WordPress 7.1 or later, and PHP 8.4.
 
 == Changelog ==
+
+= 0.4.0 =
+* The panel's step form keeps the latest Pass or Fail after a save and after a reload: its choice, its comment and its screenshot. A tester can add to the comment and save again, which records a new result and leaves the earlier one in the history. Once the step is marked fixed, the form starts blank for the retest.
+* Saving again without choosing a new image keeps the screenshot, as a copy on the new result that does not count toward the day's limit. **Remove screenshot** saves the next result without one. If someone else saved the step in the meantime, the earlier screenshot is not kept, and the panel says so.
 
 = 0.3.0 =
 * A tester can send a screenshot with a result, from **Add a screenshot** under a step's comment in the panel. The chosen image is previewed full width above the button, which then offers to replace it, with **Remove screenshot** to clear it. JPEG, PNG, GIF and WebP images are accepted, up to the site's upload limit; anything else is refused and nothing is saved.
