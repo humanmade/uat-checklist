@@ -122,3 +122,31 @@ $control-height: 2.5rem;
 		background-color: token( color-accent-tint );
 	}
 }
+
+// A wp-admin page drawn in the theme: the theme's background as a sheet on the admin canvas, in its type. The
+// Overview and Mark fixed pages share it.
+@mixin admin-sheet {
+	box-sizing: border-box;
+	margin-block-start: token( space-s );
+	padding: token( space-2-xl );
+	border: 1px solid token( color-border-subtle );
+	border-radius: token( radius );
+	background-color: token( color-background );
+	box-shadow: 0 1px 0.25rem token( color-shadow );
+	color: token( color-text );
+	font-family: token( font-family );
+	font-size: token( font-size );
+	font-weight: token( font-weight-regular );
+	line-height: token( line-height );
+	letter-spacing: token( letter-spacing );
+
+	::selection {
+		background-color: token( color-accent-tint );
+		color: token( color-text );
+	}
+
+	a {
+
+		@include link;
+	}
+}

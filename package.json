@@ -1,6 +1,6 @@
 {
 	"name": "uat-checklist",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Testing checklists for user acceptance testing: testers mark each step Pass or Fail, and the results are stored on the site.",
 	"author": "Human Made Limited",
 	"license": "GPL-2.0-or-later",

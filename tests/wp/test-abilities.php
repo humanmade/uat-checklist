@@ -309,6 +309,57 @@ try {
 				'uat_checklist_not_fixable'
 			);
 
+			// A tester's Fail, since a manager's own is never emailed whatever notify says.
+			hm_test_as_user(
+				'subscriber',
+				static function ( int $tester ) use ( $manager, $saved, $first ): void {
+					/*
+					 * Saves a fresh Fail, marks it fixed through the ability as the manager, and reports whether the
+					 * email was scheduled. The ID can be sent as a string, as an assistant may send it.
+					 */
+					$emails = static function ( array $input, bool $id_as_string = false ) use ( $tester, $manager, $saved, $first ): bool {
+						$fail = Results\save( $saved['id'], $tester, $first['id'], 'Add the block', 'fail', 'Broken.' );
+
+						wp_set_current_user( $manager );
+
+						try {
+							return hm_test_unscheduling(
+								Notifications\FIXED_EVENT,
+								static function () use ( $fail, $input, $id_as_string ): bool {
+									$id    = $id_as_string ? (string) $fail->ID : $fail->ID;
+									$fixed = hm_test_ability( 'mark-fixed', [ 'result_id' => $id ] + $input );
+
+									return is_array( $fixed ) && is_int(
+										wp_next_scheduled( Notifications\FIXED_EVENT, [ $fixed['fixed_result_id'], $fail->ID ] )
+									);
+								}
+							);
+						} finally {
+							wp_set_current_user( $tester );
+						}
+					};
+
+					check(
+						'mark-fixed with notify false schedules no email, and without it schedules one',
+						[
+							$emails( [ 'note' => 'Patched quietly.', 'notify' => false ] ),
+							$emails( [ 'note' => 'Patched again.' ] ),
+						],
+						[ false, true ]
+					);
+					// Core's schema check passes these unconverted, so the ability converts them itself.
+					check(
+						'notify as the string "false" or 0, and the ID as a string, are read as meant',
+						[
+							$emails( [ 'note' => 'Patched as text.', 'notify' => 'false' ], true ),
+							$emails( [ 'note' => 'Patched as a number.', 'notify' => 0 ] ),
+							$emails( [ 'note' => 'Patched with a text ID.' ], true ),
+						],
+						[ false, false, true ]
+					);
+				}
+			);
+
 			$reworded = $saved['sections'];
 
 			$reworded[0]['steps'][0]['step'] = 'Insert the block and save it';

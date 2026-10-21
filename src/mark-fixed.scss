@@ -1,0 +1,215 @@
+// UAT → Results → Mark fixed in wp-admin: the Fail an engineer is answering, then their note, on the Overview's
+// sheet. Every value is a token from inc/styles.php. Selectors start from .uat-fixed so they outrank wp-admin's
+// `.wrap h1` and its form styles.
+
+@use 'tokens' as *;
+@use 'controls' as *;
+
+// One measure for the step, the note and the screenshot: a form, not a page of columns.
+$fixed-width: 48rem;
+
+// Tall enough for a desktop capture at full width. A phone capture stops here, its full size a click away, so the
+// note never falls below a long screenshot.
+$screenshot-max-height: 32rem;
+
+// wp-admin's own small-screen breakpoint, where its menu collapses.
+$stack-breakpoint: 782px;
+
+.uat-fixed {
+	max-inline-size: $fixed-width;
+
+	@include admin-sheet;
+
+	.uat-fixed__title {
+		margin: 0;
+		padding: 0;
+		color: inherit;
+		font-family: token( font-family-heading );
+		font-size: token( font-size-heading-s );
+		font-weight: token( font-weight-heading );
+		line-height: token( line-height-heading );
+		letter-spacing: token( letter-spacing-heading );
+	}
+
+	// The step leads: it is what the engineer fixed, and the rest of the page is about it.
+	.uat-fixed__lead {
+		margin: token( space-l ) 0 0;
+		font-size: token( font-size-l );
+		font-weight: token( font-weight-medium );
+		line-height: token( line-height-heading );
+		text-wrap: pretty;
+	}
+
+	.uat-fixed__meta {
+		margin: token( space-xs ) 0 0;
+		color: token( color-text-muted );
+		font-size: token( font-size-s );
+		line-height: token( line-height-s );
+	}
+
+	// The tester's evidence: each heading sits close to what it labels, and further from what came before.
+	.uat-fixed__evidence {
+		display: grid;
+		gap: token( space-s );
+		margin-block-start: token( space-xl );
+	}
+
+	.uat-fixed__heading {
+		margin: 0;
+		color: token( color-text-muted );
+		font-family: inherit;
+		font-size: token( font-size-s );
+		font-weight: token( font-weight-medium );
+		line-height: token( line-height-s );
+	}
+
+	* + .uat-fixed__heading {
+		margin-block-start: token( space-l );
+	}
+
+	.uat-fixed__comment {
+		max-inline-size: token( measure );
+		margin: 0;
+
+		// wp-admin sets every paragraph at 13px; the tester's words read at the sheet's size.
+		p {
+			margin: 0 0 token( space-s );
+			font-size: inherit;
+			line-height: inherit;
+		}
+
+		p:last-child {
+			margin-block-end: 0;
+		}
+	}
+
+	.uat-fixed__screenshot {
+		display: grid;
+		justify-items: start;
+		gap: token( space-xs );
+
+		p {
+			margin: 0;
+			font-size: token( font-size-s );
+			line-height: token( line-height-s );
+		}
+
+		// Stretched to the sheet, so the image's 100% cap is the sheet's width rather than the figure's shrunk one.
+		.uat-checklist__screenshot {
+			justify-self: stretch;
+			margin: 0;
+		}
+
+		// The sheet's width, which core's `sizes="auto"` needs to pick a file: at an auto width the browser sizes a
+		// lazy image at 300px. A capture taller than the limit is fitted inside, on the surface, not stretched.
+		img {
+			display: block;
+			box-sizing: border-box;
+			inline-size: 100%;
+			// The block's figure caps an image at the panel's width; this page is wider.
+			max-inline-size: 100%;
+			block-size: auto;
+			max-block-size: $screenshot-max-height;
+			border: 1px solid token( color-border-subtle );
+			border-radius: token( radius );
+			background-color: token( color-surface );
+			object-fit: contain;
+		}
+	}
+
+	// The engineer's answer, ruled off from the tester's evidence above it.
+	.uat-fixed__form {
+		display: grid;
+		gap: token( space-s );
+		margin-block-start: token( space-xl );
+		padding-block-start: token( space-l );
+		border-block-start: 1px solid token( color-border-subtle );
+	}
+
+	.uat-fixed__label {
+		font-weight: token( font-weight-medium );
+	}
+
+	textarea {
+		inline-size: 100%;
+		line-height: token( line-height );
+		resize: vertical;
+
+		@include field;
+	}
+
+	.uat-fixed__hint {
+		margin: 0;
+		color: token( color-text-muted );
+		font-size: token( font-size-s );
+		line-height: token( line-height-s );
+	}
+
+	.uat-fixed__check {
+		display: flex;
+		align-items: center;
+		gap: token( space-s );
+		justify-self: start;
+		cursor: pointer;
+	}
+
+	// wp-admin draws its own checkbox; the native one takes the theme's accent.
+	.uat-fixed__check input {
+		flex: none;
+		inline-size: 1rem;
+		block-size: 1rem;
+		margin: 0;
+		border: 0;
+		box-shadow: none;
+		appearance: auto;
+		accent-color: token( color-accent );
+
+		&::before {
+			content: none;
+		}
+
+		@include focus-ring;
+	}
+
+	.uat-fixed__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: token( space-s );
+		margin-block-start: token( space-m );
+	}
+
+	.uat-fixed__submit {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+
+		@include primary-button;
+	}
+
+	.uat-fixed__cancel {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+
+		@include secondary-button;
+
+		&,
+		&:hover {
+			text-decoration: none;
+		}
+	}
+}
+
+@media ( max-width: $stack-breakpoint ) {
+
+	.uat-fixed {
+		padding: token( space-l );
+
+		// Full-width buttons, the primary first, as in the panel's step form.
+		.uat-fixed__submit,
+		.uat-fixed__cancel {
+			flex: 1 1 100%;
+		}
+	}
+}

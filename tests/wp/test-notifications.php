@@ -190,6 +190,77 @@ hm_test_unscheduling(
 									[ 0, false ]
 								);
 
+								$fail_again = static function ( string $comment ) use ( $checklist_id, $tester, $step_ids ): WP_Post {
+									$fail = Results\save( $checklist_id, $tester, $step_ids[1], 'Step 1', 'fail', $comment );
+
+									if ( ! $fail instanceof WP_Post ) {
+										throw new RuntimeException( 'The Fail was not saved.' );
+									}
+
+									return $fail;
+								};
+
+								$quiet_fail = $fail_again( 'Broken a third time.' );
+								$before     = $hm_test_pending_notices();
+								$quiet      = Admin\mark_fixed( $quiet_fail->ID, $developer, 'Fixed quietly.', false );
+								check(
+									'Mark fixed told not to notify saves the note and schedules nothing',
+									[ $quiet instanceof WP_Post ? $quiet->post_content : null, $hm_test_pending_notices() - $before ],
+									[ 'Fixed quietly.', 0 ]
+								);
+
+								/*
+								 * Posts the Mark fixed form as the browser does, and reports whether it reached the
+								 * redirect, which is thrown out of so the handler's exit never runs.
+								 */
+								$through_form = static function ( WP_Post $fail, array $fields ): bool {
+									$saved = [ $_POST, $_REQUEST ];
+									$_POST = [
+										'result_id' => (string) $fail->ID,
+										'_wpnonce'  => wp_create_nonce( Admin\MARK_FIXED_ACTION . '_' . $fail->ID ),
+									] + $fields;
+									$_REQUEST = $_POST;
+
+									try {
+										hm_test_with_filter(
+											'wp_redirect',
+											static function (): never {
+												throw new RuntimeException( 'redirected' );
+											},
+											static fn () => Admin\handle_mark_fixed()
+										);
+									} catch ( RuntimeException $redirect ) {
+										return $redirect->getMessage() === 'redirected';
+									} finally {
+										[ $_POST, $_REQUEST ] = $saved;
+									}
+
+									return false;
+								};
+
+								$before = $hm_test_pending_notices();
+								check(
+									'the form with Don\'t send email notification ticked marks it fixed and schedules nothing',
+									[
+										$through_form(
+											$fail_again( 'Broken a fourth time.' ),
+											[ 'note' => 'Fixed, no email.', Admin\NO_EMAIL_FIELD => '1' ]
+										),
+										$hm_test_pending_notices() - $before,
+									],
+									[ true, 0 ]
+								);
+
+								$before = $hm_test_pending_notices();
+								check(
+									'the form with it unticked schedules the email',
+									[
+										$through_form( $fail_again( 'Broken a fifth time.' ), [ 'note' => 'Fixed, emailed.' ] ),
+										$hm_test_pending_notices() - $before,
+									],
+									[ true, 1 ]
+								);
+
 								$mails = $hm_test_send( $fixed->ID, $main_fail->ID );
 								$mail  = $mails[0] ?? [];
 								check( 'sending mails once', count( $mails ), 1 );

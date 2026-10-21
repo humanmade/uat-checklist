@@ -4,7 +4,7 @@ Tags: testing, uat, checklist, blocks, qa
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.4
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,15 @@ Every interface string is translatable. A Japanese translation ships in `languag
 WordPress 7.1 or later, and PHP 8.4.
 
 == Changelog ==
+
+= 0.3.0 =
+* A tester can send a screenshot with a result, from **Add a screenshot** under a step's comment in the panel. The chosen image is previewed full width above the button, which then offers to replace it, with **Remove screenshot** to clear it. JPEG, PNG, GIF and WebP images are accepted, up to the site's upload limit; anything else is refused and nothing is saved.
+* The screenshot has its own column in **UAT → Results**, right of the comment. It shows large on the **Mark fixed** page, under the tester's comment, and in the panel's retest notice once the step is marked fixed. It is listed in the Media Library, and deleted with its result.
+* A screenshot can be up to 20 MB, or the site's upload limit when lower, and a tester can add 50 a day. The `hm_uat_checklist_screenshot_max_bytes` and `hm_uat_checklist_screenshot_daily_limit` filters change them.
+* A JPEG screenshot is saved without its metadata, so a phone photo does not publish where it was taken. This needs PHP's GD and exif extensions; without either, a JPEG is refused. A plugin converting JPEGs to WebP is set aside for that save.
+* **Save result** spans the step form as the primary button, and **Add a screenshot** above it is a secondary one.
+* **Mark fixed** has a **Don't send email notification** checkbox under the note. Ticked, the note is saved and shown in the panel, and the tester is not emailed. The `mark-fixed` ability takes the same choice as `notify` false.
+* The **Mark fixed** page is drawn in the theme, as **UAT → Overview** is: the step and who failed it lead, then their comment and screenshot, then the note and its email choice, with **Mark fixed** and **Cancel**.
 
 = 0.2.0 =
 * A step can show a screenshot uploaded in the editor. Select the step, then upload an image or choose one from the Media Library under its text; the panel shows it there, above the step's instructions. Its alternative text is under **Screenshot** in the sidebar, and **Replace** and **Remove image** are in the block toolbar.
