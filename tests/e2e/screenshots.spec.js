@@ -87,10 +87,11 @@ test('the route refuses a file that is not an image, and saves no result', async
 	expect((await response.json()).code).toBe(
 		'uat_checklist_screenshot_refused'
 	);
+	// The panel loads the checklist after the page, and a badge not yet rendered also counts as hidden.
 	await page.reload();
-	await expect(
-		panelStep(page, stepId).locator('.uat-checklist__badge')
-	).toBeHidden();
+	const step = panelStep(page, stepId);
+	await expect(step.locator('.uat-checklist__summary')).toBeVisible();
+	await expect(step.locator('.uat-checklist__badge')).toBeHidden();
 });
 
 test('a chosen screenshot is previewed above the button, which offers to replace it, until it is removed', async ({
@@ -146,8 +147,31 @@ test('a screenshot saved with a Fail shows in Results, on Mark fixed and in the 
 	});
 	await step.getByRole('button', { name: 'Save result' }).click();
 	await expect(step.locator('.uat-checklist__badge')).toHaveText('Fail');
-	// The form starts blank again after a save, preview included.
-	await expect(step.locator('.uat-checklist__preview')).toBeHidden();
+	// The form keeps what was saved, with the stored screenshot in place of the chosen file.
+	await expect(step.getByLabel('Comment')).toHaveValue(
+		'The button does nothing.'
+	);
+	await expect(step.locator('.uat-checklist__preview img')).toHaveAttribute(
+		'src',
+		/\/wp-content\/uploads\//
+	);
+
+	// After a reload too, and an addition to the comment saves as a new result that keeps the screenshot. Every step
+	// is done, so none opens by itself.
+	await page.reload();
+	const reloaded = panelStep(page, stepId);
+	await reloaded.locator('.uat-checklist__summary').click();
+	await expect(reloaded.getByLabel('Fail', { exact: true })).toBeChecked();
+	await expect(reloaded.getByLabel('Comment')).toHaveValue(
+		'The button does nothing.'
+	);
+	await reloaded
+		.getByLabel('Comment')
+		.fill('The button does nothing. Not even on mobile.');
+	await reloaded.getByRole('button', { name: 'Save result' }).click();
+	await expect(reloaded.locator('.uat-checklist__status')).toHaveText(
+		/^Saved as Fail on [^.]+\.$/
+	);
 
 	const manager = await browser.newPage({
 		storageState: storageState(USERS.manager),
@@ -155,8 +179,13 @@ test('a screenshot saved with a Fail shows in Results, on Mark fixed and in the 
 	await manager.goto(
 		`/wp-admin/edit.php?post_type=uat_result&uat_checklist_id=${id}`
 	);
+	await expect(
+		manager.locator(
+			'#the-list .column-uat_screenshot .uat-checklist__screenshot img'
+		)
+	).toHaveCount(2);
 	const row = manager.locator('#the-list tr', {
-		hasText: 'Press the button',
+		hasText: 'Not even on mobile.',
 	});
 	await expect(
 		row.locator('.column-uat_screenshot .uat-checklist__screenshot img')
@@ -178,9 +207,53 @@ test('a screenshot saved with a Fail shows in Results, on Mark fixed and in the 
 
 	// The panel was left open, so it reopens on the same checklist.
 	await page.reload();
+	const retest = panelStep(page, stepId);
 	await expect(
-		panelStep(page, stepId).locator(
-			'.uat-checklist__retest .uat-checklist__screenshot img'
-		)
+		retest.locator('.uat-checklist__retest .uat-checklist__screenshot img')
 	).toHaveAttribute('src', /\/wp-content\/uploads\//);
+	// The Fail shows in the notice, and the form starts blank for the retest.
+	await expect(retest.getByLabel('Comment')).toHaveValue('');
+	await expect(retest.getByLabel('Fail', { exact: true })).not.toBeChecked();
+	await expect(retest.locator('.uat-checklist__preview img')).toHaveCount(0);
+});
+
+test('a screenshot removed from a saved result is not kept by the next save', async ({
+	page,
+	site,
+}) => {
+	const {
+		id,
+		stepIds: [stepId],
+	} = await site.createChecklist('Screenshot removed', ['Press the button']);
+	await openChecklist(page, id);
+	const step = panelStep(page, stepId);
+
+	await step.getByLabel('Fail', { exact: true }).check();
+	await step.getByLabel('Comment').fill('The button does nothing.');
+	await step.getByLabel('Add a screenshot').setInputFiles({
+		name: 'button.png',
+		mimeType: 'image/png',
+		buffer: PNG,
+	});
+	await step.getByRole('button', { name: 'Save result' }).click();
+	await expect(step.locator('.uat-checklist__preview img')).toHaveAttribute(
+		'src',
+		/\/wp-content\/uploads\//
+	);
+
+	// The save moved on and closed the step.
+	await step.locator('.uat-checklist__summary').click();
+	await step.getByRole('button', { name: 'Remove screenshot' }).click();
+	await step.getByRole('button', { name: 'Save result' }).click();
+	await expect(step.locator('.uat-checklist__status')).toHaveText(
+		/^Saved as Fail on [^.]+\.$/
+	);
+
+	// The panel loads the checklist after the page, so the step is waited for before its preview is counted.
+	await page.reload();
+	const reloaded = panelStep(page, stepId);
+	await expect(reloaded.locator('.uat-checklist__badge')).toHaveText('Fail');
+	await expect(reloaded.locator('.uat-checklist__preview img')).toHaveCount(
+		0
+	);
 });

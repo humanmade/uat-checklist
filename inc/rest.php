@@ -140,7 +140,13 @@ function register_routes(): void {
 					'validate_callback' => 'rest_validate_request_arg',
 					'sanitize_callback' => 'sanitize_key',
 				],
-				'comment'      => comment_arg(),
+				'comment'         => comment_arg(),
+				'screenshot_from' => [
+					'type'              => 'integer',
+					'minimum'           => 1,
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => 'absint',
+				],
 			],
 		]
 	);
@@ -257,7 +263,8 @@ function recent_save_count( int $user_id ): int {
  * Saves the current user's result for one step of a published checklist.
  *
  * @param WP_REST_Request $request Request.
- * @return WP_REST_Response|WP_Error `{ status, label, message }`, or why it was refused.
+ * @return WP_REST_Response|WP_Error `{ id, status, label, message, screenshot }`, where the screenshot is
+ *                                   `{ url, alt }` or null, or why it was refused.
  */
 function save_result( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 	$step_id = (string) $request['step_id'];
@@ -316,6 +323,11 @@ function save_result( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		return $upload;
 	}
 
+	// Read before the save, which becomes the latest itself. Only the latest is carried over: a form loaded before
+	// someone else saved, or before the step was marked fixed, names an older result.
+	$from      = (int) $request['screenshot_from'];
+	$latest_id = Results\result_ids_by_step( $checklist->ID )[ $step_id ][0] ?? 0;
+
 	$result = Results\save(
 		$checklist->ID,
 		get_current_user_id(),
@@ -343,11 +355,30 @@ function save_result( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$message .= ' ' . __( 'The screenshot could not be saved.', 'uat-checklist' );
 	}
 
+	if ( $upload === null && $from > 0 ) {
+		$source = $from === $latest_id ? get_post( $from ) : null;
+
+		if ( ! $source instanceof WP_Post ) {
+			$message .= ' ' . __( 'Someone saved this step since you opened it, so the earlier screenshot was not kept. Add it again if it is still needed.', 'uat-checklist' );
+		} elseif ( is_wp_error( Screenshots\carry_over( $source, $result ) ) ) {
+			$message .= ' ' . __( 'The screenshot could not be saved.', 'uat-checklist' );
+		}
+	}
+
+	$preview = Screenshots\preview_url( $result );
+
 	return new WP_REST_Response(
 		[
-			'status'  => $status,
-			'label'   => Results\label( $status ),
-			'message' => $message,
+			'id'         => $result->ID,
+			'status'     => $status,
+			'label'      => Results\label( $status ),
+			'message'    => $message,
+			'screenshot' => $preview === ''
+				? null
+				: [
+					'url' => $preview,
+					'alt' => Screenshots\alt_text( $result ),
+				],
 		]
 	);
 }
