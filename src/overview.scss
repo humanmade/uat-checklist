@@ -20,30 +20,9 @@ $swatch-width: 1.5rem;
 $hatch-line: color-mix( in srgb, #{ token( color-fail ) } 55%, #{ token( color-background ) } );
 
 .uat-overview {
-	box-sizing: border-box;
 	max-inline-size: $overview-width;
-	margin-block-start: token( space-s );
-	padding: token( space-2-xl );
-	border: 1px solid token( color-border-subtle );
-	border-radius: token( radius );
-	background-color: token( color-background );
-	box-shadow: 0 1px 0.25rem token( color-shadow );
-	color: token( color-text );
-	font-family: token( font-family );
-	font-size: token( font-size );
-	font-weight: token( font-weight-regular );
-	line-height: token( line-height );
-	letter-spacing: token( letter-spacing );
 
-	::selection {
-		background-color: token( color-accent-tint );
-		color: token( color-text );
-	}
-
-	a {
-
-		@include link;
-	}
+	@include admin-sheet;
 
 	// Title and the Results links on one line, as the checklist header's meta row.
 	.uat-overview__header {
