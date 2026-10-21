@@ -41,6 +41,9 @@
 	"src/lib/window-presence.js": [
 		"build/panel.js"
 	],
+	"src/mark-fixed.js": [
+		"build/mark-fixed.js"
+	],
 	"src/overview.js": [
 		"build/overview.js"
 	],

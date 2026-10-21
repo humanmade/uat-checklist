@@ -21,7 +21,7 @@ const HANDLE = 'uat-checklist-tokens';
 /**
  * Every element the plugin's stylesheets style from the top: the tokens are declared on each of them.
  */
-const SCOPE = '.uat-checklist,.uat-panel,.uat-panel-toggle,#wp-admin-bar-uat-checklist,.uat-guide,.uat-overview';
+const SCOPE = '.uat-checklist,.uat-panel,.uat-panel-toggle,#wp-admin-bar-uat-checklist,.uat-guide,.uat-overview,.uat-fixed';
 
 /**
  * Prefix of every token's custom property.

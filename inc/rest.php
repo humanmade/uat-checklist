@@ -14,6 +14,7 @@ use HM\UAT_Checklist\Blocks;
 use HM\UAT_Checklist\Checklists;
 use HM\UAT_Checklist\Progress;
 use HM\UAT_Checklist\Results;
+use HM\UAT_Checklist\Screenshots;
 use WP_Error;
 use WP_Post;
 use WP_REST_Request;
@@ -295,6 +296,26 @@ function save_result( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		);
 	}
 
+	$file = Screenshots\chosen_file( $request->get_file_params() );
+
+	if ( $file !== null && Screenshots\uploaded_today( get_current_user_id() ) >= Screenshots\daily_limit() ) {
+		return new WP_Error(
+			'hm_uat_checklist_screenshot_limited',
+			sprintf(
+				/* translators: %s: how many screenshots a tester can add in a day. */
+				__( 'You have added %s screenshots in the last day, the most a tester can. Save without one, or add it tomorrow.', 'uat-checklist' ),
+				number_format_i18n( Screenshots\daily_limit() )
+			),
+			[ 'status' => 429 ]
+		);
+	}
+
+	$upload = $file === null ? null : Screenshots\store( $file );
+
+	if ( is_wp_error( $upload ) ) {
+		return $upload;
+	}
+
 	$result = Results\save(
 		$checklist->ID,
 		get_current_user_id(),
@@ -305,16 +326,28 @@ function save_result( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 	);
 
 	if ( is_wp_error( $result ) ) {
+		if ( $upload !== null ) {
+			wp_delete_file( $upload['file'] );
+		}
+
 		$result->add_data( [ 'status' => 500 ] );
 
 		return $result;
+	}
+
+	$message = Results\describe( $result );
+
+	// The result stands without its screenshot: the Pass or Fail is the record, and the tester is told to add it again.
+	if ( $upload !== null && is_wp_error( Screenshots\attach( $upload, $result ) ) ) {
+		wp_delete_file( $upload['file'] );
+		$message .= ' ' . __( 'The screenshot could not be saved.', 'uat-checklist' );
 	}
 
 	return new WP_REST_Response(
 		[
 			'status'  => $status,
 			'label'   => Results\label( $status ),
-			'message' => Results\describe( $result ),
+			'message' => $message,
 		]
 	);
 }

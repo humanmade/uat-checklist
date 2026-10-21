@@ -1,11 +1,14 @@
 <?php return array(
 	'dependencies' => array(
 		'react-jsx-runtime',
+		'wp-blob',
 		'wp-block-editor',
 		'wp-blocks',
+		'wp-components',
 		'wp-data',
 		'wp-element',
-		'wp-i18n'
+		'wp-i18n',
+		'wp-notices'
 	),
-	'version' => 'e2bc440243b20e76dc7b'
+	'version' => 'eecd8b3f67fe718d0f39'
 );

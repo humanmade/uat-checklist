@@ -23,6 +23,7 @@ function bootstrap(): void {
 	Access\bootstrap();
 	Checklists\bootstrap();
 	Results\bootstrap();
+	Screenshots\bootstrap();
 	REST\bootstrap();
 	Admin\bootstrap();
 	Notifications\bootstrap();

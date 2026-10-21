@@ -2,8 +2,8 @@
 
 A user acceptance testing panel for any WordPress site. Write a checklist under **UAT → Checklists**, and every
 logged-in member of the site works through it from **UAT** in the admin bar, on any screen, marking each step
-Pass or Fail with a comment. Results are saved on the site, and administrators read them under **UAT →
-Results**. A page of instructions for a checklist is optional.
+Pass or Fail with a comment and, optionally, a screenshot. Results are saved on the site, and administrators
+read them under **UAT → Results**. A page of instructions for a checklist is optional.
 
 The panel and the checklist take their colours, fonts, corners and spacing from the active theme's theme.json,
 so on any site they look like that site. Every value the theme does not set has a fallback, and both are
@@ -48,6 +48,11 @@ A step is required unless its `required` attribute is false. The panel tags requ
 with them, so a tester can finish those and stop. Each step gets a `stepId` UUID when it is added, and its
 results are stored against it: rewording a step keeps them, and deleting the step leaves them in **Results**.
 
+A step can show one screenshot, for a control that is hard to find. Select the step, then upload an image or
+choose one from the Media Library in the space under its text. The panel shows it in the same place, above the
+step's instructions. Write what it shows under **Screenshot** in the sidebar, for testers who cannot see it.
+**Replace** and **Remove image** are in the block toolbar.
+
 Writing steps by hand suits a short checklist. To generate checklists from JSON specs, optionally with a page
 of instructions, screenshots and live examples for each, use the `creating-a-uat-page` skill in
 `.claude/skills/`. It reaches WordPress through WP-CLI on any host and writes in the site's own language.
@@ -91,10 +96,10 @@ failures the overview counted, and not a Fail another tester has since passed.
 comments** above the list filter it, and the checklist dropdown limits it to one. **Latest result on each step
 only** leaves the one result per step the panel and the overview go by. The counts beside the statuses are core's,
 and still count every result. **Move to Trash** clears results, for example before a retest round. Results cannot
-be edited.
+be edited. A tester's screenshot has its own **Screenshot** column, right of **Comment**, linked to the full image.
 
-Deleting a checklist permanently, from the trash, deletes its results and testers' additional comments with it. A
-checklist in the trash keeps them, so restoring it brings its history back.
+Deleting a checklist permanently, from the trash, deletes its results, their screenshots and testers' additional
+comments with it. A checklist in the trash keeps them, so restoring it brings its history back.
 
 Every save is a new result, so nothing a tester saved is overwritten: a step's results read as its history, and
 the latest from anyone is what every tester sees.
@@ -103,18 +108,21 @@ the latest from anyone is what every tester sees.
 
 Once a failed step is fixed, a UAT manager clicks **Mark fixed** under that Fail in **Results**, and may add a note
 for the testers. It shows only while the step's latest result is a Fail, and it covers every tester's Fail on the
-step. Marking it saves a **Fixed** result of its own and leaves the Fail as it was.
+step. Marking it saves a **Fixed** result of its own and leaves the Fail as it was. The page it opens is drawn in
+the theme, as the Overview is: the step, who failed it and when, their comment and their screenshot with a link to
+the full size, then the note. **Cancel** goes back to the checklist's results.
 
-While a Fixed is the step's latest result, the panel tags the step **Retest** and opens it first, with the note
-and the failure it fixed. The tester's next Pass or Fail decides the step, and the overview counts the step as not
+While a Fixed is the step's latest result, the panel tags the step **Retest** and opens it first, with the note,
+the failure it fixed and that failure's screenshot. The tester's next Pass or Fail decides the step, and the overview counts the step as not
 completed until then.
 
 When the manager writes a note, the tester whose Fail it was also gets an email. It names the step and the
 checklist, quotes the tester's comment and the note, and links to retest. WP-Cron sends it shortly after the save,
 so on a site with WP-Cron disabled it goes when the system cron next runs. It goes through `wp_mail()`, so the
 site's own mailer applies. It is written in the tester's profile language, provided the site has that language
-installed. No email goes when the note is empty, or when the manager marked their own Fail. The
-`uat-checklist/mark-fixed` ability sends it too. Deactivating the plugin removes any email still waiting to go,
+installed. No email goes when the note is empty, when the manager marked their own Fail, or when they ticked
+**Don't send email notification** under the note; the note still shows in the panel. The
+`uat-checklist/mark-fixed` ability sends it too, unless it is given `notify` false. Deactivating the plugin removes any email still waiting to go,
 since nothing would be there to send it.
 
 **Ready to retest** lists each tester's own Fails that have since been marked fixed, with or without a note. It
@@ -190,6 +198,8 @@ A plain CSS rule works too, since any class selector outranks `:where()`:
 | `hm_uat_checklist_guide_slug`              | Slug of the guide to the panel   | `using-the-checklist`; empty turns the link off |
 | `hm_uat_checklist_window_hidden_selectors` | Selectors hidden in the pop-out  | The block theme's header and footer             |
 | `hm_uat_checklist_staff_domains`           | Email domains of UAT managers    | `[ 'humanmade.com' ]`                           |
+| `hm_uat_checklist_screenshot_max_bytes`    | Largest screenshot, in bytes     | 20 MB; the site's upload limit when lower       |
+| `hm_uat_checklist_screenshot_daily_limit`  | Screenshots a tester can add a day | `50`                                          |
 
 ## The hub page and the guide
 
@@ -208,12 +218,16 @@ site.
 | `GET checklists`                | Every published checklist, with progress, for the picker                      |
 | `GET checklists/<checklist ID>` | One checklist, rendered for the current tester                                |
 | `GET retests`                   | The current user's Fails marked fixed and not yet retested (Ready to retest)  |
-| `POST results`                  | Saves `checklist_id`, `step_id`, `status` (`pass` or `fail`) and `comment`    |
+| `POST results`                  | Saves `checklist_id`, `step_id`, `status` (`pass` or `fail`), `comment` and an optional `screenshot` file |
 | `POST notes`                    | Saves `checklist_id` and `comment` as additional comments; empty deletes them |
 
 A comment is required with `fail` and capped at 2,000 characters. The step text stored is read from the
 checklist, not from the request. One user can save 30 results a minute; past that, `POST results` answers 429
 until the minute has passed.
+
+`screenshot` makes `POST results` a multipart request. Any member who can save a result can send one, including
+a Subscriber, who cannot use the Media Library. It must be a JPEG, PNG, GIF or WebP image, checked by its content,
+no larger than the site's upload limit. A file that fails either check is refused with a 400 and nothing is saved.
 
 Checklists are also at core's `/wp-json/wp/v2/uat-checklists`, which the block editor reads and saves through.
 Core would serve a published checklist there to anyone; the plugin refuses every request to it from a user who
@@ -233,7 +247,7 @@ managers. **Full access to UAT checklists** on a profile does not open the abili
 | `uat-checklist/get-progress`   | The overview's counts, site-wide and for each published checklist   |
 | `uat-checklist/get-checklist`  | One checklist's sections and steps, with each step's latest result  |
 | `uat-checklist/list-failures`  | Every step whose latest result is a Fail, with the tester's comment |
-| `uat-checklist/mark-fixed`     | **Mark fixed** on one of those Fails, with an optional note         |
+| `uat-checklist/mark-fixed`     | **Mark fixed** on one of those Fails, with an optional note, emailed unless `notify` is false |
 | `uat-checklist/save-checklist` | Creates a checklist, or replaces one's sections and steps           |
 
 No ability saves a Pass or a Fail: testers do that in the panel. `save-checklist` keeps a step's results when the
@@ -261,6 +275,17 @@ One `uat_result` post per save, never updated, in post columns only:
 
 Additional comments use the status `uat-note`, one post per tester per checklist, under the slug
 `note-<checklist ID>-<user ID>`.
+
+A screenshot sent with a result is an image attachment whose `post_parent` is the result and whose author is the
+tester, so it is listed in the Media Library. Deleting the result for good, alone or with its checklist, deletes the
+screenshot and its file.
+
+A screenshot can be up to 20 MB, or the site's upload limit when that is lower, and a tester can add 50 in a day; a
+filter changes each. Past the day's limit, the result can still be saved without one. A JPEG is saved again without
+its metadata, turned upright first, because a phone photo's EXIF holds where it was taken and the file's address
+opens without logging in. That needs PHP's GD and exif extensions: without either, a JPEG is refused and a PNG still
+works. A plugin that converts JPEGs to WebP, such as Performance Lab's Modern Image Formats, is set aside for that
+save, so the JPEG itself is rewritten.
 
 ## Restoring media after a database move
 
