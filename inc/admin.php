@@ -14,15 +14,18 @@ declare( strict_types = 1 );
 
 namespace HM\UAT_Checklist\Admin;
 
+use HM\UAT_Checklist;
 use HM\UAT_Checklist\Access;
 use HM\UAT_Checklist\Blocks;
 use HM\UAT_Checklist\Checklists;
 use HM\UAT_Checklist\Notifications;
 use HM\UAT_Checklist\Overview;
+use HM\UAT_Checklist\Panel;
 use HM\UAT_Checklist\Progress;
 use HM\UAT_Checklist\REST;
 use HM\UAT_Checklist\Results;
 use HM\UAT_Checklist\Screenshots;
+use HM\UAT_Checklist\Styles;
 use WP_Error;
 use WP_Post;
 use WP_Query;
@@ -61,6 +64,11 @@ const FIXED_NOTICE = 'uat_fixed';
 const NO_EMAIL_FIELD = 'no_email';
 
 /**
+ * Handle of the Mark fixed page's stylesheet.
+ */
+const MARK_FIXED_HANDLE = 'uat-checklist-mark-fixed';
+
+/**
  * Wires up the module's hooks.
  *
  * @return void
@@ -73,7 +81,8 @@ function bootstrap(): void {
 	add_action( 'restrict_manage_posts', __NAMESPACE__ . '\\render_checklist_filter' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\filter_by_checklist' );
 	add_action( 'load-edit.php', __NAMESPACE__ . '\\label_notes' );
-	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\style_results_screens' );
+	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\style_results_list' );
+	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue_mark_fixed' );
 	add_filter( 'post_row_actions', __NAMESPACE__ . '\\row_actions', 10, 2 );
 	add_action( 'admin_menu', __NAMESPACE__ . '\\add_mark_fixed_page' );
 	add_action( 'admin_post_' . MARK_FIXED_ACTION, __NAMESPACE__ . '\\handle_mark_fixed' );
@@ -81,18 +90,16 @@ function bootstrap(): void {
 }
 
 /**
- * On the results list and the Mark fixed page only, sets the latest-only checkbox in line with the filter bar's
- * controls, and fits a tester's screenshot under their comment.
+ * On the results list only, sets the latest-only checkbox in line with the filter bar's controls, and fits a
+ * tester's screenshot to its column.
  *
  * Core floats those controls and sizes them, and leaves a label beside them unaligned and touching the Filter
  * button. A screenshot's figure would otherwise take the browser's default margins.
  *
  * @return void
  */
-function style_results_screens(): void {
-	$screens = [ 'edit-' . Results\POST_TYPE, get_plugin_page_hookname( MARK_FIXED_PAGE, '' ) ];
-
-	if ( ! in_array( get_current_screen()?->id, $screens, true ) ) {
+function style_results_list(): void {
+	if ( get_current_screen()?->id !== 'edit-' . Results\POST_TYPE ) {
 		return;
 	}
 
@@ -125,38 +132,35 @@ function style_results_screens(): void {
 		.column-uat_screenshot {
 			width: 144px;
 		}
-
-		/* Set apart from the rows above as the tester's own words, with the red edge core gives an error notice. */
-		.uat-fixed-comment {
-			box-sizing: border-box;
-			max-width: 65ch;
-			margin: 0;
-			padding: 12px 16px;
-			border: 1px solid #c3c4c7;
-			border-inline-start: 4px solid #d63638;
-			background-color: #fff;
-		}
-
-		.uat-fixed-comment p {
-			margin: 0 0 1em;
-			font-size: 14px;
-			line-height: 1.6;
-		}
-
-		.uat-fixed-comment p:last-child {
-			margin-block-end: 0;
-		}
-
-		.uat-fixed-screenshot img {
-			max-width: min( 100%, 640px );
-		}
-
-		.uat-fixed-screenshot p {
-			margin: 8px 0 0;
-		}
 		CSS;
 
 	wp_add_inline_style( 'list-tables', $css );
+}
+
+/**
+ * Enqueues the Mark fixed page's stylesheet, on that page only.
+ *
+ * @param string $hook_suffix Current admin screen's hook suffix.
+ * @return void
+ */
+function enqueue_mark_fixed( string $hook_suffix ): void {
+	if (
+		$hook_suffix !== get_plugin_page_hookname( MARK_FIXED_PAGE, '' )
+		|| ! file_exists( UAT_Checklist\PATH . 'build/mark-fixed.asset.php' )
+	) {
+		return;
+	}
+
+	// phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant -- this plugin's own build manifest, existence checked above.
+	$asset = require UAT_Checklist\PATH . 'build/mark-fixed.asset.php';
+
+	// The panel's stylesheet carries the theme's preset variables the tokens point at, as on the Overview.
+	wp_enqueue_style(
+		MARK_FIXED_HANDLE,
+		plugins_url( 'build/mark-fixed.css', UAT_Checklist\FILE ),
+		[ Styles\HANDLE, Panel\HANDLE ],
+		$asset['version']
+	);
 }
 
 /**
@@ -575,42 +579,47 @@ function render_mark_fixed_page(): void {
 	if ( ! $result instanceof WP_Post || ! is_open_fail( $result ) ) {
 		wp_die( esc_html( not_fixable()->get_error_message() ), '', [ 'back_link' => true ] );
 	}
+
+	$tester     = (string) get_the_author_meta( 'display_name', (int) $result->post_author );
+	$checklist  = Blocks\checklist_title( $result->post_parent );
+	$screenshot = Screenshots\of( $result );
+	$failed     = $checklist === ''
+		? sprintf(
+			/* translators: 1: the tester's name, 2: when they saved the Fail. */
+			__( 'Failed by %1$s on %2$s.', 'uat-checklist' ),
+			$tester,
+			Results\saved_at( $result )
+		)
+		: sprintf(
+			/* translators: 1: the tester's name, 2: when they saved the Fail, 3: the checklist's title. */
+			__( 'Failed by %1$s on %2$s, in %3$s.', 'uat-checklist' ),
+			$tester,
+			Results\saved_at( $result ),
+			$checklist
+		);
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Mark fixed', 'uat-checklist' ); ?></h1>
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="<?php echo esc_attr( MARK_FIXED_ACTION ); ?>">
-			<input type="hidden" name="result_id" value="<?php echo esc_attr( (string) $result->ID ); ?>">
-			<?php wp_nonce_field( MARK_FIXED_ACTION . '_' . $result->ID ); ?>
-			<table class="form-table" role="presentation">
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Step', 'uat-checklist' ); ?></th>
-					<td><?php echo esc_html( $result->post_title ); ?></td>
-				</tr>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Failed by', 'uat-checklist' ); ?></th>
-					<td><?php echo esc_html( get_the_author_meta( 'display_name', (int) $result->post_author ) ); ?></td>
-				</tr>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Failed on', 'uat-checklist' ); ?></th>
-					<td><?php echo esc_html( Results\saved_at( $result ) ); ?></td>
-				</tr>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Their comment', 'uat-checklist' ); ?></th>
-					<td>
-						<blockquote class="uat-fixed-comment">
+		<div class="uat-fixed">
+			<h1 class="uat-fixed__title"><?php esc_html_e( 'Mark fixed', 'uat-checklist' ); ?></h1>
+			<?php // Core moves admin notices to just after .wp-header-end, so they land under the title, inside the sheet. ?>
+			<hr class="wp-header-end">
+			<p class="uat-fixed__lead"><?php echo esc_html( $result->post_title ); ?></p>
+			<p class="uat-fixed__meta"><?php echo esc_html( $failed ); ?></p>
+
+			<?php if ( trim( $result->post_content ) !== '' || $screenshot !== null ) : ?>
+				<div class="uat-fixed__evidence">
+					<?php if ( trim( $result->post_content ) !== '' ) : ?>
+						<h2 class="uat-fixed__heading"><?php esc_html_e( 'Their comment', 'uat-checklist' ); ?></h2>
+						<blockquote class="uat-fixed__comment">
 							<?php
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by esc_html() before wpautop() adds the paragraphs.
 							echo wpautop( esc_html( $result->post_content ) );
 							?>
 						</blockquote>
-					</td>
-				</tr>
-				<?php $screenshot = Screenshots\of( $result ); ?>
-				<?php if ( $screenshot !== null ) : ?>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Their screenshot', 'uat-checklist' ); ?></th>
-						<td class="uat-fixed-screenshot">
+					<?php endif; ?>
+					<?php if ( $screenshot !== null ) : ?>
+						<h2 class="uat-fixed__heading"><?php esc_html_e( 'Their screenshot', 'uat-checklist' ); ?></h2>
+						<div class="uat-fixed__screenshot">
 							<?php
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built by Screenshots\markup() from esc_url(), esc_html__() and wp_get_attachment_image().
 							echo Screenshots\markup( $result, 'large' );
@@ -620,31 +629,34 @@ function render_mark_fixed_page(): void {
 									<?php esc_html_e( 'Open full size', 'uat-checklist' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)', 'uat-checklist' ); ?></span>
 								</a>
 							</p>
-						</td>
-					</tr>
-				<?php endif; ?>
-				<tr>
-					<th scope="row"><label for="uat-fixed-note"><?php esc_html_e( 'Note for testers', 'uat-checklist' ); ?></label></th>
-					<td>
-						<textarea
-							name="note"
-							id="uat-fixed-note"
-							class="large-text"
-							rows="4"
-							maxlength="<?php echo esc_attr( (string) Results\COMMENT_MAX_LENGTH ); ?>"
-						></textarea>
-						<p class="description"><?php esc_html_e( 'Optional. Testers see it when they retest the step, and the tester who failed it is emailed the note.', 'uat-checklist' ); ?></p>
-						<p>
-							<label>
-								<input type="checkbox" name="<?php echo esc_attr( NO_EMAIL_FIELD ); ?>" value="1">
-								<?php esc_html_e( "Don't send email notification", 'uat-checklist' ); ?>
-							</label>
-						</p>
-					</td>
-				</tr>
-			</table>
-			<?php submit_button( __( 'Mark fixed', 'uat-checklist' ) ); ?>
-		</form>
+						</div>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
+			<form class="uat-fixed__form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="<?php echo esc_attr( MARK_FIXED_ACTION ); ?>">
+				<input type="hidden" name="result_id" value="<?php echo esc_attr( (string) $result->ID ); ?>">
+				<?php wp_nonce_field( MARK_FIXED_ACTION . '_' . $result->ID ); ?>
+				<label class="uat-fixed__label" for="uat-fixed-note"><?php esc_html_e( 'Note for testers', 'uat-checklist' ); ?></label>
+				<textarea
+					name="note"
+					id="uat-fixed-note"
+					rows="4"
+					maxlength="<?php echo esc_attr( (string) Results\COMMENT_MAX_LENGTH ); ?>"
+					aria-describedby="uat-fixed-note-hint"
+				></textarea>
+				<p class="uat-fixed__hint" id="uat-fixed-note-hint"><?php esc_html_e( 'Optional. Testers see it when they retest the step, and the tester who failed it is emailed the note.', 'uat-checklist' ); ?></p>
+				<label class="uat-fixed__check">
+					<input type="checkbox" name="<?php echo esc_attr( NO_EMAIL_FIELD ); ?>" value="1">
+					<?php esc_html_e( "Don't send email notification", 'uat-checklist' ); ?>
+				</label>
+				<div class="uat-fixed__actions">
+					<button type="submit" class="uat-fixed__submit"><?php esc_html_e( 'Mark fixed', 'uat-checklist' ); ?></button>
+					<a class="uat-fixed__cancel" href="<?php echo esc_url( Overview\results_url( (int) $result->post_parent ) ); ?>"><?php esc_html_e( 'Cancel', 'uat-checklist' ); ?></a>
+				</div>
+			</form>
+		</div>
 	</div>
 	<?php
 }

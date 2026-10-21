@@ -108,8 +108,9 @@ the latest from anyone is what every tester sees.
 
 Once a failed step is fixed, a UAT manager clicks **Mark fixed** under that Fail in **Results**, and may add a note
 for the testers. It shows only while the step's latest result is a Fail, and it covers every tester's Fail on the
-step. Marking it saves a **Fixed** result of its own and leaves the Fail as it was. The page it opens quotes the
-tester's comment, and shows their screenshot large, with a link to the full size, when they sent one.
+step. Marking it saves a **Fixed** result of its own and leaves the Fail as it was. The page it opens is drawn in
+the theme, as the Overview is: the step, who failed it and when, their comment and their screenshot with a link to
+the full size, then the note. **Cancel** goes back to the checklist's results.
 
 While a Fixed is the step's latest result, the panel tags the step **Retest** and opens it first, with the note,
 the failure it fixed and that failure's screenshot. The tester's next Pass or Fail decides the step, and the overview counts the step as not

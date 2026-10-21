@@ -37,7 +37,7 @@ this plugin's. `README.md` is the user documentation; this file is for working o
 | `blocks/<slug>/`        | `checklist`, `section` and `step`: block.json, editor script, render.php           |
 | `src/panel.js`, `src/lib/` | The panel, the step and comment forms, the pop-out window                       |
 | `src/checklist-editor.js` | The Instructions page setting in a checklist's editor sidebar                    |
-| `src/*.scss`            | Panel, guide, overview and shared control styles; `_tokens.scss` reads the tokens  |
+| `src/*.scss`            | Panel, guide, overview, Mark fixed and shared control styles; `_tokens.scss` reads the tokens |
 | `PRODUCT.md`, `.impeccable/` | Product record and surface briefs for the impeccable design skill; not shipped |
 | `webpack.config.js`     | Builds `src/*.js` to `build/`, `blocks/*/index.js` to `build/blocks/`, and the i18n map |
 | `bin/i18n`              | POT, catalogs and their compiled forms                                             |

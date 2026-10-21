@@ -40,12 +40,12 @@ msgid "Open in new window"
 msgstr "新しいウィンドウで開く"
 
 #: blocks/step/render.php:178
-#: inc/admin.php:233
+#: inc/admin.php:237
 msgid "Result"
 msgstr "結果"
 
 #: blocks/step/render.php:181
-#: inc/admin.php:234
+#: inc/admin.php:238
 msgid "Comment"
 msgstr "コメント"
 
@@ -66,8 +66,7 @@ msgstr "結果を記録するには JavaScript を有効にしてください。
 msgid "Expected result"
 msgstr "期待される結果"
 
-#: inc/admin.php:232
-#: inc/admin.php:587
+#: inc/admin.php:236
 msgid "Step"
 msgstr "ステップ"
 
@@ -75,7 +74,7 @@ msgstr "ステップ"
 msgid "Page"
 msgstr "ページ"
 
-#: inc/admin.php:238
+#: inc/admin.php:242
 msgid "Last saved"
 msgstr "最終保存日時"
 
@@ -182,7 +181,7 @@ msgstr "保存中…"
 msgid "The result could not be saved. Check your connection and try again."
 msgstr "結果を保存できませんでした。接続を確認して、もう一度お試しください。"
 
-#: inc/admin.php:236
+#: inc/admin.php:240
 #: inc/checklists.php:57
 #: inc/overview.php:440
 #: src/panel.js:62
@@ -266,7 +265,7 @@ msgid "Other testers"
 msgstr "他のテスター"
 
 #: blocks/checklist/render.php:130
-#: inc/admin.php:203
+#: inc/admin.php:207
 #: inc/results.php:195
 msgid "Additional comments"
 msgstr "追加コメント"
@@ -378,24 +377,24 @@ msgstr ""
 msgid "Testing checklists for user acceptance testing: testers mark each step Pass or Fail, and the results are stored on the site."
 msgstr "受け入れテスト（UAT）用のテストチェックリスト。テスターが各ステップを「合格」または「不合格」にし、結果はサイトに保存されます。"
 
-#: inc/admin.php:293
+#: inc/admin.php:297
 msgid "(checklist deleted)"
 msgstr "(削除済みのチェックリスト)"
 
-#: inc/admin.php:325
+#: inc/admin.php:329
 #: inc/checklists.php:61
 msgid "Edit checklist"
 msgstr "チェックリストを編集"
 
-#: inc/admin.php:335
+#: inc/admin.php:339
 msgid "View instructions"
 msgstr "使い方のページを表示"
 
-#: inc/admin.php:380
+#: inc/admin.php:384
 msgid "All checklists"
 msgstr "すべてのチェックリスト"
 
-#: inc/admin.php:396
+#: inc/admin.php:400
 msgid "Filter by checklist"
 msgstr "チェックリストで絞り込み"
 
@@ -545,7 +544,7 @@ msgid "%1$s failed step in %2$s. View its failed results."
 msgid_plural "%1$s failed steps in %2$s. View their failed results."
 msgstr[0] "%2$s の不合格ステップ %1$s 件。不合格の結果を表示します。"
 
-#: inc/admin.php:406
+#: inc/admin.php:410
 msgid "Latest result on each step only"
 msgstr "各ステップの最新の結果のみ"
 
@@ -627,52 +626,44 @@ msgstr "メールアドレスによりフルアクセスが付与されていま
 msgid "Lets them write checklists, mark results fixed and trash them."
 msgstr "チェックリストの作成、結果の修正済みへの変更、結果のゴミ箱への移動ができるようになります。"
 
-#: inc/admin.php:237
+#: inc/admin.php:241
 msgid "By"
 msgstr "実施者"
 
-#: inc/admin.php:531
-#: inc/admin.php:546
-#: inc/admin.php:580
-#: inc/admin.php:646
+#: inc/admin.php:535
+#: inc/admin.php:550
+#: inc/admin.php:603
+#: inc/admin.php:655
 msgid "Mark fixed"
 msgstr "修正済みにする"
 
-#: inc/admin.php:562
+#: inc/admin.php:566
 msgid "Only a Fail that is still the latest result on its step can be marked fixed."
 msgstr "ステップの最新の結果が不合格の場合のみ、修正済みにできます。"
 
-#: inc/admin.php:591
-msgid "Failed by"
-msgstr "不合格にした人"
-
-#: inc/admin.php:595
-msgid "Failed on"
-msgstr "不合格にした日時"
-
-#: inc/admin.php:599
+#: inc/admin.php:612
 msgid "Their comment"
 msgstr "コメント"
 
-#: inc/admin.php:627
+#: inc/admin.php:641
 msgid "Note for testers"
 msgstr "テスター向けのメモ"
 
-#: inc/admin.php:669
+#: inc/admin.php:681
 msgid "You cannot mark results fixed."
 msgstr "結果を修正済みにする権限がありません。"
 
 #. translators: %s: the most characters a note can hold.
-#: inc/admin.php:684
+#: inc/admin.php:696
 #, php-format
 msgid "The note can be at most %s characters."
 msgstr "メモは %s 文字以内で入力してください。"
 
-#: inc/admin.php:697
+#: inc/admin.php:709
 msgid "This step is no longer in the checklist."
 msgstr "このステップはチェックリストにありません。"
 
-#: inc/admin.php:757
+#: inc/admin.php:769
 msgid "Marked fixed. Testers now see the step as Retest."
 msgstr "修正済みにしました。テスターにはこのステップが再テストとして表示されます。"
 
@@ -903,7 +894,7 @@ msgid "Steps ready to retest could not be loaded."
 msgstr "再テスト待ちのステップを読み込めませんでした。"
 
 #: blocks/step/render.php:190
-#: inc/admin.php:235
+#: inc/admin.php:239
 #: blocks/step/edit.js:130
 #: blocks/step/edit.js:163
 msgid "Screenshot"
@@ -947,7 +938,7 @@ msgstr "スクリーンショットが %s を超えています。もっと小�
 msgid "Screenshot from %s"
 msgstr "%s のスクリーンショット"
 
-#: inc/admin.php:620
+#: inc/admin.php:629
 #: inc/screenshots.php:180
 msgid "(opens in a new tab)"
 msgstr "（新しいタブで開きます）"
@@ -970,11 +961,11 @@ msgstr "スクリーンショットを削除"
 msgid "Add a screenshot"
 msgstr "スクリーンショットを追加"
 
-#: inc/admin.php:612
+#: inc/admin.php:621
 msgid "Their screenshot"
 msgstr "スクリーンショット"
 
-#: inc/admin.php:620
+#: inc/admin.php:629
 msgid "Open full size"
 msgstr "フルサイズで開く"
 
@@ -986,11 +977,11 @@ msgstr "選択したスクリーンショット"
 msgid "Replace screenshot"
 msgstr "スクリーンショットを差し替え"
 
-#: inc/admin.php:636
+#: inc/admin.php:649
 msgid "Optional. Testers see it when they retest the step, and the tester who failed it is emailed the note."
 msgstr "任意。ステップを再テストするときにテスターに表示され、失敗としたテスターにはメールでも送信されます。"
 
-#: inc/admin.php:640
+#: inc/admin.php:652
 msgid "Don't send email notification"
 msgstr "メール通知を送信しない"
 
@@ -1001,3 +992,19 @@ msgstr "修正した内容。ステップを再テストするときにテスタ
 #: inc/abilities.php:186
 msgid "False to save the note without emailing it to the tester. Defaults to true."
 msgstr "false にすると、メモを保存し、テスターにはメールで送信しません。既定値は true です。"
+
+#. translators: 1: the tester's name, 2: when they saved the Fail.
+#: inc/admin.php:589
+#, php-format
+msgid "Failed by %1$s on %2$s."
+msgstr "%1$s が %2$s に不合格にしました。"
+
+#. translators: 1: the tester's name, 2: when they saved the Fail, 3: the checklist's title.
+#: inc/admin.php:595
+#, php-format
+msgid "Failed by %1$s on %2$s, in %3$s."
+msgstr "%1$s が %2$s に %3$s で不合格にしました。"
+
+#: inc/admin.php:656
+msgid "Cancel"
+msgstr "キャンセル"

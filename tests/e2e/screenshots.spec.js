@@ -158,7 +158,7 @@ test('a screenshot saved with a Fail shows in Results, on Mark fixed and in the 
 	await row.hover();
 	await row.getByRole('link', { name: 'Mark fixed' }).click();
 	await expect(
-		manager.locator('.uat-fixed-screenshot .uat-checklist__screenshot img')
+		manager.locator('.uat-fixed__screenshot .uat-checklist__screenshot img')
 	).toHaveAttribute('src', /\/wp-content\/uploads\//);
 	await expect(
 		manager.getByRole('link', { name: /Open full size/ })
