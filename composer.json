@@ -25,7 +25,7 @@
 		],
 		"phpcbf": "phpcbf",
 		"phpcs": "phpcs",
-		"phpstan": "phpstan analyse --configuration=phpstan.neon.dist --memory-limit=1G"
+		"phpstan": "phpstan analyse --configuration=phpstan.neon.dist --memory-limit=2G"
 	},
 	"scripts-descriptions": {
 		"lint": "Run PHPCS and PHPStan over the plugin.",
