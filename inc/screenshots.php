@@ -5,7 +5,8 @@
  *
  * Testers are often Subscribers, who cannot use the Media Library, so the upload is taken here rather than by core's
  * media route, and only by the panel's result route, under its rate limit. Only images are accepted, checked by
- * their content as well as their name.
+ * their content as well as their name. Each is capped in size, a tester's uploads are capped per day, and a JPEG's
+ * metadata is stripped, since a phone photo carries where it was taken and the file's address is public.
  *
  * @package HM_UAT_Checklist
  */
@@ -17,6 +18,7 @@ namespace HM\UAT_Checklist\Screenshots;
 use HM\UAT_Checklist\Results;
 use WP_Error;
 use WP_Post;
+use WP_Query;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,12 +38,89 @@ const MIMES = [
 ];
 
 /**
+ * Largest screenshot accepted, in bytes, unless the site's upload limit is lower.
+ */
+const MAX_BYTES = 20 * MB_IN_BYTES;
+
+/**
+ * Most screenshots one tester can upload in DAY_WINDOW.
+ */
+const DAILY_LIMIT = 50;
+
+/**
+ * Period DAILY_LIMIT is counted over, in seconds.
+ */
+const DAY_WINDOW = DAY_IN_SECONDS;
+
+/**
+ * Cache group for each result's screenshot ID, for the request only.
+ */
+const CACHE_GROUP = 'hm_uat_checklist_screenshots';
+
+/**
  * Wires up the module's hooks.
  *
  * @return void
  */
 function bootstrap(): void {
+	// Per request: a persistent cache would need clearing on every attachment change anywhere on the site.
+	wp_cache_add_non_persistent_groups( CACHE_GROUP );
 	add_action( 'before_delete_post', __NAMESPACE__ . '\\delete_with_result', 10, 2 );
+}
+
+/**
+ * Returns the largest screenshot accepted, in bytes.
+ *
+ * @return int Bytes.
+ */
+function max_bytes(): int {
+	/**
+	 * Filters the largest screenshot a tester can upload. The site's upload limit still applies when it is lower.
+	 *
+	 * @param int $bytes Bytes. Default 20 MB.
+	 */
+	$bytes = (int) apply_filters( 'hm_uat_checklist_screenshot_max_bytes', MAX_BYTES );
+
+	return min( max( 0, $bytes ), wp_max_upload_size() );
+}
+
+/**
+ * Returns how many screenshots one tester can upload in a day.
+ *
+ * @return int Screenshots.
+ */
+function daily_limit(): int {
+	/**
+	 * Filters how many screenshots one tester can upload in a day.
+	 *
+	 * @param int $limit Screenshots. Default 50.
+	 */
+	return max( 0, (int) apply_filters( 'hm_uat_checklist_screenshot_daily_limit', DAILY_LIMIT ) );
+}
+
+/**
+ * Counts the screenshots a user has uploaded to results in the last day.
+ *
+ * Counted from the attachments themselves, as the rate limit counts results, so nothing extra is stored.
+ *
+ * @param int $user_id User ID.
+ * @return int Screenshots.
+ */
+function uploaded_today( int $user_id ): int {
+	global $wpdb;
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- WP_Query cannot filter by the parent's post type, and the answer changes with every upload.
+	return (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->posts} AS screenshot
+			INNER JOIN {$wpdb->posts} AS result ON result.ID = screenshot.post_parent
+			WHERE screenshot.post_type = 'attachment' AND screenshot.post_author = %d
+			AND screenshot.post_date_gmt >= %s AND result.post_type = %s",
+			$user_id,
+			gmdate( 'Y-m-d H:i:s', time() - DAY_WINDOW ),
+			Results\POST_TYPE
+		)
+	);
 }
 
 /**
@@ -65,12 +144,12 @@ function chosen_file( array $files ): ?array {
  * @return array{file: string, url: string, type: string}|WP_Error The stored file, or why it was refused.
  */
 function store( array $file ): array|WP_Error {
-	if ( (int) ( $file['size'] ?? 0 ) > wp_max_upload_size() ) {
+	if ( (int) ( $file['size'] ?? 0 ) > max_bytes() ) {
 		return refused(
 			sprintf(
 				/* translators: %s: the largest file size the site accepts, such as 2 MB. */
 				__( 'The screenshot is larger than %s. Choose a smaller image.', 'uat-checklist' ),
-				size_format( wp_max_upload_size() )
+				size_format( max_bytes() )
 			)
 		);
 	}
@@ -85,7 +164,86 @@ function store( array $file ): array|WP_Error {
 		]
 	);
 
-	return isset( $upload['error'] ) ? refused( (string) $upload['error'] ) : $upload;
+	if ( isset( $upload['error'] ) ) {
+		return refused( (string) $upload['error'] );
+	}
+
+	if ( $upload['type'] === 'image/jpeg' && is_wp_error( strip_metadata( $upload['file'] ) ) ) {
+		wp_delete_file( $upload['file'] );
+
+		return refused( __( 'The screenshot could not be processed. Try a PNG instead.', 'uat-checklist' ) );
+	}
+
+	return $upload;
+}
+
+/**
+ * Rewrites a JPEG in place without its metadata, turned upright first since the turn is part of what is removed.
+ *
+ * A phone photo's EXIF holds where it was taken, and the file's address opens without logging in. GD is used
+ * because it writes no EXIF: Imagick, core's first choice, keeps it when it saves an image at its own size.
+ * Refused rather than kept whenever the rewrite cannot be made as it should, so a photo's location is never
+ * published by default and a photo is never stored sideways. PNG, GIF and WebP are left as they are: re-encoding
+ * would drop a GIF's or WebP's animation, and screenshots in them carry none.
+ *
+ * @param string $path JPEG file.
+ * @return true|WP_Error True once rewritten, or why it could not be.
+ */
+function strip_metadata( string $path ): true|WP_Error {
+	// Core reads the turn with exif_read_data() and skips it silently without this extension. Once the EXIF is gone,
+	// nothing would say to turn a portrait photo.
+	if ( ! extension_loaded( 'exif' ) ) {
+		return new WP_Error( 'uat_checklist_no_exif', 'PHP\'s exif extension is needed to turn a JPEG upright.' );
+	}
+
+	add_filter( 'wp_image_editors', __NAMESPACE__ . '\\gd_only' );
+
+	try {
+		$editor = wp_get_image_editor( $path );
+	} finally {
+		remove_filter( 'wp_image_editors', __NAMESPACE__ . '\\gd_only' );
+	}
+
+	if ( is_wp_error( $editor ) ) {
+		return $editor;
+	}
+
+	$turned = $editor->maybe_exif_rotate();
+
+	if ( is_wp_error( $turned ) ) {
+		return $turned;
+	}
+
+	// Core converts on save whatever this filter maps, even a save that names its type: a JPEG-to-WebP plugin would
+	// write a WebP beside the JPEG and leave the JPEG, EXIF and all, as the file attached. Last, so it has the final say.
+	add_filter( 'image_editor_output_format', __NAMESPACE__ . '\\no_conversion', PHP_INT_MAX );
+
+	try {
+		$saved = $editor->save( $path, 'image/jpeg' );
+	} finally {
+		remove_filter( 'image_editor_output_format', __NAMESPACE__ . '\\no_conversion', PHP_INT_MAX );
+	}
+
+	return is_wp_error( $saved ) ? $saved : true;
+}
+
+/**
+ * Maps no image type to another, for strip_metadata()'s save.
+ *
+ * @return array<string, string> No conversions.
+ */
+function no_conversion(): array {
+	return [];
+}
+
+/**
+ * Limits image editing to GD, for strip_metadata().
+ *
+ * @param string[] $editors Editor class names, in order of preference.
+ * @return string[] GD's alone.
+ */
+function gd_only( array $editors ): array {
+	return array_values( array_intersect( $editors, [ 'WP_Image_Editor_GD' ] ) );
 }
 
 /**
@@ -116,8 +274,50 @@ function attach( array $upload, WP_Post $result ): int|WP_Error {
 	}
 
 	wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
+	wp_cache_delete( (string) $result->ID, CACHE_GROUP );
 
 	return $attachment_id;
+}
+
+/**
+ * Finds the screenshots of many results in one query, so of() then reads each from the request's cache.
+ *
+ * For a list of results, which would otherwise query once a row.
+ *
+ * @param int[] $result_ids Result IDs.
+ * @return void
+ */
+function prime( array $result_ids ): void {
+	if ( $result_ids === [] ) {
+		return;
+	}
+
+	$found = array_fill_keys( $result_ids, 0 );
+	// Newest first, as of() takes the newest, so the first one seen for a result is the one kept.
+	$query = new WP_Query(
+		[
+			'post_type'       => 'attachment',
+			'post_status'     => 'inherit',
+			'post_mime_type'  => 'image',
+			'post_parent__in' => $result_ids,
+			// Every one: a result with two images would otherwise use another's place, and that one would be cached
+			// as having none. Bounded by the results asked for, a page of the list.
+			'posts_per_page'  => -1,
+			'orderby'         => 'date',
+			'order'           => 'DESC',
+			'no_found_rows'   => true,
+		]
+	);
+
+	foreach ( $query->posts as $attachment ) {
+		if ( $attachment instanceof WP_Post && ( $found[ $attachment->post_parent ] ?? null ) === 0 ) {
+			$found[ $attachment->post_parent ] = $attachment->ID;
+		}
+	}
+
+	foreach ( $found as $result_id => $attachment_id ) {
+		wp_cache_set( (string) $result_id, $attachment_id, CACHE_GROUP );
+	}
 }
 
 /**
@@ -127,6 +327,14 @@ function attach( array $upload, WP_Post $result ): int|WP_Error {
  * @return WP_Post|null Attachment.
  */
 function of( WP_Post $result ): ?WP_Post {
+	$cached = wp_cache_get( (string) $result->ID, CACHE_GROUP );
+
+	if ( is_int( $cached ) ) {
+		$attachment = $cached === 0 ? null : get_post( $cached );
+
+		return $attachment instanceof WP_Post ? $attachment : null;
+	}
+
 	$attachments = get_children(
 		[
 			'post_parent'    => $result->ID,
@@ -207,6 +415,8 @@ function delete_with_result( int $post_id, WP_Post $post ): void {
 	foreach ( $attachment_ids as $attachment_id ) {
 		wp_delete_attachment( (int) $attachment_id, true );
 	}
+
+	wp_cache_delete( (string) $post_id, CACHE_GROUP );
 }
 
 /**

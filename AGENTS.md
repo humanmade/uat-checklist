@@ -156,6 +156,16 @@ member who can record, Subscribers included, because core's media route would ne
 type check is tested in `tests/e2e/` and not in `tests/wp/`. `Screenshots\delete_with_result()` deletes it on
 `before_delete_post`: core would otherwise move it to the checklist and orphan the file.
 
+Uploads are capped at `Screenshots\max_bytes()` each and `Screenshots\daily_limit()` per tester, counted from the
+attachments' `post_date_gmt` as the rate limit counts results, so nothing extra is stored. `Screenshots\store()`
+rewrites a JPEG through GD alone (`strip_metadata()`): Imagick, core's first choice, keeps EXIF when it saves an image
+at its own size, and only strips it when it resizes. wp-env has no usable Imagick, so the tests cannot tell the two
+apart; keep the GD-only filter. It also turns `image_editor_output_format` off for that save, at `PHP_INT_MAX`:
+core converts on save whatever that filter maps, so a JPEG-to-WebP plugin would leave the JPEG and its EXIF as the
+attached file. A JPEG is refused without the exif extension, because core then skips the turn upright and the
+rewrite would store a portrait photo sideways; wp-env has the extension, so that branch is untested. The Results list primes every row's screenshot in one query (`Screenshots\prime()`),
+cached for the request; `attach()` and `delete_with_result()` clear a result's entry.
+
 Stored comments, notes and step text are HTML-safe, not raw: `sanitize_textarea_field()` stores a lone `<` as
 `&lt;`, and kses stores `&` as `&amp;` for a user without `unfiltered_html`. HTML output escapes them, and
 `esc_html()` does not encode them twice. Anything shown as text (an email, JSON the panel sets as `textContent`,

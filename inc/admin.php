@@ -81,6 +81,7 @@ function bootstrap(): void {
 	add_action( 'restrict_manage_posts', __NAMESPACE__ . '\\render_checklist_filter' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\filter_by_checklist' );
 	add_action( 'load-edit.php', __NAMESPACE__ . '\\label_notes' );
+	add_action( 'load-edit.php', __NAMESPACE__ . '\\watch_list_query' );
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\style_results_list' );
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue_mark_fixed' );
 	add_filter( 'post_row_actions', __NAMESPACE__ . '\\row_actions', 10, 2 );
@@ -184,6 +185,32 @@ function label_notes(): void {
 	if ( get_current_screen()?->post_type === Results\POST_TYPE ) {
 		add_filter( 'the_title', __NAMESPACE__ . '\\note_title', 10, 2 );
 	}
+}
+
+/**
+ * On the results list only, finds the listed results' screenshots once the list's query has run.
+ *
+ * @return void
+ */
+function watch_list_query(): void {
+	if ( get_current_screen()?->post_type === Results\POST_TYPE ) {
+		add_filter( 'the_posts', __NAMESPACE__ . '\\prime_screenshots', 10, 2 );
+	}
+}
+
+/**
+ * Finds the screenshots of the list's results in one query, rather than one a row in the Screenshot column.
+ *
+ * @param WP_Post[] $posts Posts the query found.
+ * @param WP_Query  $query Query.
+ * @return WP_Post[] The same posts.
+ */
+function prime_screenshots( array $posts, WP_Query $query ): array {
+	if ( $query->is_main_query() ) {
+		Screenshots\prime( array_map( 'intval', wp_list_pluck( $posts, 'ID' ) ) );
+	}
+
+	return $posts;
 }
 
 /**

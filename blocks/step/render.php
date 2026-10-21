@@ -185,7 +185,7 @@ if ( $can_record ) {
 		esc_html__( 'Save result', 'uat-checklist' ),
 		$saved && ! $is_retest ? esc_html( Results\describe( $saved ) ) : '',
 		esc_html__( 'Turn on JavaScript to record a result.', 'uat-checklist' ),
-		wp_max_upload_size(),
+		Screenshots\max_bytes(),
 		esc_attr( $screenshot_id ),
 		esc_html__( 'Screenshot', 'uat-checklist' ),
 		esc_attr( Screenshots\FIELD ),
@@ -195,7 +195,7 @@ if ( $can_record ) {
 			sprintf(
 				/* translators: %s: the largest file size the site accepts, such as 2 MB. */
 				__( 'Optional. A JPEG, PNG, GIF or WebP image of up to %s.', 'uat-checklist' ),
-				size_format( wp_max_upload_size() )
+				size_format( Screenshots\max_bytes() )
 			)
 		),
 		esc_html__( 'Remove screenshot', 'uat-checklist' ),

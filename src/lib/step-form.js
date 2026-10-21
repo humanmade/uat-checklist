@@ -302,8 +302,11 @@ export default function bindStepForms(root) {
 				input.focus();
 			}
 		);
-		// A save resets the form, which empties the file field but leaves the preview.
-		form.addEventListener('reset', () => clearPreview(form));
+		// A save resets the form, which empties the file field but leaves the preview and any refusal of the file.
+		form.addEventListener('reset', () => {
+			input.removeAttribute('aria-invalid');
+			clearPreview(form);
+		});
 		form.addEventListener('submit', (event) => {
 			event.preventDefault();
 			save(form);

@@ -198,6 +198,8 @@ A plain CSS rule works too, since any class selector outranks `:where()`:
 | `hm_uat_checklist_guide_slug`              | Slug of the guide to the panel   | `using-the-checklist`; empty turns the link off |
 | `hm_uat_checklist_window_hidden_selectors` | Selectors hidden in the pop-out  | The block theme's header and footer             |
 | `hm_uat_checklist_staff_domains`           | Email domains of UAT managers    | `[ 'humanmade.com' ]`                           |
+| `hm_uat_checklist_screenshot_max_bytes`    | Largest screenshot, in bytes     | 20 MB; the site's upload limit when lower       |
+| `hm_uat_checklist_screenshot_daily_limit`  | Screenshots a tester can add a day | `50`                                          |
 
 ## The hub page and the guide
 
@@ -277,6 +279,13 @@ Additional comments use the status `uat-note`, one post per tester per checklist
 A screenshot sent with a result is an image attachment whose `post_parent` is the result and whose author is the
 tester, so it is listed in the Media Library. Deleting the result for good, alone or with its checklist, deletes the
 screenshot and its file.
+
+A screenshot can be up to 20 MB, or the site's upload limit when that is lower, and a tester can add 50 in a day; a
+filter changes each. Past the day's limit, the result can still be saved without one. A JPEG is saved again without
+its metadata, turned upright first, because a phone photo's EXIF holds where it was taken and the file's address
+opens without logging in. That needs PHP's GD and exif extensions: without either, a JPEG is refused and a PNG still
+works. A plugin that converts JPEGs to WebP, such as Performance Lab's Modern Image Formats, is set aside for that
+save, so the JPEG itself is rewritten.
 
 ## Restoring media after a database move
 

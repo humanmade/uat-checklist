@@ -44,6 +44,14 @@ test('the form refuses a file named as an image that is not one', async ({
 	await expect(step.locator('.uat-checklist__upload')).toHaveText(
 		'Add a screenshot'
 	);
+
+	// Saving without one clears the refusal, so the field does not stay marked invalid.
+	const file = step.locator('.uat-checklist__file');
+	await expect(file).toHaveAttribute('aria-invalid', 'true');
+	await step.getByLabel('Pass', { exact: true }).check();
+	await step.getByRole('button', { name: 'Save result' }).click();
+	await expect(step.locator('.uat-checklist__badge')).toHaveText('Pass');
+	await expect(file).not.toHaveAttribute('aria-invalid');
 });
 
 test('the route refuses a file that is not an image, and saves no result', async ({

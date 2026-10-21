@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T23:42:38+00:00\n"
+"POT-Creation-Date: 2026-10-21T03:47:01+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: uat-checklist\n"
@@ -68,7 +68,7 @@ msgid "Other testers"
 msgstr ""
 
 #: blocks/checklist/render.php:130
-#: inc/admin.php:207
+#: inc/admin.php:234
 #: inc/results.php:195
 msgid "Additional comments"
 msgstr ""
@@ -115,12 +115,12 @@ msgid "%1$s marked this Fail on %2$s: %3$s"
 msgstr ""
 
 #: blocks/step/render.php:178
-#: inc/admin.php:237
+#: inc/admin.php:264
 msgid "Result"
 msgstr ""
 
 #: blocks/step/render.php:181
-#: inc/admin.php:238
+#: inc/admin.php:265
 msgid "Comment"
 msgstr ""
 
@@ -137,7 +137,7 @@ msgid "Turn on JavaScript to record a result."
 msgstr ""
 
 #: blocks/step/render.php:190
-#: inc/admin.php:239
+#: inc/admin.php:266
 #: blocks/step/edit.js:130
 #: blocks/step/edit.js:163
 msgid "Screenshot"
@@ -296,7 +296,7 @@ msgid "There is no checklist with that ID."
 msgstr ""
 
 #. translators: %s: a step ID.
-#: inc/abilities.php:786
+#: inc/abilities.php:787
 #, php-format
 msgid "Step id %s is not a step of this checklist, or is given twice. Leave the id out to add a new step."
 msgstr ""
@@ -317,121 +317,121 @@ msgstr ""
 msgid "Lets them write checklists, mark results fixed and trash them."
 msgstr ""
 
-#: inc/admin.php:236
+#: inc/admin.php:263
 msgid "Step"
 msgstr ""
 
-#: inc/admin.php:240
+#: inc/admin.php:267
 #: inc/checklists.php:57
 #: inc/overview.php:440
 #: src/panel.js:62
 msgid "Checklist"
 msgstr ""
 
-#: inc/admin.php:241
+#: inc/admin.php:268
 msgid "By"
 msgstr ""
 
-#: inc/admin.php:242
+#: inc/admin.php:269
 msgid "Last saved"
 msgstr ""
 
-#: inc/admin.php:297
+#: inc/admin.php:324
 msgid "(checklist deleted)"
 msgstr ""
 
-#: inc/admin.php:329
+#: inc/admin.php:356
 #: inc/checklists.php:61
 msgid "Edit checklist"
 msgstr ""
 
-#: inc/admin.php:339
+#: inc/admin.php:366
 msgid "View instructions"
 msgstr ""
 
-#: inc/admin.php:384
+#: inc/admin.php:411
 msgid "All checklists"
 msgstr ""
 
-#: inc/admin.php:400
+#: inc/admin.php:427
 msgid "Filter by checklist"
 msgstr ""
 
-#: inc/admin.php:410
+#: inc/admin.php:437
 msgid "Latest result on each step only"
 msgstr ""
 
-#: inc/admin.php:535
-#: inc/admin.php:550
-#: inc/admin.php:603
-#: inc/admin.php:655
+#: inc/admin.php:562
+#: inc/admin.php:577
+#: inc/admin.php:630
+#: inc/admin.php:682
 msgid "Mark fixed"
 msgstr ""
 
-#: inc/admin.php:566
+#: inc/admin.php:593
 msgid "Only a Fail that is still the latest result on its step can be marked fixed."
 msgstr ""
 
 #. translators: 1: the tester's name, 2: when they saved the Fail.
-#: inc/admin.php:589
+#: inc/admin.php:616
 #, php-format
 msgid "Failed by %1$s on %2$s."
 msgstr ""
 
 #. translators: 1: the tester's name, 2: when they saved the Fail, 3: the checklist's title.
-#: inc/admin.php:595
+#: inc/admin.php:622
 #, php-format
 msgid "Failed by %1$s on %2$s, in %3$s."
 msgstr ""
 
-#: inc/admin.php:612
+#: inc/admin.php:639
 msgid "Their comment"
 msgstr ""
 
-#: inc/admin.php:621
+#: inc/admin.php:648
 msgid "Their screenshot"
 msgstr ""
 
-#: inc/admin.php:629
+#: inc/admin.php:656
 msgid "Open full size"
 msgstr ""
 
-#: inc/admin.php:629
-#: inc/screenshots.php:180
+#: inc/admin.php:656
+#: inc/screenshots.php:388
 msgid "(opens in a new tab)"
 msgstr ""
 
-#: inc/admin.php:641
+#: inc/admin.php:668
 msgid "Note for testers"
 msgstr ""
 
-#: inc/admin.php:649
+#: inc/admin.php:676
 msgid "Optional. Testers see it when they retest the step, and the tester who failed it is emailed the note."
 msgstr ""
 
-#: inc/admin.php:652
+#: inc/admin.php:679
 msgid "Don't send email notification"
 msgstr ""
 
-#: inc/admin.php:656
+#: inc/admin.php:683
 msgid "Cancel"
 msgstr ""
 
-#: inc/admin.php:681
+#: inc/admin.php:708
 msgid "You cannot mark results fixed."
 msgstr ""
 
 #. translators: %s: the most characters a note can hold.
-#: inc/admin.php:696
+#: inc/admin.php:723
 #, php-format
 msgid "The note can be at most %s characters."
 msgstr ""
 
-#: inc/admin.php:709
+#: inc/admin.php:736
 msgid "This step is no longer in the checklist."
 msgstr ""
 
-#: inc/admin.php:769
+#: inc/admin.php:796
 msgid "Marked fixed. Testers now see the step as Retest."
 msgstr ""
 
@@ -698,11 +698,17 @@ msgstr ""
 msgid "Too many results saved in the last minute. Wait a moment, then save again."
 msgstr ""
 
-#: inc/rest.php:330
+#. translators: %s: how many screenshots a tester can add in a day.
+#: inc/rest.php:306
+#, php-format
+msgid "You have added %s screenshots in the last day, the most a tester can. Save without one, or add it tomorrow."
+msgstr ""
+
+#: inc/rest.php:343
 msgid "The screenshot could not be saved."
 msgstr ""
 
-#: inc/rest.php:367
+#: inc/rest.php:380
 msgid "Comment removed."
 msgstr ""
 
@@ -822,13 +828,17 @@ msgid "Marked fixed by %1$s on %2$s."
 msgstr ""
 
 #. translators: %s: the largest file size the site accepts, such as 2 MB.
-#: inc/screenshots.php:72
+#: inc/screenshots.php:151
 #, php-format
 msgid "The screenshot is larger than %s. Choose a smaller image."
 msgstr ""
 
+#: inc/screenshots.php:174
+msgid "The screenshot could not be processed. Try a PNG instead."
+msgstr ""
+
 #. translators: %s: name of the tester who attached the screenshot.
-#: inc/screenshots.php:164
+#: inc/screenshots.php:372
 #, php-format
 msgid "Screenshot from %s"
 msgstr ""

@@ -685,15 +685,16 @@ function describe_failure( WP_Post $checklist, string $section, array $step, WP_
 /**
  * Marks a failed step fixed, through the same decision as the Results list's Mark fixed.
  *
- * @param array{result_id: int, note?: string, notify?: bool} $input Input.
+ * @param array{result_id: int|string, note?: string, notify?: bool|int|string} $input Input.
  * @return array{fixed_result_id: int, checklist_id: int, step_id: string}|WP_Error The Fixed result.
  */
 function mark_fixed( array $input ): array|WP_Error {
+	// The schema validates the input but does not convert it: "5" passes as an integer and "false" as a boolean.
 	$fixed = Admin\mark_fixed(
-		$input['result_id'],
+		absint( $input['result_id'] ),
 		get_current_user_id(),
 		sanitize_textarea_field( $input['note'] ?? '' ),
-		$input['notify'] ?? true
+		rest_sanitize_boolean( $input['notify'] ?? true )
 	);
 
 	if ( is_wp_error( $fixed ) ) {

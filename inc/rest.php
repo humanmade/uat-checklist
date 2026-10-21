@@ -296,7 +296,20 @@ function save_result( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		);
 	}
 
-	$file   = Screenshots\chosen_file( $request->get_file_params() );
+	$file = Screenshots\chosen_file( $request->get_file_params() );
+
+	if ( $file !== null && Screenshots\uploaded_today( get_current_user_id() ) >= Screenshots\daily_limit() ) {
+		return new WP_Error(
+			'hm_uat_checklist_screenshot_limited',
+			sprintf(
+				/* translators: %s: how many screenshots a tester can add in a day. */
+				__( 'You have added %s screenshots in the last day, the most a tester can. Save without one, or add it tomorrow.', 'uat-checklist' ),
+				number_format_i18n( Screenshots\daily_limit() )
+			),
+			[ 'status' => 429 ]
+		);
+	}
+
 	$upload = $file === null ? null : Screenshots\store( $file );
 
 	if ( is_wp_error( $upload ) ) {
