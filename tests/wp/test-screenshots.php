@@ -269,3 +269,132 @@ function hm_test_jpeg_with_exif(): string {
 		);
 	}
 )();
+
+echo "\nKeeping a saved result in the form\n";
+
+/**
+ * Returns the current tester's rendered step, as the panel loads it.
+ *
+ * @param int $checklist_id Checklist.
+ * @return string Markup.
+ */
+function hm_test_rendered_checklist( int $checklist_id ): string {
+	return (string) ( hm_test_rest( 'GET', "/uat-checklist/v1/checklists/{$checklist_id}" )->get_data()['html'] ?? '' );
+}
+
+(
+	static function (): void {
+		$step_id = wp_generate_uuid4();
+
+		hm_test_with_page(
+			[
+				'post_type'    => Checklists\POST_TYPE,
+				'post_title'   => 'Carry-over test checklist',
+				'post_content' => hm_test_checklist_markup( $step_id ),
+			],
+			static function ( int $checklist_id ) use ( $step_id ): void {
+				hm_test_as_user(
+					'subscriber',
+					static function ( int $tester ) use ( $checklist_id, $step_id ): void {
+						$failed = Results\save(
+							$checklist_id,
+							$tester,
+							$step_id,
+							'Add the block',
+							'fail',
+							sanitize_textarea_field( 'Total < 5 & rising' )
+						);
+						Screenshots\attach( hm_test_stored_png(), $failed );
+						$original = Screenshots\of( $failed );
+
+						$html = hm_test_rendered_checklist( $checklist_id );
+						check(
+							'the form opens with the latest comment, encoded once',
+							str_contains( $html, '>Total &lt; 5 &amp; rising</textarea>' ),
+							true
+						);
+						check( 'and its choice checked', str_contains( $html, 'value="fail" checked' ), true );
+						check(
+							'and its screenshot shown in the preview',
+							str_contains( $html, '<div class="uat-checklist__preview"><img src="' ),
+							true
+						);
+						check(
+							'and named for the next save to keep',
+							str_contains( $html, 'name="screenshot_from" value="' . $failed->ID . '"' ),
+							true
+						);
+
+						$uploads = Screenshots\uploaded_today( $tester );
+						$params  = [
+							'checklist_id' => $checklist_id,
+							'step_id'      => $step_id,
+							'status'       => 'fail',
+							'comment'      => 'Total < 5 & rising, and the total is wrong.',
+						];
+						$kept    = hm_test_rest( 'POST', '/uat-checklist/v1/results', $params + [ 'screenshot_from' => $failed->ID ] );
+						$update  = get_post( (int) ( $kept->get_data()['id'] ?? 0 ) );
+						$copy    = $update instanceof WP_Post ? Screenshots\of( $update ) : null;
+						check( 'an update saves as a new result', $update instanceof WP_Post && $update->ID !== $failed->ID, true );
+						check(
+							'and keeps the latest result\'s screenshot as a copy of its own',
+							[
+								$copy instanceof WP_Post,
+								$copy && $original && get_attached_file( $copy->ID ) !== get_attached_file( $original->ID ),
+								$copy ? (int) get_post_meta( $copy->ID, Screenshots\COPIED_FROM, true ) : 0,
+							],
+							[ true, true, $original->ID ?? 0 ]
+						);
+						check(
+							'and answers with the copy, for the next save to keep',
+							( $kept->get_data()['screenshot']['url'] ?? '' ) !== '',
+							true
+						);
+						check( 'a copy is not counted as an upload', Screenshots\uploaded_today( $tester ), $uploads );
+						check( 'the earlier result keeps its own screenshot', Screenshots\of( $failed )?->ID, $original->ID ?? 0 );
+
+						$stale        = hm_test_rest( 'POST', '/uat-checklist/v1/results', $params + [ 'screenshot_from' => $failed->ID ] );
+						$stale_result = get_post( (int) ( $stale->get_data()['id'] ?? 0 ) );
+						check(
+							'a form naming a result that is no longer the latest keeps no screenshot',
+							$stale_result instanceof WP_Post ? Screenshots\of( $stale_result ) : 'not saved',
+							null
+						);
+						check(
+							'and says so',
+							str_contains( (string) ( $stale->get_data()['message'] ?? '' ), 'Someone saved this step' ),
+							true
+						);
+
+						// Given one, so only the step's being marked fixed can stop it carrying over below.
+						Screenshots\attach( hm_test_stored_png(), $stale_result );
+						Results\save_fixed( $checklist_id, $tester, $step_id, 'Add the block', 'Mended.' );
+						$html = hm_test_rendered_checklist( $checklist_id );
+						check(
+							'once marked fixed, the form starts blank for the retest',
+							[
+								str_contains( $html, '></textarea>' ),
+								str_contains( $html, ' checked' ),
+								str_contains( $html, 'name="screenshot_from" value=""' ),
+								str_contains( $html, '<div class="uat-checklist__preview" hidden>' ),
+							],
+							[ true, false, true, true ]
+						);
+
+						$retest = hm_test_rest(
+							'POST',
+							'/uat-checklist/v1/results',
+							[ 'status' => 'pass' ] + $params + [ 'screenshot_from' => $stale_result->ID ?? 0 ]
+						);
+						$retest_result = get_post( (int) ( $retest->get_data()['id'] ?? 0 ) );
+						check(
+							'and a retest naming the Fail before the fix keeps no screenshot',
+							$retest_result instanceof WP_Post ? Screenshots\of( $retest_result ) : 'not saved',
+							null
+						);
+					}
+				);
+			}
+		);
+	}
+)();

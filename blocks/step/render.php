@@ -93,8 +93,11 @@ $saved      = $history[0] ?? null;
 $result     = $saved ? Results\result_for_status( $saved->post_status ) : '';
 $is_retest  = $result === 'fixed';
 
-// The form is never filled in: every save is a new result, so a step starts blank however often it was tested.
-$notice = '';
+// The form opens filled in from the latest Pass or Fail, so a tester can add to it; a save is still a new result.
+// Once the latest is Fixed, it starts blank for the retest, and the notice shows the Fail.
+$filled         = $saved && ! $is_retest ? $saved : null;
+$saved_preview  = $filled ? Screenshots\preview_url( $filled ) : '';
+$notice         = '';
 
 if ( $saved && $is_retest ) {
 	$failure = Results\last_failure( $history );
@@ -140,9 +143,10 @@ if ( $can_record ) {
 	foreach ( array_keys( Results\STATUSES ) as $value ) {
 		$choices .= sprintf(
 			'<label class="uat-checklist__choice uat-checklist__choice--%1$s">'
-				. '<input type="radio" name="result" value="%1$s"> %2$s</label>',
+				. '<input type="radio" name="result" value="%1$s"%3$s> %2$s</label>',
 			esc_attr( $value ),
-			esc_html( Results\label( $value ) )
+			esc_html( Results\label( $value ) ),
+			$filled && $value === $result ? ' checked' : ''
 		);
 	}
 
@@ -157,12 +161,14 @@ if ( $can_record ) {
 			. '<legend class="uat-checklist__label">%3$s</legend>%4$s</fieldset>'
 			. '<label class="uat-checklist__label" for="%5$s">%6$s</label>'
 			. '<textarea class="uat-checklist__comment" id="%5$s" name="comment" rows="2" maxlength="%7$d"'
-			. ' aria-describedby="%8$s"></textarea>'
+			. ' aria-describedby="%8$s">%22$s</textarea>'
 			. '<p class="uat-checklist__hint" id="%8$s">%9$s</p>'
 			. '<div class="uat-checklist__attach">'
 			. '<span class="uat-checklist__label">%15$s</span>'
-			. '<div class="uat-checklist__preview" hidden>'
+			. '<div class="uat-checklist__preview"%23$s>%24$s'
 			. '<button type="button" class="uat-checklist__remove">%20$s</button></div>'
+			// Names the result whose screenshot the preview shows, for the server to copy when no new file is chosen.
+			. '<input type="hidden" name="screenshot_from" value="%25$s">'
 			// The input stays in the page, focusable, so keyboard and screen readers use the native control.
 			. '<input type="file" class="uat-checklist__file" id="%14$s" name="%16$s" accept="%17$s" aria-describedby="%18$s">'
 			. '<label class="uat-checklist__upload" for="%14$s">%21$s</label>'
@@ -199,7 +205,16 @@ if ( $can_record ) {
 			)
 		),
 		esc_html__( 'Remove screenshot', 'uat-checklist' ),
-		esc_html__( 'Add a screenshot', 'uat-checklist' )
+		$saved_preview !== ''
+			? esc_html__( 'Replace screenshot', 'uat-checklist' )
+			: esc_html__( 'Add a screenshot', 'uat-checklist' ),
+		// Decoded first: the comment is stored HTML-safe, and esc_textarea() would encode its entities a second time.
+		$filled ? esc_textarea( Results\plain_text( $filled->post_content ) ) : '',
+		$saved_preview !== '' ? '' : ' hidden',
+		$filled && $saved_preview !== ''
+			? sprintf( '<img src="%1$s" alt="%2$s">', esc_url( $saved_preview ), esc_attr( Screenshots\alt_text( $filled ) ) )
+			: '',
+		$filled && $saved_preview !== '' ? esc_attr( (string) $filled->ID ) : ''
 	);
 }
 

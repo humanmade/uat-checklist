@@ -216,10 +216,20 @@ export async function saveResult(page, stepId, result, comment = '') {
 
 	await choice.check();
 	await step.getByLabel('Comment').fill(comment);
+	const saved = page.waitForResponse(
+		(response) =>
+			decodeURIComponent(response.url()).includes(
+				'uat-checklist/v1/results'
+			) && response.request().method() === 'POST'
+	);
 	await step.getByRole('button', { name: 'Save result' }).click();
+	await saved;
+	// The badge alone may already read the result from an earlier save. The button is busy until this one lands, and
+	// the step is updated in the same turn it is freed.
+	await expect(step.locator('.uat-checklist__save')).not.toHaveAttribute(
+		'aria-disabled'
+	);
 	await expect(step.locator('.uat-checklist__badge')).toHaveText(result);
-	// The badge alone may already read the result from an earlier save; the form resets only once this one lands.
-	await expect(choice).not.toBeChecked();
 }
 
 /**

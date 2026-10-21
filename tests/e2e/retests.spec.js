@@ -30,10 +30,29 @@ test('a fixed Fail is listed as ready to retest, opens its step, and leaves once
 	]);
 	const retests = panel(page).locator('.uat-panel__retests');
 	const entry = retests.getByRole('button', { name: /Press the button/ });
+	const listRequests = [];
+	page.on('request', (request) => {
+		if (
+			decodeURIComponent(request.url()).includes(
+				'uat-checklist/v1/retests'
+			)
+		) {
+			listRequests.push(request);
+		}
+	});
 
 	await openChecklist(page, id);
+	// The panel's own load is issued before the checklist's, which openChecklist() waited on, so it is counted.
+	const loadsBeforeSave = listRequests.length;
+	expect(loadsBeforeSave).toBeGreaterThan(0);
 	await saveResult(page, stepId, 'Fail', 'Nothing happens.');
-	await expect(retests).toHaveCount(0);
+	// An empty list renders nothing, so no element shows the refresh after the save has landed: its answer is read
+	// instead.
+	await expect
+		.poll(() => listRequests.length)
+		.toBeGreaterThan(loadsBeforeSave);
+	const refreshed = await listRequests[loadsBeforeSave].response();
+	expect(await refreshed.json()).toEqual([]);
 
 	await markFixed(browser, id, 'Press the button', 'Wired up the handler.');
 

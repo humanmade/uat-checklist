@@ -11,6 +11,8 @@ const FORM = '.uat-checklist__result';
 const ROUTE = '/uat-checklist/v1/results';
 // Mirrors Screenshots\FIELD in inc/screenshots.php.
 const SCREENSHOT_FIELD = 'screenshot';
+// Names the result whose screenshot the preview shows; blocks/step/render.php prints it.
+const FROM_FIELD = 'screenshot_from';
 const PREVIEW = '.uat-checklist__preview';
 const UPLOAD = '.uat-checklist__upload';
 
@@ -117,6 +119,8 @@ function screenshotProblem(input, file, max) {
 /**
  * Removes the screenshot preview, frees its image, and sets the upload button back to adding one.
  *
+ * The saved screenshot goes with it, so the next save does not carry it over.
+ *
  * @param {HTMLFormElement} form Step result form.
  */
 function clearPreview(form) {
@@ -128,6 +132,7 @@ function clearPreview(form) {
 		image.remove();
 	}
 
+	form.elements[FROM_FIELD].value = '';
 	preview.hidden = true;
 	form.querySelector(UPLOAD).textContent = __(
 		'Add a screenshot',
@@ -151,31 +156,28 @@ function refuse(form, message) {
 }
 
 /**
- * Shows a chosen screenshot full width above the upload button, which then offers to replace it.
+ * Shows a screenshot full width above the upload button, which then offers to replace it.
  *
  * @param {HTMLFormElement} form Step result form.
- * @param {File}            file Chosen image.
+ * @param {string}          src  Image address.
+ * @param {string}          alt  Alternative text.
+ * @return {HTMLImageElement} The image shown.
  */
-function showPreview(form, file) {
+function showPreview(form, src, alt) {
 	const preview = form.querySelector(PREVIEW);
 	const image = form.ownerDocument.createElement('img');
 
 	clearPreview(form);
-	// The type checked so far comes from the file's name; an image the browser cannot draw is not one.
-	image.addEventListener('error', () =>
-		refuse(
-			form,
-			__('Choose a JPEG, PNG, GIF or WebP image.', 'uat-checklist')
-		)
-	);
-	image.src = window.URL.createObjectURL(file);
-	image.alt = __('The screenshot you chose', 'uat-checklist');
+	image.src = src;
+	image.alt = alt;
 	preview.prepend(image);
 	preview.hidden = false;
 	form.querySelector(UPLOAD).textContent = __(
 		'Replace screenshot',
 		'uat-checklist'
 	);
+
+	return image;
 }
 
 /**
@@ -206,7 +208,19 @@ function choose(form) {
 		return;
 	}
 
-	showPreview(form, file);
+	const image = showPreview(
+		form,
+		window.URL.createObjectURL(file),
+		__('The screenshot you chose', 'uat-checklist')
+	);
+
+	// The type checked so far comes from the file's name; an image the browser cannot draw is not one.
+	image.addEventListener('error', () =>
+		refuse(
+			form,
+			__('Choose a JPEG, PNG, GIF or WebP image.', 'uat-checklist')
+		)
+	);
 }
 
 /**
@@ -244,6 +258,7 @@ async function save(form) {
 
 	// Already checked when it was chosen, by choose().
 	const file = form.elements[SCREENSHOT_FIELD].files[0];
+	const from = form.elements[FROM_FIELD].value;
 	const body = new window.FormData();
 	body.append('checklist_id', form.dataset.checklistId);
 	body.append('step_id', form.dataset.stepId);
@@ -252,6 +267,8 @@ async function save(form) {
 
 	if (file) {
 		body.append(SCREENSHOT_FIELD, file);
+	} else if (from) {
+		body.append(FROM_FIELD, from);
 	}
 
 	const response = await post(
@@ -274,9 +291,19 @@ async function save(form) {
 	step.dataset.result = response.status;
 	badge.textContent = response.label;
 	badge.hidden = false;
-	// A save is a new result, so the retest notice is stale and the form starts blank, as after a reload.
+	// A save is a new result, so the retest notice is stale. The form keeps what was saved, as after a reload, with
+	// the file field emptied so the screenshot is carried over rather than sent again.
 	step.querySelector('.uat-checklist__retest')?.remove();
-	form.reset();
+	form.elements[SCREENSHOT_FIELD].value = '';
+	form.elements[SCREENSHOT_FIELD].removeAttribute('aria-invalid');
+
+	if (response.screenshot) {
+		showPreview(form, response.screenshot.url, response.screenshot.alt);
+		form.elements[FROM_FIELD].value = String(response.id);
+	} else {
+		clearPreview(form);
+	}
+
 	syncRequired(form);
 	step.dispatchEvent(new window.CustomEvent(SAVED_EVENT, { bubbles: true }));
 }
@@ -302,11 +329,6 @@ export default function bindStepForms(root) {
 				input.focus();
 			}
 		);
-		// A save resets the form, which empties the file field but leaves the preview and any refusal of the file.
-		form.addEventListener('reset', () => {
-			input.removeAttribute('aria-invalid');
-			clearPreview(form);
-		});
 		form.addEventListener('submit', (event) => {
 			event.preventDefault();
 			save(form);
