@@ -15,7 +15,9 @@ namespace HM\UAT_Checklist\Panel;
 use HM\UAT_Checklist;
 use HM\UAT_Checklist\Blocks;
 use HM\UAT_Checklist\Checklists;
+use HM\UAT_Checklist\Reports;
 use HM\UAT_Checklist\Results;
+use HM\UAT_Checklist\Screenshots;
 use HM\UAT_Checklist\Styles;
 use WP_Admin_Bar;
 use WP_Block_Type;
@@ -25,6 +27,8 @@ use WP_Query;
 defined( 'ABSPATH' ) || exit;
 
 const HANDLE = 'uat-checklist-panel';
+
+const REPORT_HANDLE = 'uat-checklist-report';
 
 const NODE_ID = 'uat-checklist';
 
@@ -55,6 +59,8 @@ function bootstrap(): void {
 	add_action( 'admin_bar_menu', __NAMESPACE__ . '\\add_guide_node', 82 );
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue' );
+	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue_report' );
+	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_report' );
 	add_action( 'admin_print_styles', __NAMESPACE__ . '\\print_admin_font_faces' );
 }
 
@@ -66,6 +72,39 @@ function bootstrap(): void {
 function should_load(): bool {
 	return Results\can_record()
 		&& file_exists( UAT_Checklist\PATH . 'build/panel.asset.php' );
+}
+
+/**
+ * Returns whether the Report an issue dialog loads: for anyone who may submit a report, whether or not the panel
+ * loads for them, once the build exists.
+ *
+ * Not in the pop-out window, which cannot tell which page is under test, and not on a block editor screen the panel
+ * does not load on, where the top-right button would be all there is to show and it would sit over the editor's
+ * own toolbar.
+ *
+ * @return bool Whether to load.
+ */
+function report_should_load(): bool {
+	return Reports\can_submit()
+		&& file_exists( UAT_Checklist\PATH . 'build/report.asset.php' )
+		&& ! Blocks\is_window_view()
+		&& ( should_load() || ! is_editor_screen() );
+}
+
+/**
+ * Returns whether this is a block editor or site editor screen, whose toolbar sits where the Report an issue
+ * button would.
+ *
+ * @return bool Whether this is an editor screen.
+ */
+function is_editor_screen(): bool {
+	if ( ! is_admin() ) {
+		return false;
+	}
+
+	$screen = get_current_screen();
+
+	return $screen !== null && ( $screen->is_block_editor() || $screen->base === 'site-editor' );
 }
 
 /**
@@ -208,14 +247,16 @@ function published_page_id( string $slug, int $parent_id ): int {
 }
 
 /**
- * Prints the theme's @font-face rules in wp-admin, so the panel is set in the same face as on the front end.
+ * Prints the theme's @font-face rules in wp-admin, so the panel and the report dialog are set in the same face as on
+ * the front end.
  *
- * The rules only declare the face: the browser downloads a file when the panel's text needs it.
+ * The rules only declare the face: the browser downloads a file when the panel's text needs it. A user who gets only
+ * the report button needs them too, as the button is on screen from the start and is set in the theme's face.
  *
  * @return void
  */
 function print_admin_font_faces(): void {
-	if ( should_load() ) {
+	if ( should_load() || report_should_load() ) {
 		wp_print_font_faces();
 	}
 }
@@ -249,7 +290,7 @@ function enqueue(): void {
 
 	wp_add_inline_script(
 		HANDLE,
-		'window.hmUatChecklist = ' . wp_json_encode( [ 'current' => current_checklist() ] ) . ';',
+		inline_data( [ 'current' => current_checklist() ] ),
 		'before'
 	);
 
@@ -266,6 +307,82 @@ function enqueue(): void {
 	if ( $variables !== '' ) {
 		wp_add_inline_style( HANDLE, $variables );
 	}
+}
+
+/**
+ * Enqueues the Report an issue script and stylesheet.
+ *
+ * @return void
+ */
+function enqueue_report(): void {
+	if ( ! report_should_load() ) {
+		return;
+	}
+
+	// phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant -- this plugin's own build manifest, existence checked in report_should_load().
+	$asset = require UAT_Checklist\PATH . 'build/report.asset.php';
+
+	wp_enqueue_script(
+		REPORT_HANDLE,
+		plugins_url( 'build/report.js', UAT_Checklist\FILE ),
+		$asset['dependencies'],
+		$asset['version'],
+		[
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		]
+	);
+
+	wp_set_script_translations( REPORT_HANDLE, 'uat-checklist' );
+
+	wp_add_inline_script( REPORT_HANDLE, inline_data( [ 'report' => report_data() ] ), 'before' );
+
+	wp_enqueue_style(
+		REPORT_HANDLE,
+		plugins_url( 'build/report.css', UAT_Checklist\FILE ),
+		[ Styles\HANDLE ],
+		$asset['version']
+	);
+
+	// The panel's stylesheet carries these when it loads too; a user it does not load for needs them here.
+	$variables = is_admin() && ! should_load() ? scoped_theme_variables() : '';
+
+	if ( $variables !== '' ) {
+		wp_add_inline_style( REPORT_HANDLE, $variables );
+	}
+}
+
+/**
+ * Returns the script that adds data to `window.hmUatChecklist`, which the panel and the report dialog share.
+ *
+ * Merged rather than assigned, so neither script's data depends on which prints first.
+ *
+ * @param array<string, mixed> $data Data to add.
+ * @return string Inline script.
+ */
+function inline_data( array $data ): string {
+	return 'window.hmUatChecklist = Object.assign( window.hmUatChecklist || {}, ' . wp_json_encode( $data ) . ' );';
+}
+
+/**
+ * Returns what the report dialog shows and checks: the screen's page, the signed-in user and the limits.
+ *
+ * The address and title the report records are read from the browser when the dialog opens, which is also what it
+ * shows. Only the page's ID is the server's to give, and only on the front end: a wp-admin screen is not a post.
+ * `toggle` is whether the top-right button is added; the panel's footer opens the dialog wherever the panel loads.
+ *
+ * @return array{page: array{id: int}, user: string, toggle: bool, maxBytes: int, maxSize: string, maxLength: int, maxTitle: int} Report data.
+ */
+function report_data(): array {
+	return [
+		'page'      => [ 'id' => is_admin() ? 0 : get_queried_object_id() ],
+		'user'      => wp_get_current_user()->display_name,
+		'toggle'    => ! is_editor_screen(),
+		'maxBytes'  => Screenshots\max_bytes(),
+		'maxSize'   => size_format( Screenshots\max_bytes() ),
+		'maxLength' => Reports\DESCRIPTION_MAX_LENGTH,
+		'maxTitle'  => Reports\PAGE_TITLE_MAX_LENGTH,
+	];
 }
 
 /**

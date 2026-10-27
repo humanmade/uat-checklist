@@ -1,10 +1,10 @@
 <?php
 /**
- * A tester's screenshot on a result: sent with Save result, stored as an image attachment whose parent is the
- * result, shown beside the result's comment, and deleted with the result.
+ * A tester's screenshot on a result or an issue report: sent with Save result or the report form, stored as an image
+ * attachment whose parent is the result or report, shown beside a result's comment, and deleted with its parent.
  *
  * Testers are often Subscribers, who cannot use the Media Library, so the upload is taken here rather than by core's
- * media route, and only by the panel's result route, under its rate limit. Only images are accepted, checked by
+ * media route, and only by the panel's result and report routes, under their rate limits. Only images are accepted, checked by
  * their content as well as their name. Each is capped in size, a tester's uploads are capped per day, and a JPEG's
  * metadata is stripped, since a phone photo carries where it was taken and the file's address is public.
  *
@@ -15,6 +15,7 @@ declare( strict_types = 1 );
 
 namespace HM\UAT_Checklist\Screenshots;
 
+use HM\UAT_Checklist\Reports;
 use HM\UAT_Checklist\Results;
 use WP_Error;
 use WP_Post;
@@ -104,10 +105,10 @@ function daily_limit(): int {
 }
 
 /**
- * Counts the screenshots a user has uploaded to results in the last day.
+ * Counts the screenshots a user has uploaded to results and reports in the last day.
  *
- * Counted from the attachments themselves, as the rate limit counts results. A screenshot carried over to a new result
- * is not counted: the tester chose no file.
+ * Counted from the attachments themselves, as the rate limits count results and reports. A screenshot carried over to a
+ * new result is not counted: the tester chose no file.
  *
  * @param int $user_id User ID.
  * @return int Screenshots.
@@ -119,14 +120,15 @@ function uploaded_today( int $user_id ): int {
 	return (int) $wpdb->get_var(
 		$wpdb->prepare(
 			"SELECT COUNT(*) FROM {$wpdb->posts} AS screenshot
-			INNER JOIN {$wpdb->posts} AS result ON result.ID = screenshot.post_parent
+			INNER JOIN {$wpdb->posts} AS owner ON owner.ID = screenshot.post_parent
 			LEFT JOIN {$wpdb->postmeta} AS copied ON copied.post_id = screenshot.ID AND copied.meta_key = %s
 			WHERE screenshot.post_type = 'attachment' AND screenshot.post_author = %d
-			AND screenshot.post_date_gmt >= %s AND result.post_type = %s AND copied.meta_id IS NULL",
+			AND screenshot.post_date_gmt >= %s AND owner.post_type IN ( %s, %s ) AND copied.meta_id IS NULL",
 			COPIED_FROM,
 			$user_id,
 			gmdate( 'Y-m-d H:i:s', time() - DAY_WINDOW ),
-			Results\POST_TYPE
+			Results\POST_TYPE,
+			Reports\POST_TYPE
 		)
 	);
 }
@@ -255,10 +257,10 @@ function gd_only( array $editors ): array {
 }
 
 /**
- * Records a stored screenshot as an image attachment of a result, with its smaller sizes made.
+ * Records a stored screenshot as an image attachment of a result or report, with its smaller sizes made.
  *
  * @param array{file: string, url: string, type: string} $upload The stored file.
- * @param WP_Post                                         $result Result.
+ * @param WP_Post                                         $result Result or report.
  * @return int|WP_Error Attachment ID.
  */
 function attach( array $upload, WP_Post $result ): int|WP_Error {
@@ -365,11 +367,11 @@ function alt_text( WP_Post $result ): string {
 }
 
 /**
- * Finds the screenshots of many results in one query, so of() then reads each from the request's cache.
+ * Finds the screenshots of many results or reports in one query, so of() then reads each from the request's cache.
  *
- * For a list of results, which would otherwise query once a row.
+ * For a list of them, which would otherwise query once a row.
  *
- * @param int[] $result_ids Result IDs.
+ * @param int[] $result_ids Result or report IDs.
  * @return void
  */
 function prime( array $result_ids ): void {
@@ -406,9 +408,9 @@ function prime( array $result_ids ): void {
 }
 
 /**
- * Returns a result's screenshot, or null when it has none.
+ * Returns a result's or report's screenshot, or null when it has none.
  *
- * @param WP_Post $result Result.
+ * @param WP_Post $result Result or report.
  * @return WP_Post|null Attachment.
  */
 function of( WP_Post $result ): ?WP_Post {
@@ -471,17 +473,17 @@ function markup( WP_Post $result, string $size ): string {
 }
 
 /**
- * Deletes a result's screenshots, and their files, when the result is deleted for good.
+ * Deletes a result's or report's screenshots, and their files, when it is deleted for good.
  *
  * Without this, core would keep the attachments and move them to the checklist, leaving files no one can reach
- * from a result.
+ * from a result or report.
  *
  * @param int     $post_id Post being deleted.
  * @param WP_Post $post    Post being deleted.
  * @return void
  */
 function delete_with_result( int $post_id, WP_Post $post ): void {
-	if ( $post->post_type !== Results\POST_TYPE ) {
+	if ( ! in_array( $post->post_type, [ Results\POST_TYPE, Reports\POST_TYPE ], true ) ) {
 		return;
 	}
 

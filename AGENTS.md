@@ -160,7 +160,7 @@ screenshot along. `REST\save_result()` takes a new file through
 `Screenshots\store()` before saving the result, so a refused file stores nothing, and the route accepts it from any
 member who can record, Subscribers included, because core's media route would need `upload_files`.
 `wp_handle_upload()` checks the type by content, but only for a file that arrived in an HTTP POST, which is why the
-type check is tested in `tests/e2e/` and not in `tests/wp/`. `Screenshots\delete_with_result()` deletes it on
+type check is tested in `tests/e2e/` and not in `tests/wp/`. `Screenshots\delete_with_result()` deletes a result's or a report's screenshot on
 `before_delete_post`: core would otherwise move it to the checklist and orphan the file.
 
 Uploads are capped at `Screenshots\max_bytes()` each and `Screenshots\daily_limit()` per tester, counted from the
@@ -172,7 +172,7 @@ apart; keep the GD-only filter. It also turns `image_editor_output_format` off f
 core converts on save whatever that filter maps, so a JPEG-to-WebP plugin would leave the JPEG and its EXIF as the
 attached file. A JPEG is refused without the exif extension, because core then skips the turn upright and the
 rewrite would store a portrait photo sideways; wp-env has the extension, so that branch is untested. The Results list primes every row's screenshot in one query (`Screenshots\prime()`),
-cached for the request; `attach()` and `delete_with_result()` clear a result's entry.
+cached for the request; `attach()` and `delete_with_result()` clear a result's or a report's entry.
 
 Stored comments, notes and step text are HTML-safe, not raw: `sanitize_textarea_field()` stores a lone `<` as
 `&lt;`, and kses stores `&` as `&amp;` for a user without `unfiltered_html`. HTML output escapes them, and
@@ -212,19 +212,56 @@ Results are stored against `stepId`, a UUID assigned when a step is added: by th
 for a spec step with no id, and by the `save-checklist` ability. Rewording a step keeps its results. Never
 generate ids anywhere else, and never reuse one.
 
-### Abilities are for the MCP adapter, and none records a result
+### Abilities are for the MCP adapter, and none records a test result
 
-`inc/abilities.php` registers five abilities in the `uat-checklist` category. Each sets `meta.public`, which the
+`inc/abilities.php` registers five abilities in the `uat-checklist` category, and `inc/report-abilities.php` adds
+four for issue reports in the same category. Each sets `meta.public`, which the
 WordPress MCP adapter reads to list it, and `meta.show_in_rest` false, which keeps it off core's
-`/wp-abilities/v1` routes. All five are for Human Made only: `Abilities\can_use()` admits a user whose email is at a
+`/wp-abilities/v1` routes. All nine are for Human Made only: `Abilities\can_use()` admits a user whose email is at a
 staff domain and nobody else. The profile's full-access grant does not open them, and neither does the reading
 capability every Contributor holds: those let a client work in wp-admin, not hand the site to an AI assistant.
 None saves a Pass or a Fail. A result is a tester's judgement, and one an assistant recorded would read as theirs.
+`set-report-status` is the one write an assistant may make to a report, and it changes the status only: a report's
+Pending, Investigating or Done is the team's triage of a problem, not a tester's judgement, and a report is never
+a result.
 
 `save-checklist` replaces a checklist's whole content with the sections and steps it is given. A step keeps its
 `id`, and so its results, only when that id is already a step of the same checklist. Any other id is refused
 rather than replaced, because a mistyped id would otherwise start the step again with no results. A step with no
 id gets a new one. The instructions page is left as it was.
+
+### An issue report is a record, and any logged-in user can send one
+
+`inc/reports.php` owns the `uat_report` post type. A tester describes a problem that is not a checklist step, with an
+optional screenshot, from the button at the top right or from the panel's footer, and `POST uat-checklist/v1/reports`
+stores it as `pending`. Any logged-in user may send one (`Reports\can_submit()`), and the feature has no environment
+gate: it exists whenever the plugin is active. The block editor and the site editor get no top-right button, and the
+pop-out window gets none at all, because the page under test cannot be known from there.
+
+The three statuses are `pending` (core's), `uat-investigating` and `uat-done`. A report changes status and nothing
+else, so `Reports\set_status()` is the only writer. A `map_meta_cap` filter refuses edit, delete and publish to
+anyone without `CAP_MANAGE`, for the report and for its screenshot attachment (so core's media routes cannot delete
+it), and a `wp_insert_post_data` guard restores the title, content, author, date, slug and a status outside the three
+on any other update. `set_status()` sets the slug to the report's ID. Quick Edit and bulk Edit are hidden, so the guard only matters for a
+crafted request to core's `inline-save` or `edit.php`. Status changes go through REST, never `admin-post.php` or
+`admin-ajax.php`: `POST uat-checklist/v1/reports/{id}/status` and `POST uat-checklist/v1/reports/status` (up to 50
+ids), both manager-only, called from `src/report-admin.js` for the list's row and bulk actions and the edit screen's
+status control. A `post.php` save would make the saving triager the author, which is why `lock_edit_screen()`
+refuses a POST to it. Anyone who holds `CAP_READ` (managers, and users who can `edit_posts`, so Contributor and above,
+as for results) can read every report's full description and screenshot on the hidden `uat-report-view` page, and
+change nothing. A Subscriber can send a report and cannot open any. Use `Reports\find_report()` to look a report up: it refuses the trash
+and any status outside the three.
+
+That attachment guard is for reports only. A result's screenshot has none: no `map_meta_cap` filter covers an
+attachment whose parent is a result, so an Author-role tester or an Editor who is not a manager may be able to edit or
+delete it through core's media routes. This has not been tested for results. Widen `restrict_report_caps()` if
+results should be a record too.
+
+The description is stored HTML-encoded and returned decoded by `Reports\describe()`, so a report about `<button>`
+survives kses for users without `unfiltered_html`; read it through `describe()`, never from `post_content`. The
+page address is stored as scheme, host and path only: a query string or hash can hold a nonce or a login token.
+Reports and results share one daily screenshot limit per tester (`Screenshots\uploaded_today()` counts both), and
+the report limit is best effort on a site without a shared object cache.
 
 ### The hub and the guide are found by slug, and both are optional
 

@@ -133,6 +133,13 @@ $popup-width: 500px;
 		}
 	}
 
+	// A column, so the footer sits at the panel's bottom when the checklist is short. Not while hidden, which a
+	// display set here would override.
+	&:not( [hidden] ) {
+		display: flex;
+		flex-direction: column;
+	}
+
 	// Set by panel.js when the admin bar is not on screen.
 	&.uat-panel--no-admin-bar {
 		inset-block-start: 0;
@@ -291,6 +298,25 @@ $popup-width: 500px;
 
 .uat-panel__body {
 	padding: token( space-xl ) token( space-l );
+}
+
+// Pinned to the bottom of the panel: on the panel's floor when the checklist is short, over its scrolling content
+// when it is long. panel.js adds it only when the report dialog is loaded.
+.uat-panel__footer {
+	position: sticky;
+	z-index: 2;
+	inset-block-end: 0;
+	display: flex;
+	justify-content: flex-end;
+	margin-block-start: auto;
+	padding: token( space-s ) token( space-l );
+	border-block-start: 1px solid token( color-border );
+	background-color: token( color-background );
+}
+
+.uat-panel__report {
+
+	@include secondary-button;
 }
 
 .uat-panel__message {

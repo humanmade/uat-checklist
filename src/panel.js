@@ -18,6 +18,7 @@ import {
 	WINDOW_HASH,
 } from './lib/checklist';
 import bindNoteForms from './lib/note-form';
+import { bindReportOpener } from './lib/report-open';
 import {
 	fetchRetests,
 	openStep,
@@ -34,6 +35,8 @@ const OPEN_KEY = 'uat-checklist-open:';
 const LAST_KEY = 'uat-checklist:last-checklist';
 // The checklist inc/panel.php names for this screen, or '' when none belongs to it.
 const CURRENT = String(window.hmUatChecklist?.current || '');
+// Whether inc/panel.php loaded src/report.js, whose dialog the footer's button opens.
+const HAS_REPORT = !!window.hmUatChecklist?.report;
 // localStorage key set once a tester has seen the panel open, so it opens by itself only on their first visit.
 const SEEN_KEY = 'uat-checklist:seen';
 const ADMIN_BAR_ITEM = '#wp-admin-bar-uat-checklist > .ab-item';
@@ -79,6 +82,26 @@ function buildShell() {
 	panel.append(bar, retests, body);
 
 	return { panel, select, close, retests, body };
+}
+
+/**
+ * Builds the footer pinned to the bottom of the panel, holding the button that opens the report dialog.
+ *
+ * @return {HTMLElement} Footer.
+ */
+function buildReportFooter() {
+	const footer = document.createElement('div');
+	footer.className = 'uat-panel__footer';
+
+	const button = document.createElement('button');
+	button.type = 'button';
+	button.className = 'uat-panel__report';
+	button.textContent = __('Report an issue', 'uat-checklist');
+	bindReportOpener(button);
+
+	footer.append(button);
+
+	return footer;
 }
 
 /**
@@ -195,6 +218,11 @@ function init() {
 				: '';
 		});
 	}
+
+	if (HAS_REPORT) {
+		panel.append(buildReportFooter());
+	}
+
 	document.body.append(panel, floatingToggle);
 
 	// Two separate questions. The admin bar's own box decides the panel's top edge; the item's box decides the
@@ -210,14 +238,12 @@ function init() {
 		floatingToggle.hidden = itemShown;
 		panel.classList.toggle('uat-panel--no-admin-bar', !barShown);
 
-		if (barShown) {
-			// Inline because only the rendered layout knows it: items that do not fit wrap onto a second row
-			// below the bar's fixed-height box.
-			panel.style.setProperty(
-				'--uat-admin-bar-depth',
-				`${adminBarDepth(adminBar, adminBarItems)}px`
-			);
-		}
+		// Inline because only the rendered layout knows it: items that do not fit wrap onto a second row below
+		// the bar's fixed-height box. On the root, so the report button reads it as the panel does.
+		document.documentElement.style.setProperty(
+			'--uat-admin-bar-depth',
+			barShown ? `${adminBarDepth(adminBar, adminBarItems)}px` : '0px'
+		);
 	};
 	syncAdminBar();
 	new window.MutationObserver(syncAdminBar).observe(document.body, {
@@ -395,6 +421,8 @@ function init() {
 		// The admin bar item shows the panel is open with a class: its aria-expanded belongs to core's dropdown.
 		onToggle: (open) => {
 			adminBarItem?.parentElement.classList.toggle('is-panel-open', open);
+			// src/report.scss hides the top-right report button while the panel is open.
+			document.documentElement.dataset.uatPanelOpen = String(open);
 			if (open) {
 				window.localStorage.setItem(SEEN_KEY, '1');
 			}

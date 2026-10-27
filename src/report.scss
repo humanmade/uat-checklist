@@ -1,0 +1,275 @@
+// Report an issue: the button at the top right and the modal it opens. Both are the panel's own controls and sheet,
+// so neither takes a colour of its own: a report is not a result, and Pass and Fail are the only colours with
+// meaning. An error is told by weight and a bar beside it, not by colour.
+
+@use 'tokens' as *;
+@use 'controls' as *;
+
+// The sheet's width, narrower than the panel so it never needs a breakpoint: a phone's 360px less its margins.
+$dialog-width: 32rem;
+
+.uat-report-toggle {
+	position: fixed;
+	z-index: 99980;
+	// panel.js measures --uat-admin-bar-depth, which counts a wrapped second row; core's height is the fallback,
+	// and for a user the panel does not load for, the only value.
+	inset-block-start: calc( var( --uat-admin-bar-depth, var( --wp-admin--admin-bar--height, 0px ) ) + #{ token( space-s ) } );
+	inset-inline-end: token( space-s );
+	box-shadow: 0 0.25rem 1rem token( color-shadow );
+	font-family: token( font-family );
+	font-size: token( font-size );
+
+	@include secondary-button;
+}
+
+// While the panel is open the same action is in its footer, so this button would sit over the panel.
+html[data-uat-panel-open="true"] .uat-report-toggle {
+	display: none;
+}
+
+.uat-report {
+	box-sizing: border-box;
+	width: $dialog-width;
+	max-width: calc( 100vw - #{ token( space-s ) } * 2 );
+	max-height: calc( 100dvh - #{ token( space-l ) } * 2 );
+	margin: auto;
+	padding: 0;
+	border: 1px solid token( color-border );
+	border-radius: token( radius );
+	background-color: token( color-surface );
+	box-shadow: 0 0.25rem 1.5rem token( color-shadow );
+	color: token( color-text );
+	font-family: token( font-family );
+	font-size: token( font-size-l );
+	font-weight: token( font-weight-regular );
+	line-height: token( line-height );
+	letter-spacing: token( letter-spacing );
+
+	&[open] {
+		display: flex;
+		flex-direction: column;
+	}
+
+	&::backdrop {
+		background-color: token( color-shadow );
+	}
+
+	@media ( prefers-reduced-motion: no-preference ) {
+
+		&[open],
+		&[open]::backdrop {
+			animation: uat-report-in 0.15s ease-out;
+		}
+	}
+}
+
+@keyframes uat-report-in {
+
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+.uat-report__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: token( space-s );
+	padding: token( space-s ) token( space-l );
+	border-block-end: 1px solid token( color-border );
+	background-color: token( color-background );
+}
+
+.uat-report__title {
+	margin: 0;
+	color: inherit;
+	font-family: token( font-family-heading );
+	font-size: token( font-size-l );
+	font-weight: token( font-weight-medium );
+	line-height: token( line-height );
+}
+
+.uat-report__close {
+
+	@include secondary-button;
+}
+
+// The fields scroll and the actions stay in view, so Submit is on screen on a short window.
+.uat-report__form {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-height: 0;
+	margin: 0;
+}
+
+.uat-report__body {
+	display: grid;
+	flex: 1;
+	gap: token( space-s );
+	padding: token( space-xl ) token( space-l );
+	overflow-y: auto;
+	overscroll-behavior: contain;
+
+	&[hidden] {
+		display: none;
+	}
+}
+
+.uat-report__label {
+	font-weight: token( font-weight-medium );
+}
+
+.uat-report__description {
+	width: 100%;
+	resize: vertical;
+
+	@include field;
+
+	&[aria-invalid="true"] {
+		border-color: token( color-text );
+	}
+}
+
+// What the report will record, as plain text: the tester cannot change it.
+.uat-report__context {
+	display: grid;
+	gap: token( space-xs ) token( space-s );
+	margin: 0;
+	color: token( color-text-muted );
+	font-size: token( font-size-s );
+	line-height: token( line-height-s );
+	grid-template-columns: max-content minmax( 0, 1fr );
+}
+
+.uat-report__term {
+	font-weight: token( font-weight-medium );
+}
+
+.uat-report__detail {
+	display: grid;
+	min-width: 0;
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+// The screenshot field's label, preview, upload button and hint read as one group, closer than the fields around it.
+.uat-report__attach {
+	position: relative;
+	display: grid;
+	gap: token( space-xs );
+}
+
+// Hidden but focusable: the upload button is its label, and its focus and error show there.
+.uat-report__file {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset( 50% );
+	white-space: nowrap;
+
+	&:focus-visible + .uat-report__upload {
+		outline: 2px solid token( color-accent );
+		outline-offset: 2px;
+	}
+
+	&[aria-invalid="true"] + .uat-report__upload {
+		outline: 2px solid token( color-text );
+		outline-offset: 2px;
+	}
+}
+
+.uat-report__upload {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+
+	@include secondary-button;
+}
+
+.uat-report__preview {
+	display: grid;
+	gap: token( space-xs );
+	justify-items: start;
+
+	&[hidden] {
+		display: none;
+	}
+
+	img {
+		display: block;
+		box-sizing: border-box;
+		width: 100%;
+		max-height: 12rem;
+		object-fit: contain;
+		border: 1px solid token( color-border );
+	}
+}
+
+.uat-report__remove {
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	font-size: token( font-size-s );
+	line-height: token( line-height-s );
+	cursor: pointer;
+
+	@include link;
+}
+
+.uat-report__hint {
+	margin: 0;
+	color: token( color-text-subtle );
+	font-size: token( font-size-s );
+	line-height: token( line-height-s );
+}
+
+.uat-report__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: token( space-s ) token( space-l );
+	padding: token( space-s ) token( space-l );
+	border-block-start: 1px solid token( color-border );
+	background-color: token( color-background );
+}
+
+.uat-report__submit {
+
+	@include primary-button;
+}
+
+.uat-report__status {
+	flex: 1;
+	min-width: 12rem;
+	margin: 0;
+	color: token( color-text-muted );
+	font-size: token( font-size );
+	line-height: token( line-height );
+
+	// Rendered while empty, so a screen reader already has the live region when text arrives.
+	&:empty {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		min-width: 0;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset( 50% );
+		white-space: nowrap;
+	}
+
+	&.is-error {
+		padding-inline-start: token( space-s );
+		border-inline-start: 3px solid token( color-text );
+		color: token( color-text );
+		font-weight: token( font-weight-medium );
+	}
+}
