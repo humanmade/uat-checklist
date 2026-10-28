@@ -92,6 +92,22 @@ function report_should_load(): bool {
 }
 
 /**
+ * Returns whether this is a block editor or site editor screen, whose toolbar sits where the floating Report an issue
+ * button would.
+ *
+ * @return bool Whether this is an editor screen.
+ */
+function is_editor_screen(): bool {
+	if ( ! is_admin() ) {
+		return false;
+	}
+
+	$screen = get_current_screen();
+
+	return $screen !== null && ( $screen->is_block_editor() || $screen->base === 'site-editor' );
+}
+
+/**
  * Adds the Testing checklist item to the admin bar: the tick and a short label, with the full name in a tooltip.
  * A click opens the panel; its dropdown holds the hub page and the guide to the panel.
  *
@@ -256,7 +272,7 @@ function published_page_id( string $slug, int $parent_id ): int {
  * the front end.
  *
  * The rules only declare the face: the browser downloads a file when the panel's text needs it. A user who gets only
- * the report dialog needs them too.
+ * the report button needs them too, as the button is on screen from the start and is set in the theme's face.
  *
  * @return void
  */
@@ -373,14 +389,16 @@ function inline_data( array $data ): string {
  * Returns what the report dialog shows and checks: the screen's page, the signed-in user and the limits.
  *
  * The address and title the report records are read from the browser when the dialog opens, which is also what it
- * shows. Only the page's ID is the server's to give, from report_page_id().
+ * shows. Only the page's ID is the server's to give, from report_page_id(). `toggle` is whether the floating
+ * top-right button is added; the admin bar item and the panel's footer open the dialog wherever they show.
  *
- * @return array{page: array{id: int}, user: string, maxBytes: int, maxSize: string, maxLength: int, maxTitle: int} Report data.
+ * @return array{page: array{id: int}, user: string, toggle: bool, maxBytes: int, maxSize: string, maxLength: int, maxTitle: int} Report data.
  */
 function report_data(): array {
 	return [
 		'page'      => [ 'id' => report_page_id() ],
 		'user'      => wp_get_current_user()->display_name,
+		'toggle'    => ! is_editor_screen(),
 		'maxBytes'  => Screenshots\max_bytes(),
 		'maxSize'   => size_format( Screenshots\max_bytes() ),
 		'maxLength' => Reports\DESCRIPTION_MAX_LENGTH,

@@ -1,12 +1,32 @@
-// Report an issue: the admin bar item and the modal it opens. The item keeps core's look; the modal is the panel's own
-// sheet, so it takes no colour of its own: a report is not a result, and Pass and Fail are the only colours with
-// meaning. An error is told by weight and a bar beside it, not by colour.
+// Report an issue: the button at the top right, the admin bar item, and the modal both open. The button and the modal
+// are the panel's own controls and sheet, so neither takes a colour of its own: a report is not a result, and Pass
+// and Fail are the only colours with meaning. An error is told by weight and a bar beside it, not by colour. The admin
+// bar item keeps core's look.
 
 @use 'tokens' as *;
 @use 'controls' as *;
 
 // The sheet's width, narrower than the panel so it never needs a breakpoint: a phone's 360px less its margins.
 $dialog-width: 32rem;
+
+.uat-report-toggle {
+	position: fixed;
+	z-index: 99980;
+	// panel.js measures --uat-admin-bar-depth, which counts a wrapped second row; core's height is the fallback,
+	// and for a user the panel does not load for, the only value.
+	inset-block-start: calc( var( --uat-admin-bar-depth, var( --wp-admin--admin-bar--height, 0px ) ) + #{ token( space-s ) } );
+	inset-inline-end: token( space-s );
+	box-shadow: 0 0.25rem 1rem token( color-shadow );
+	font-family: token( font-family );
+	font-size: token( font-size );
+
+	@include secondary-button;
+}
+
+// While the panel is open the same action is in its footer, so this button would sit over the panel.
+html[data-uat-panel-open="true"] .uat-report-toggle {
+	display: none;
+}
 
 // Dashicons' flag, spaced from its label by core's .ab-icon margin.
 #wp-admin-bar-uat-report .ab-icon::before {
