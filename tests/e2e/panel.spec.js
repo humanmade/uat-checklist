@@ -155,7 +155,15 @@ test('Open in new window moves the checklist to a pop-out, and its Close shuts t
 	await expect(menuItem).toHaveClass(/\bis-in-window\b/);
 
 	const closing = popup.waitForEvent('close');
-	await panel(popup).getByRole('button', { name: 'Close' }).click();
+	// The window can close before the click's own input events are acknowledged, and the click then throws.
+	await panel(popup)
+		.getByRole('button', { name: 'Close' })
+		.click()
+		.catch((error) => {
+			if (!popup.isClosed()) {
+				throw error;
+			}
+		});
 	await closing;
 	await expect(menuItem).not.toHaveClass(/\bis-in-window\b/);
 });
