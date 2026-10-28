@@ -4,7 +4,7 @@ Tags: testing, uat, checklist, blocks, qa
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.4
-Stable tag: 0.5.0
+Stable tag: 0.5.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,8 +30,11 @@ WordPress 7.1 or later, and PHP 8.4.
 
 == Changelog ==
 
+= 0.5.1 =
+* A **Report an issue** item in the admin bar, beside **UAT**, opens the report dialog on the front end and in wp-admin, the block editor and site editor included. It stays while the UAT panel is open, and on a phone it shows as a flag icon.
+
 = 0.5.0 =
-* Any logged-in member of the site can report an issue. A **Report an issue** button sits top right on the front end and in wp-admin, and opens a dialog with a description, a screenshot upload previewed above its button, and **Submit report**. The report records who sent it and the page they were on. While the UAT panel is open the button moves into the panel's footer, which is always visible. A **Report an issue** item in the admin bar opens the same dialog.
+* Any logged-in member of the site can report an issue. A **Report an issue** button sits top right on the front end and in wp-admin, and opens a dialog with a description, a screenshot upload previewed above its button, and **Submit report**. The report records who sent it and the page they were on. While the UAT panel is open the button moves into the panel's footer, which is always visible.
 * Reports are stored as the **UAT issue reports** post type, listed at **UAT → Issue reports**, and start as Pending. A UAT manager moves each to Investigating and then Done from the list's row actions and bulk action or from the edit screen, all through the REST API. A report is a record: its description, screenshot, author and date cannot be edited. Users who hold the read capability see every report's details, read-only, and cannot change anything.
 * A tester can send 20 reports a day, and the screenshot limit is shared with results. The description is limited to 5,000 characters and the page address must be on the site; its query string and fragment are not stored.
 * Four abilities for the WordPress MCP adapter: `list-reports`, `get-report`, `get-report-screenshot` and `set-report-status`, so an AI assistant can read reports and set their status.
