@@ -1,9 +1,8 @@
 /*
- * Report an issue: a floating button at the top right, an admin bar item, and the modal both open. A tester describes
- * a problem, attaches a screenshot and sends it without leaving the page; the site records who they are and where
- * they were. While the panel is open the floating button is hidden by src/report.scss and the panel's footer opens
- * the same dialog, through the event src/lib/report-open.js names. inc/panel.php adds the admin bar item, passes the
- * page, the user and the limits, and leaves the floating button out where it would cover an editor's toolbar.
+ * Report an issue: an admin bar item on every screen, and the modal it opens. A tester describes a problem,
+ * attaches a screenshot and sends it without leaving the page; the site records who they are and where they were.
+ * The panel's footer opens the same dialog, through the event src/lib/report-open.js names. inc/panel.php adds the
+ * item and passes the page, the user and the limits.
  */
 
 import apiFetch from '@wordpress/api-fetch';
@@ -223,8 +222,7 @@ function visibleOpener(opener) {
 }
 
 /**
- * Adds the dialog and the floating button unless inc/panel.php left it out, and wires them and the admin bar item to
- * the report form.
+ * Adds the dialog, and wires it and the admin bar item, where inc/panel.php added one, to the report form.
  */
 function init() {
 	if (!DATA) {
@@ -239,16 +237,6 @@ function init() {
 	let page = { url: '', title: '' };
 
 	document.body.append(dialog);
-
-	if (DATA.toggle) {
-		const toggle = createButton(
-			'uat-report-toggle',
-			__('Report an issue', 'uat-checklist')
-		);
-
-		bindReportOpener(toggle);
-		document.body.append(toggle);
-	}
 
 	const adminBarItem = document.querySelector(ADMIN_BAR_ITEM);
 

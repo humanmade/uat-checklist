@@ -31,7 +31,7 @@ WordPress 7.1 or later, and PHP 8.4.
 == Changelog ==
 
 = 0.5.1 =
-* A **Report an issue** item in the admin bar, beside **UAT**, opens the report dialog on the front end and in wp-admin, the block editor and site editor included. It stays while the UAT panel is open, and on a phone it shows as a flag icon.
+* **Report an issue** moves from the floating button at the top right, which covered a theme's header menu and wp-admin's Screen Options and Help tabs, to an item in the admin bar beside **UAT**. It opens the report dialog on the front end and in wp-admin, the block editor and site editor included. It stays while the UAT panel is open, and on a phone it shows as a flag icon. The panel's footer still opens the same dialog.
 
 = 0.5.0 =
 * Any logged-in member of the site can report an issue. A **Report an issue** button sits top right on the front end and in wp-admin, and opens a dialog with a description, a screenshot upload previewed above its button, and **Submit report**. The report records who sent it and the page they were on. While the UAT panel is open the button moves into the panel's footer, which is always visible.

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-28T05:56:13+00:00\n"
+"POT-Creation-Date: 2026-10-28T05:57:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: uat-checklist\n"
@@ -141,19 +141,19 @@ msgstr ""
 #: inc/report-admin.php:312
 #: blocks/step/edit.js:130
 #: blocks/step/edit.js:163
-#: src/report.js:126
+#: src/report.js:125
 msgid "Screenshot"
 msgstr ""
 
 #. translators: %s: the largest file size the site accepts, such as 2 MB.
 #: blocks/step/render.php:203
-#: src/report.js:152
+#: src/report.js:151
 #, php-format,js-format
 msgid "Optional. A JPEG, PNG, GIF or WebP image of up to %s."
 msgstr ""
 
 #: blocks/step/render.php:207
-#: src/report.js:132
+#: src/report.js:131
 msgid "Remove screenshot"
 msgstr ""
 
@@ -166,7 +166,7 @@ msgstr ""
 #: blocks/step/render.php:210
 #: src/lib/report-screenshot.js:72
 #: src/lib/step-form.js:137
-#: src/report.js:144
+#: src/report.js:143
 msgid "Add a screenshot"
 msgstr ""
 
@@ -469,7 +469,7 @@ msgstr ""
 #. translators: Admin bar label beside the tick icon. Keep it as short as the English.
 #: inc/checklists.php:58
 #: inc/overview.php:48
-#: inc/panel.php:124
+#: inc/panel.php:108
 msgid "UAT"
 msgstr ""
 
@@ -685,25 +685,24 @@ msgstr ""
 msgid "(no title)"
 msgstr ""
 
-#: inc/panel.php:122
+#: inc/panel.php:106
 #: src/lib/checklist.js:77
 #: src/panel.js:57
 #: src/panel.js:131
 msgid "Testing checklist"
 msgstr ""
 
-#: inc/panel.php:146
+#: inc/panel.php:130
 msgid "UAT hub page"
 msgstr ""
 
-#: inc/panel.php:161
+#: inc/panel.php:145
 msgid "How to use the checklist"
 msgstr ""
 
-#: inc/panel.php:182
+#: inc/panel.php:166
 #: src/panel.js:99
-#: src/report.js:77
-#: src/report.js:246
+#: src/report.js:76
 msgid "Report an issue"
 msgstr ""
 
@@ -807,7 +806,7 @@ msgstr ""
 #: inc/report-admin.php:310
 #: inc/report-admin.php:710
 #: src/checklist-editor.js:74
-#: src/report.js:108
+#: src/report.js:107
 msgid "Page"
 msgstr ""
 
@@ -1230,7 +1229,7 @@ msgid "Loading…"
 msgstr ""
 
 #: src/panel.js:74
-#: src/report.js:82
+#: src/report.js:81
 msgid "Close"
 msgstr ""
 
@@ -1307,35 +1306,35 @@ msgstr[1] ""
 msgid "%1$s could not be moved: %2$s"
 msgstr ""
 
-#: src/report.js:94
+#: src/report.js:93
 msgid "What went wrong?"
 msgstr ""
 
-#: src/report.js:117
+#: src/report.js:116
 msgid "Signed in as"
 msgstr ""
 
-#: src/report.js:169
+#: src/report.js:168
 msgid "Submit report"
 msgstr ""
 
-#: src/report.js:345
+#: src/report.js:333
 msgid "Describe the problem first."
 msgstr ""
 
-#: src/report.js:366
+#: src/report.js:354
 msgid "Uploading the screenshot…"
 msgstr ""
 
-#: src/report.js:367
+#: src/report.js:355
 msgid "Sending the report…"
 msgstr ""
 
-#: src/report.js:377
+#: src/report.js:365
 msgid "Thank you. Your report was sent."
 msgstr ""
 
-#: src/report.js:391
+#: src/report.js:379
 msgid "The report could not be sent. Check your connection and try again."
 msgstr ""
 

@@ -257,12 +257,12 @@ id gets a new one. The instructions page is left as it was.
 ### An issue report is a record, and any logged-in user can send one
 
 `inc/reports.php` owns the `uat_report` post type. A tester describes a problem that is not a checklist step, with an
-optional screenshot, from the button at the top right, the **Report an issue** admin bar item or the panel's
-footer, and `POST uat-checklist/v1/reports` stores it as `pending`. Any logged-in user may send one
-(`Reports\can_submit()`), and the feature has no environment gate: it exists whenever the plugin is active. The
-top-right button hides while the panel is open, where the footer takes its place, and is left off the block editor and
-the site editor, where it would cover their toolbars. The admin bar item shows on every screen the dialog loads on.
-The pop-out window gets none of the three, because the page under test cannot be known from there.
+optional screenshot, from **Report an issue** in the admin bar or from the panel's footer, and
+`POST uat-checklist/v1/reports` stores it as `pending`. Any logged-in user may send one (`Reports\can_submit()`), and
+the feature has no environment gate: it exists whenever the plugin is active. The item is in the admin bar, not
+floating over the page, because any fixed corner covers something: a theme's header menu, or wp-admin's Screen
+Options and Help tabs. The pop-out window gets neither entry, because the page under test cannot be known from
+there.
 
 The three statuses are `pending` (core's), `uat-investigating` and `uat-done`. A report changes status and nothing
 else, so `Reports\set_status()` is the only writer. A `map_meta_cap` filter refuses edit, delete and publish to

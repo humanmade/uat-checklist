@@ -1,6 +1,5 @@
 /*
- * How the panel's footer, the floating button and the admin bar item, which two bundles wire, ask src/report.js to
- * open its dialog.
+ * How the panel's footer and the admin bar item, which two bundles wire, ask src/report.js to open its dialog.
  */
 
 export const REPORT_OPEN_EVENT = 'hm-uat-report:open';
