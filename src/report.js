@@ -368,8 +368,16 @@ function init() {
 			// The focused Submit button has just left the page.
 			close.focus();
 		} catch (error) {
+			// A 4xx is the server saying what the tester can fix. A network or server failure has only apiFetch's own
+			// words, which do not say what to do. For a refused field WordPress's own message only names it
+			// ("Invalid parameter(s): page_url"), and the plugin's reason is in `data.params`.
+			const httpStatus = error?.data?.status;
+			const refused = httpStatus >= 400 && httpStatus < 500;
+			const reasons = Object.values(error?.data?.params ?? {}).join(' ');
+			const explanation = refused ? reasons || error.message : '';
+
 			say(
-				error?.message ??
+				explanation ||
 					__(
 						'The report could not be sent. Check your connection and try again.',
 						'uat-checklist'

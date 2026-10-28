@@ -3,7 +3,7 @@
  * The wp-admin screens for issue reports: list columns, status views, the edit screen and a read-only view.
  *
  * A report is a record: a triager changes its status and nothing else. The row actions, the bulk action and the edit
- * screen's select send the change to the REST API from `src/report-admin.js`, and none posts to `post.php`, whose save
+ * screen's select send the change to the REST API from `src/report-status.js`, and none posts to `post.php`, whose save
  * would make the saving user the report's author. Anyone else who holds Access\CAP_READ sees the same details of
  * every report on a page with no controls.
  *
@@ -31,7 +31,7 @@ const BULK_PREFIX = 'uat_report_mark_';
 /**
  * Handle of the script that changes a report's status from the list and the edit screen.
  */
-const HANDLE = 'uat-checklist-report-admin';
+const HANDLE = 'uat-checklist-report-status';
 
 /**
  * Slug of the read-only report page, which has no menu entry.
@@ -141,7 +141,7 @@ function style_screens(): void {
  * @return bool Whether it is.
  */
 function script_built(): bool {
-	return file_exists( UAT_Checklist\PATH . 'build/report-admin.asset.php' );
+	return file_exists( UAT_Checklist\PATH . 'build/report-status.asset.php' );
 }
 
 /**
@@ -161,11 +161,11 @@ function enqueue_script(): void {
 	}
 
 	// phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant -- this plugin's own build manifest, existence checked above.
-	$asset = require UAT_Checklist\PATH . 'build/report-admin.asset.php';
+	$asset = require UAT_Checklist\PATH . 'build/report-status.asset.php';
 
 	wp_enqueue_script(
 		HANDLE,
-		plugins_url( 'build/report-admin.js', UAT_Checklist\FILE ),
+		plugins_url( 'build/report-status.js', UAT_Checklist\FILE ),
 		$asset['dependencies'],
 		$asset['version'],
 		[
@@ -404,9 +404,12 @@ function render_report_cell( WP_Post $report ): void {
 
 	printf( '<strong><a class="row-title" href="%1$s">%2$s</a></strong>', esc_url( $link ), esc_html( $title ) );
 
+	// Escaped before trimming, because wp_trim_words() strips any tag-like text a tester typed. Its `&hellip;` is the only
+	// entity it can add, so what is printed is safe.
 	printf(
 		'<p class="uat-report-admin__excerpt">%s</p>',
-		esc_html( wp_trim_words( (string) details( $report )['description'], 20 ) )
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by escape_text() before it is trimmed.
+		wp_trim_words( Reports\escape_text( (string) details( $report )['description'] ), 20 )
 	);
 }
 
@@ -445,7 +448,8 @@ function render_page_cell( WP_Post $report ): void {
 		return;
 	}
 
-	printf( '<a href="%1$s">%2$s</a>', esc_url( $url ), esc_html( $title === '' ? $url : $title ) );
+	// phpcs:ignore HM.Security.EscapeOutput.OutputNotEscaped -- escape_text() is this plugin's escaper for a tester's text.
+	printf( '<a href="%1$s">%2$s</a>', esc_url( $url ), Reports\escape_text( $title === '' ? $url : $title ) );
 }
 
 /**
@@ -565,7 +569,7 @@ function view_url( int $report_id ): string {
 }
 
 /**
- * Returns a button for each status a report is not in, which `src/report-admin.js` turns into a status change.
+ * Returns a button for each status a report is not in, which `src/report-status.js` turns into a status change.
  *
  * @param int    $report_id Report.
  * @param string $current   The report's status.
@@ -699,7 +703,7 @@ function render_details_box( WP_Post $report ): void {
 	$page_title = (string) $details['page']['title'];
 	?>
 	<div class="uat-report-admin">
-		<p class="uat-report-admin__description"><?php echo nl2br( esc_html( (string) $details['description'] ) ); ?></p>
+		<p class="uat-report-admin__description"><?php echo nl2br( Reports\escape_text( (string) $details['description'] ) ); // phpcs:ignore HM.Security.EscapeOutput.OutputNotEscaped -- escape_text() is this plugin's escaper for a tester's text. ?></p>
 		<dl class="uat-report-admin__meta">
 			<dt><?php esc_html_e( 'Reporter', 'uat-checklist' ); ?></dt>
 			<dd><?php echo esc_html( (string) $details['reporter']['name'] ); ?></dd>
@@ -708,7 +712,7 @@ function render_details_box( WP_Post $report ): void {
 				<?php if ( $page_url === '' ) : ?>
 					<?php esc_html_e( 'Not recorded', 'uat-checklist' ); ?>
 				<?php else : ?>
-					<a href="<?php echo esc_url( $page_url ); ?>"><?php echo esc_html( $page_title === '' ? $page_url : $page_title ); ?></a>
+					<a href="<?php echo esc_url( $page_url ); ?>"><?php echo Reports\escape_text( $page_title === '' ? $page_url : $page_title ); // phpcs:ignore HM.Security.EscapeOutput.OutputNotEscaped -- escape_text() is this plugin's escaper for a tester's text. ?></a>
 				<?php endif; ?>
 			</dd>
 			<dt><?php esc_html_e( 'Reported', 'uat-checklist' ); ?></dt>
@@ -734,7 +738,7 @@ function render_details_box( WP_Post $report ): void {
 }
 
 /**
- * Prints the status control: a select and a button that `src/report-admin.js` sends to the REST API.
+ * Prints the status control: a select and a button that `src/report-status.js` sends to the REST API.
  *
  * Only a user who can triage reaches the edit screen, so there is no read-only form of this box.
  *

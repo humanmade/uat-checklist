@@ -368,14 +368,14 @@ function inline_data( array $data ): string {
  * Returns what the report dialog shows and checks: the screen's page, the signed-in user and the limits.
  *
  * The address and title the report records are read from the browser when the dialog opens, which is also what it
- * shows. Only the page's ID is the server's to give, and only on the front end: a wp-admin screen is not a post.
- * `toggle` is whether the top-right button is added; the panel's footer opens the dialog wherever the panel loads.
+ * shows. Only the page's ID is the server's to give, from report_page_id(). `toggle` is whether the top-right button
+ * is added; the panel's footer opens the dialog wherever the panel loads.
  *
  * @return array{page: array{id: int}, user: string, toggle: bool, maxBytes: int, maxSize: string, maxLength: int, maxTitle: int} Report data.
  */
 function report_data(): array {
 	return [
-		'page'      => [ 'id' => is_admin() ? 0 : get_queried_object_id() ],
+		'page'      => [ 'id' => report_page_id() ],
 		'user'      => wp_get_current_user()->display_name,
 		'toggle'    => ! is_editor_screen(),
 		'maxBytes'  => Screenshots\max_bytes(),
@@ -383,6 +383,26 @@ function report_data(): array {
 		'maxLength' => Reports\DESCRIPTION_MAX_LENGTH,
 		'maxTitle'  => Reports\PAGE_TITLE_MAX_LENGTH,
 	];
+}
+
+/**
+ * Returns the ID of the post this screen shows, for the report dialog: 0 when it is not a single post.
+ *
+ * Not get_queried_object_id() alone, which is a term's ID on a category, tag or taxonomy archive and a user's on an
+ * author archive. The posts page counts, as the page an editor made for it. A wp-admin screen is not a post.
+ *
+ * @return int Post ID, or 0.
+ */
+function report_page_id(): int {
+	if ( is_admin() ) {
+		return 0;
+	}
+
+	if ( is_singular() ) {
+		return get_queried_object_id();
+	}
+
+	return is_home() && ! is_front_page() ? absint( get_option( 'page_for_posts' ) ) : 0;
 }
 
 /**

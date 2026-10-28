@@ -705,10 +705,50 @@ try {
 		}
 	);
 
+	echo "\nText that looks like an entity\n";
+
+	hm_test_as_user(
+		'contributor',
+		static function () use ( &$created ): void {
+			$typed      = '&lt;b&gt; & <script>';
+			$expected   = '&amp;lt;b&amp;gt; &amp; &lt;script&gt;';
+			// Stored page titles have their tags stripped, so theirs is the same text without the tag.
+			$page_title = '&lt;b&gt; &';
+			$page_link  = '>&amp;lt;b&amp;gt; &amp;</a>';
+			$report     = hm_test_admin_report( 0, 'pending', $typed, [ Reports\META_PAGE_TITLE => $page_title ] );
+			$created[]  = $report->ID;
+
+			check( 'the description is returned exactly as typed', Reports\describe( $report, false )['description'], $typed );
+
+			$cell = hm_test_admin_cell( 'uat_report', $report->ID );
+			check(
+				'the Report cell prints the title and the start of the description as typed',
+				substr_count( $cell, $expected ),
+				2
+			);
+			check( 'and no script tag', str_contains( $cell, '<script' ), false );
+			check( 'the Page cell prints the page title as typed', hm_test_admin_cell( 'uat_page', $report->ID ), '<a href="' . esc_url( home_url( '/a-page/' ) ) . '"' . $page_link );
+
+			ob_start();
+			Report_Admin\render_details_box( $report );
+			$box = (string) ob_get_clean();
+			check( 'the details box prints the description and the page title as typed', [ substr_count( $box, $expected ), str_contains( $box, $page_link ) ], [ 1, true ] );
+			check( 'and no script tag there', str_contains( $box, '<script' ), false );
+
+			hm_test_with_view_page(
+				static function ( string $hook ) use ( $report, $expected, $page_link ): void {
+					$html = hm_test_view_page_html( $hook, $report->ID );
+					check( 'the read-only page prints the heading, description and page title as typed', [ substr_count( $html, $expected ), str_contains( $html, $page_link ) ], [ 2, true ] );
+					check( 'and no script tag there', str_contains( $html, '<script' ), false );
+				}
+			);
+		}
+	);
+
 	echo "\nThe status script\n";
 
-	$handle = Report_Admin\HANDLE;
-	$asset  = require dirname( __DIR__, 2 ) . '/build/report-admin.asset.php';
+	$handle =Report_Admin\HANDLE;
+	$asset  = require dirname( __DIR__, 2 ) . '/build/report-status.asset.php';
 	$enqueue = static function ( string $screen ) use ( $handle ): array {
 		hm_test_on_screen(
 			$screen,

@@ -36,6 +36,9 @@ WordPress 7.1 or later, and PHP 8.4.
 * A tester can send 20 reports a day, and the screenshot limit is shared with results. The description is limited to 5,000 characters and the page address must be on the site; its query string and fragment are not stored.
 * Four abilities for the WordPress MCP adapter: `list-reports`, `get-report`, `get-report-screenshot` and `set-report-status`, so an AI assistant can read reports and set their status.
 * Reports are not offered in the block editor or the pop-out window. A Japanese translation ships with the strings.
+* Screenshots of every type (JPEG, PNG, GIF and WebP) have embedded metadata, such as location, removed on upload, and an image over 10,000 pixels on a side or 50 million pixels in all is refused. The `hm_uat_checklist_screenshot_max_dimension` and `hm_uat_checklist_screenshot_max_pixels` filters change those limits. A screenshot counts only when it was uploaded by the author of the result or report it is on.
+* A user can no longer make themselves a UAT manager by changing their own email address to a staff domain, through the REST API or a front-end form. An administrator, or the link mailed to the new address, still sets one.
+* A report's description and page title in the abilities are marked as untrusted text a tester wrote, and `set-report-status` says to set a status only when the person using the assistant asks.
 
 = 0.4.0 =
 * The panel's step form keeps the latest Pass or Fail after a save and after a reload: its choice, its comment and its screenshot. A tester can add to the comment and save again, which records a new result and leaves the earlier one in the history. Once the step is marked fixed, the form starts blank for the retest.

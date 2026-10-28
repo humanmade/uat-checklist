@@ -1,5 +1,5 @@
 /*
- * Issue reports in wp-admin: moves a report to another status through the REST API, from a row action on the list,
+ * Issue report status in wp-admin: moves a report to another status through the REST API, from a row action on the list,
  * from the list's bulk action and from the status box on the edit screen. Nothing posts to edit.php or post.php. A
  * report is a record that a triager only moves between statuses, and a save through core would make the saving
  * user its author. inc/report-admin.php passes the route, the bulk action's prefix and the status labels.

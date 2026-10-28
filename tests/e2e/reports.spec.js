@@ -428,6 +428,67 @@ test('a report with a screenshot is announced as sent and kept as pending, by th
 	await manager.close();
 });
 
+test("a report from an address the server refuses shows the server's message, and one that fails for any other reason shows the generic one", async ({
+	page,
+	baseURL,
+}) => {
+	const text = `${MARKER}: the address is refused`;
+	const generic =
+		'The report could not be sent. Check your connection and try again.';
+	const submit = dialog(page).getByRole('button', { name: 'Submit report' });
+	let respond = null;
+
+	await page.route(/uat-checklist\/v1\/reports/, async (route) => {
+		if (route.request().method() === 'POST') {
+			await respond(route);
+			return;
+		}
+
+		await route.continue();
+	});
+
+	await page.goto('/');
+	await openDialog(page);
+	await dialog(page).getByLabel('What went wrong?').fill(text);
+
+	// The page address is read from the browser, so the way to send another host is to change it on the way out.
+	respond = (route) =>
+		route.continue({
+			postData: route
+				.request()
+				.postData()
+				.replace(baseURL, 'http://elsewhere.example'),
+		});
+	await submit.click();
+	await expect(status(page)).toHaveText(
+		`The page address must be on ${
+			new URL(baseURL).host
+		}, the address this site is set up to use. Open the site at that address and send the report again.`
+	);
+	await expect(status(page)).toHaveClass(/\bis-error\b/);
+	await expect(submit).toBeEnabled();
+	await expect(dialog(page).getByLabel('What went wrong?')).toHaveValue(text);
+
+	respond = (route) =>
+		route.fulfill({
+			status: 500,
+			contentType: 'application/json',
+			body: JSON.stringify({
+				code: 'internal_server_error',
+				message: 'There has been a critical error on this website.',
+				data: { status: 500 },
+			}),
+		});
+	await submit.click();
+	await expect(status(page)).toHaveText(generic);
+
+	respond = (route) => route.abort();
+	await submit.click();
+	await expect(status(page)).toHaveText(generic);
+	await expect(status(page)).toHaveClass(/\bis-error\b/);
+	await expect(dialog(page).getByLabel('What went wrong?')).toHaveValue(text);
+});
+
 test('Tab stays inside the dialog and a report can be sent from the keyboard', async ({
 	page,
 }) => {

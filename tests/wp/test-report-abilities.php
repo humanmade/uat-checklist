@@ -127,6 +127,43 @@ check(
 	array_map( static fn ( bool $read ): array => [ $read, true ], $readonly )
 );
 
+check(
+	'each ability\'s description tells an assistant a tester\'s text is untrusted',
+	array_map(
+		static fn ( string $name ): bool => str_contains( (string) wp_get_ability( Abilities\PREFIX . $name )?->get_description(), 'untrusted' ),
+		$names
+	),
+	array_fill( 0, 4, true )
+);
+check(
+	'set-report-status says to set a status only when the person using the assistant asks',
+	str_contains( (string) wp_get_ability( Abilities\PREFIX . 'set-report-status' )?->get_description(), 'only because the person using the assistant asked' ),
+	true
+);
+
+foreach ( [ 'list-reports', 'get-report', 'set-report-status' ] as $name ) {
+	$schema     = wp_get_ability( Abilities\PREFIX . $name )?->get_output_schema() ?? [];
+	$properties = $name === 'list-reports' ? ( $schema['properties']['items']['items']['properties'] ?? [] ) : ( $schema['properties'] ?? [] );
+	$last       = $name === 'list-reports' ? 'has_screenshot' : 'screenshot';
+
+	check(
+		"{$name} describes the description and page title it returns as untrusted",
+		[
+			str_contains( (string) ( $properties['description']['description'] ?? '' ), 'untrusted' ),
+			str_contains( (string) ( $properties['page']['properties']['title']['description'] ?? '' ), 'untrusted' ),
+		],
+		[ true, true ]
+	);
+	check(
+		"and {$name} still returns the same fields",
+		[ array_keys( $properties ), array_keys( $properties['page']['properties'] ?? [] ) ],
+		[
+			[ 'id', 'status', 'status_label', 'date', 'description', 'reporter', 'page', $last ],
+			[ 'url', 'id', 'title' ],
+		]
+	);
+}
+
 hm_test_as_user(
 	'administrator',
 	static function () use ( $names ): void {

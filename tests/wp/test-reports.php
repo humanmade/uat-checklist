@@ -286,6 +286,39 @@ function hm_test_dying( callable $callback ): ?string {
 	}
 }
 
+/**
+ * Runs a callback that answers as an admin-ajax request would, and returns what it printed.
+ *
+ * wp_send_json_*() ends with `die` unless the request is an ajax one, which no CLI run is, so it is made to look like one
+ * and wp_die() throws instead of ending the run.
+ *
+ * @param callable $callback Code that answers the request.
+ * @return string What was printed before the request ended.
+ */
+function hm_test_ajax( callable $callback ): string {
+	$handler = static function (): callable {
+		return static function (): void {
+			throw new RuntimeException( 'ajax request ended' );
+		};
+	};
+
+	add_filter( 'wp_doing_ajax', '__return_true' );
+	add_filter( 'wp_die_ajax_handler', $handler, PHP_INT_MAX );
+	ob_start();
+
+	try {
+		$callback();
+	} catch ( RuntimeException $e ) {
+		// The request ended, as it does in core.
+	} finally {
+		$output = (string) ob_get_clean();
+		remove_filter( 'wp_die_ajax_handler', $handler, PHP_INT_MAX );
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+	}
+
+	return $output;
+}
+
 echo "\nSubmitting a report\n";
 
 $reports_before = hm_test_report_ids();
@@ -406,6 +439,29 @@ hm_test_with_many_reports(
 					'one at another host names the page address as the cause',
 					hm_test_invalid_param_code( hm_test_submit_report( [ 'page_url' => 'https://evil.example/' ] ), 'page_url' ),
 					'uat_checklist_page_url_foreign'
+				);
+
+				$foreign = hm_test_submit_report( [ 'page_url' => 'https://evil.example/' ] );
+				$home    = wp_parse_url( home_url() );
+				$message = (string) ( ( (array) $foreign->get_data() )['data']['details']['page_url']['message'] ?? '' );
+				check(
+					'and its message names the host and port the site expects',
+					str_contains( $message, $home['host'] . ( isset( $home['port'] ) ? ':' . $home['port'] : '' ) ),
+					true
+				);
+				check( 'and is not the old message that named nothing', str_contains( wp_json_encode( $foreign->get_data() ), 'must be on this site' ), false );
+
+				hm_test_with_filter(
+					'pre_option_home',
+					static fn (): string => 'https://uat.example',
+					static function (): void {
+						$default_port = Reports\validate_page_url( 'https://evil.example/', new WP_REST_Request(), 'page_url' );
+						check(
+							'the expected address has no port when the home address uses the default',
+							[ hm_test_error_code( $default_port ), str_contains( is_wp_error( $default_port ) ? $default_port->get_error_message() : '', 'on uat.example,' ) ],
+							[ 'uat_checklist_page_url_foreign', true ]
+						);
+					}
 				);
 
 				$other_scheme = hm_test_submit_report( [ 'page_url' => 'https://' . wp_parse_url( home_url(), PHP_URL_HOST ) . ':3034/x/' ] );
@@ -1113,5 +1169,293 @@ hm_test_as_reporter(
 			wp_delete_attachment( $shot, true );
 			wp_delete_attachment( $other, true );
 		}
+	}
+);
+
+echo "\nA report keeps its type, parent and settings\n";
+
+hm_test_as_reporter(
+	'contributor',
+	static function ( int $tester ): void {
+		$report = hm_test_make_report( $tester, 'uat-investigating', 'Original description' );
+		$id     = $report->ID;
+		$fields = [ 'post_type', 'post_parent', 'post_password', 'post_excerpt', 'comment_status', 'ping_status', 'menu_order' ];
+
+		hm_test_with_page(
+			[],
+			static function ( int $page_id ) use ( $id, $fields ): void {
+				global $wpdb;
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- gives a test fixture values to keep.
+				$wpdb->update(
+					$wpdb->posts,
+					[
+						'post_excerpt'   => 'Stored excerpt',
+						'post_password'  => 'stored-secret',
+						'comment_status' => 'closed',
+						'ping_status'    => 'closed',
+						'menu_order'     => 7,
+					],
+					[ 'ID' => $id ]
+				);
+				$stored = array_intersect_key( hm_test_stored_report( $id )?->to_array() ?? [], array_flip( $fields ) );
+				check( 'the fixture holds values the attempts below would change', $stored['menu_order'] ?? null, 7 );
+
+				$changed = [
+					'post_type'      => 'post',
+					'post_parent'    => $page_id,
+					'post_password'  => 'new-secret',
+					'post_excerpt'   => 'New excerpt',
+					'comment_status' => 'open',
+					'ping_status'    => 'open',
+					'menu_order'     => 99,
+				];
+
+				hm_test_as_user(
+					'editor',
+					static function () use ( $id, $fields, $stored, $changed ): void {
+						wp_update_post( [ 'ID' => $id ] + $changed );
+						check(
+							'a manager\'s update naming another type, parent, password, excerpt, comment and ping status and order leaves them as stored',
+							array_intersect_key( hm_test_stored_report( $id )?->to_array() ?? [], array_flip( $fields ) ),
+							$stored
+						);
+						check( 'so it is still a report', Reports\find_report( $id )?->ID, $id );
+
+						require_once ABSPATH . 'wp-admin/includes/ajax-actions.php';
+						$_POST = [
+							'_inline_edit'   => wp_create_nonce( 'inlineeditnonce' ),
+							'post_ID'        => (string) $id,
+							'screen'         => 'edit-' . Reports\POST_TYPE,
+							'post_view'      => 'list',
+							'_status'        => 'uat-investigating',
+							'post_title'     => 'Quick title',
+							'post_type'      => 'post',
+							'post_parent'    => (string) $changed['post_parent'],
+							'post_password'  => 'new-secret',
+							'comment_status' => 'open',
+							'ping_status'    => 'open',
+							'menu_order'     => '99',
+						];
+
+						// check_ajax_referer() reads the nonce from $_REQUEST, which core builds once at the start of a request.
+						$request  = $_REQUEST;
+						$_REQUEST = $_POST;
+
+						try {
+							hm_test_ajax( 'wp_ajax_inline_save' );
+						} finally {
+							$_POST    = [];
+							$_REQUEST = $request;
+						}
+
+						check(
+							'core\'s Quick Edit save, crafted the same way, leaves them as stored too',
+							array_intersect_key( hm_test_stored_report( $id )?->to_array() ?? [], array_flip( $fields ) ),
+							$stored
+						);
+						check( 'and the title', hm_test_stored_report( $id )?->post_title, 'Original description' );
+					},
+					hm_test_report_staff_email()
+				);
+			}
+		);
+	}
+);
+
+echo "\nA screenshot cannot be planted on a report\n";
+
+hm_test_as_reporter(
+	'author',
+	static function ( int $author ): void {
+		$report = hm_test_make_report( $author );
+		$make   = static function ( int $owner, int $parent = 0 ): int {
+			return (int) wp_insert_attachment(
+				[
+					'post_title'     => 'Loose image',
+					'post_mime_type' => 'image/png',
+					'post_status'    => 'inherit',
+					'post_author'    => $owner,
+				],
+				false,
+				$parent
+			);
+		};
+		$loose  = $make( $author );
+
+		try {
+			wp_update_post(
+				[
+					'ID'          => $loose,
+					'post_parent' => $report->ID,
+				]
+			);
+			check( 'an Author\'s update of their own attachment naming a report as its parent leaves it unattached', (int) hm_test_stored_report( $loose )?->post_parent, 0 );
+			check( 'so the report has no screenshot', Reports\screenshot_of( $report ), null );
+
+			$rest = hm_test_rest( 'POST', "/wp/v2/media/{$loose}", [ 'post' => $report->ID ] );
+			check( 'core\'s media route is no way round it', [ $rest->get_status(), (int) hm_test_stored_report( $loose )?->post_parent ], [ 200, 0 ] );
+
+			require_once ABSPATH . 'wp-admin/includes/ajax-actions.php';
+			$_POST    = [
+				'id'      => (string) $loose,
+				'nonce'   => wp_create_nonce( 'update-post_' . $loose ),
+				'changes' => [ 'parent' => (string) $report->ID ],
+			];
+			$request  = $_REQUEST;
+			$_REQUEST = $_POST;
+
+			try {
+				hm_test_ajax( 'wp_ajax_save_attachment' );
+			} finally {
+				$_POST    = [];
+				$_REQUEST = $request;
+			}
+
+			check( 'nor is the media modal\'s save', (int) hm_test_stored_report( $loose )?->post_parent, 0 );
+
+			$page_id = wp_insert_post(
+				[
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'A page',
+					'post_author' => $author,
+				]
+			);
+			wp_update_post( [ 'ID' => $loose, 'post_parent' => $page_id ] );
+			check( 'moving it under an ordinary page is not touched', (int) hm_test_stored_report( $loose )?->post_parent, $page_id );
+			wp_delete_post( $page_id, true );
+			wp_update_post( [ 'ID' => $loose, 'post_parent' => 0 ] );
+
+			$denied = hm_test_rest( 'POST', '/wp/v2/media', [ 'post' => $report->ID ] );
+			check( 'creating media under the report through core\'s media route is refused by the report\'s caps', $denied->get_data()['code'] ?? null, 'rest_cannot_edit' );
+
+			$upload = wp_upload_bits( 'hm-test-planted.png', null, hm_test_report_png() );
+			$added  = Screenshots\attach(
+				[
+					'file' => $upload['file'],
+					'type' => 'image/png',
+				],
+				$report
+			);
+			check( 'Screenshots\attach() still attaches the report\'s own screenshot', [ is_int( $added ), is_int( $added ) ? (int) hm_test_stored_report( $added )?->post_parent : null ], [ true, $report->ID ] );
+
+			if ( is_int( $added ) ) {
+				wp_delete_attachment( $added, true );
+			}
+
+			hm_test_as_user(
+				'editor',
+				static function ( int $manager ) use ( $report, $make ): void {
+					$mine = $make( $manager );
+					wp_update_post( [ 'ID' => $mine, 'post_parent' => $report->ID ] );
+					check( 'a manager can attach one', (int) hm_test_stored_report( $mine )?->post_parent, $report->ID );
+					wp_delete_attachment( $mine, true );
+				},
+				hm_test_report_staff_email()
+			);
+
+			hm_test_as_user(
+				'editor',
+				static function ( int $editor ) use ( $make ): void {
+					$unattached = $make( $editor );
+					$GLOBALS['post'] = get_post( hm_test_make_report( $editor )->ID );
+
+					try {
+						check(
+							'an attachment with no parent is not denied because the current post is a report',
+							[ user_can( $editor, 'edit_post', $unattached ), user_can( $editor, 'delete_post', $unattached ) ],
+							[ true, true ]
+						);
+					} finally {
+						wp_delete_post( $GLOBALS['post']->ID, true );
+						unset( $GLOBALS['post'] );
+						wp_delete_attachment( $unattached, true );
+					}
+				}
+			);
+		} finally {
+			wp_delete_attachment( $loose, true );
+		}
+	}
+);
+
+echo "\nA restored report gets its ID as its slug\n";
+
+hm_test_as_reporter(
+	'subscriber',
+	static function ( int $tester ): void {
+		foreach ( Reports\STATUSES as $status ) {
+			$report = hm_test_make_report( $tester, $status );
+			wp_trash_post( $report->ID );
+			$trashed = hm_test_stored_report( $report->ID );
+			wp_untrash_post( $report->ID );
+			$restored = hm_test_stored_report( $report->ID );
+
+			check( "a {$status} report in the trash carries core's trashed slug", str_ends_with( (string) $trashed?->post_name, '__trashed' ), true );
+			check(
+				"restored as {$status}, it has its ID as the slug",
+				[ $restored?->post_status, $restored?->post_name ],
+				[ $status, (string) $report->ID ]
+			);
+		}
+	}
+);
+
+echo "\nA report that could not be saved says so without detail\n";
+
+hm_test_with_many_reports(
+	static function (): void {
+		hm_test_as_reporter(
+			'subscriber',
+			static function (): void {
+				global $wpdb;
+
+				$before = hm_test_report_ids();
+				$fail   = static fn ( string $query ): string => str_contains( $query, "INSERT INTO `{$wpdb->posts}`" ) ? 'SELECT * FROM hm_internal_missing_table' : $query;
+				$quiet  = $wpdb->suppress_errors( true );
+
+				try {
+					$failed = hm_test_with_filter( 'query', $fail, static fn (): WP_REST_Response => hm_test_submit_report() );
+				} finally {
+					$wpdb->suppress_errors( $quiet );
+				}
+
+				$body = (string) wp_json_encode( $failed->get_data() );
+				check(
+					'a report the database refuses is a 500 with a stable code',
+					[ $failed->get_status(), $failed->get_data()['code'] ?? null ],
+					[ 500, 'hm_uat_checklist_report_not_saved' ]
+				);
+				check( 'its message is generic', $failed->get_data()['message'] ?? null, 'Your report could not be saved. Try again in a few seconds.' );
+				check(
+					'and the response holds nothing of the database error',
+					[ str_contains( $body, 'hm_internal_missing_table' ), str_contains( $body, 'db_insert_error' ), str_contains( $body, 'Could not insert' ) ],
+					[ false, false, false ]
+				);
+				check( 'no report was made', hm_test_report_ids(), $before );
+			}
+		);
+	}
+);
+
+echo "\nWhat a tester typed is escaped as typed\n";
+
+hm_test_with_many_reports(
+	static function (): void {
+		hm_test_as_reporter(
+			'subscriber',
+			static function (): void {
+				$sent = hm_test_submit_report( [ 'description' => '&lt;b&gt;' ] );
+				$post = hm_test_stored_report( (int) ( $sent->get_data()['id'] ?? 0 ) );
+				$text = $post ? Reports\describe( $post )['description'] : null;
+
+				check( 'a typed entity name comes back from describe() as typed', $text, '&lt;b&gt;' );
+				check( 'escape_text() encodes its ampersands, so the browser shows what was typed', Reports\escape_text( (string) $text ), '&amp;lt;b&amp;gt;' );
+				check( 'esc_html() would not, and the browser would show a tag', esc_html( (string) $text ), '&lt;b&gt;' );
+				check( 'markup becomes text', Reports\escape_text( '<script>' ), '&lt;script&gt;' );
+				check( 'quotes are encoded', Reports\escape_text( "\"it's\"" ), '&quot;it&#039;s&quot;' );
+				check( 'text outside ASCII is left alone', Reports\escape_text( 'café 日本語' ), 'café 日本語' );
+			}
+		);
 	}
 );

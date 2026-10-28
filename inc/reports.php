@@ -109,6 +109,7 @@ function bootstrap(): void {
 	add_action( 'rest_api_init', __NAMESPACE__ . '\\register_routes' );
 	add_filter( 'map_meta_cap', __NAMESPACE__ . '\\restrict_report_caps', 10, 4 );
 	add_filter( 'wp_insert_post_data', __NAMESPACE__ . '\\keep_report_fields', 10, 4 );
+	add_filter( 'wp_insert_attachment_data', __NAMESPACE__ . '\\keep_screenshot_parent', 10, 4 );
 }
 
 /**
@@ -477,8 +478,14 @@ function restrict_report_caps( array $caps, string $cap, int $user_id, array $ar
 		return $caps;
 	}
 
-	$post  = get_post( $args[0] );
-	$owner = $post instanceof WP_Post && $post->post_type === 'attachment' ? get_post_type( $post->post_parent ) : $post?->post_type;
+	$post = get_post( $args[0] );
+
+	if ( ! $post instanceof WP_Post ) {
+		return $caps;
+	}
+
+	// Not get_post_type( 0 ), which reads the current post.
+	$owner = $post->post_type === 'attachment' ? ( $post->post_parent > 0 ? get_post_type( $post->post_parent ) : null ) : $post->post_type;
 
 	if ( $owner !== POST_TYPE ) {
 		return $caps;
@@ -488,11 +495,12 @@ function restrict_report_caps( array $caps, string $cap, int $user_id, array $ar
 }
 
 /**
- * Puts a report's title, content, author, date and slug back to what is stored, on every update but set_status()'s.
+ * Puts a report's fixed fields back to what is stored, on every update but set_status()'s.
  *
  * Every save ends in wp_insert_post(), Quick Edit and bulk edit included, and each merges the stored post under the
  * submitted fields. The filter gets that merged row slashed, so the stored values go back slashed. Creating a report is
- * not an update, so submit() needs no exemption.
+ * not an update, so submit() needs no exemption. The type and parent go back too, or a crafted save could turn a report
+ * into an ordinary post.
  *
  * @param array<string, mixed> $data                Slashed row about to be written.
  * @param array<string, mixed> $postarr             Sanitised arguments, including the `ID` of an update.
@@ -512,15 +520,64 @@ function keep_report_fields( array $data, array $postarr, array $unsanitized_pos
 	}
 
 	$stored_row = $stored->to_array();
+	$fixed      = [
+		'post_title',
+		'post_content',
+		'post_excerpt',
+		'post_author',
+		'post_date',
+		'post_date_gmt',
+		'post_name',
+		'post_type',
+		'post_parent',
+		'post_password',
+		'comment_status',
+		'ping_status',
+		'menu_order',
+	];
 
-	foreach ( [ 'post_title', 'post_content', 'post_author', 'post_date', 'post_date_gmt', 'post_name' ] as $field ) {
-		$data[ $field ] = wp_slash( (string) $stored_row[ $field ] );
+	foreach ( $fixed as $field ) {
+		$data[ $field ] = wp_slash( $stored_row[ $field ] );
+	}
+
+	// Core drops the `__trashed` suffix from the slug on a restore, which the loop above would put back.
+	if ( $stored->post_status === 'trash' && ( $data['post_status'] ?? '' ) !== 'trash' ) {
+		$data['post_name'] = (string) $stored->ID;
 	}
 
 	// Trash and its restore are the only status writes besides set_status(): core never gives a report auto-draft or
 	// inherit, and a restore lands on a report status through the wp_untrash_post_status filter.
 	if ( ! in_array( $data['post_status'] ?? '', [ ...STATUSES, 'trash' ], true ) ) {
 		$data['post_status'] = wp_slash( (string) $stored_row['post_status'] );
+	}
+
+	return $data;
+}
+
+/**
+ * Keeps an existing attachment off a report unless a manager moves it there.
+ *
+ * Core lets a user who cannot edit a report move their own attachment under it, through `POST /wp/v2/media/{id}` and
+ * the media modal's `save-attachment`, and neither checks the new parent. Attaching a new file, as Screenshots does, is
+ * not an update. Core filters an attachment's row through `wp_insert_attachment_data`, not `wp_insert_post_data`.
+ *
+ * @param array<string, mixed> $data                Slashed row about to be written.
+ * @param array<string, mixed> $postarr             Sanitised arguments, including the `ID` of an update.
+ * @param array<string, mixed> $unsanitized_postarr Arguments as passed.
+ * @param bool                 $update              Whether an existing post is being updated.
+ * @return array<string, mixed> The row.
+ */
+function keep_screenshot_parent( array $data, array $postarr, array $unsanitized_postarr, bool $update ): array {
+	$parent_id = (int) ( $data['post_parent'] ?? 0 );
+
+	if ( ! $update || ( $data['post_type'] ?? '' ) !== 'attachment' || $parent_id <= 0 || get_post_type( $parent_id ) !== POST_TYPE ) {
+		return $data;
+	}
+
+	$stored = get_post( (int) $postarr['ID'] );
+
+	if ( $stored instanceof WP_Post && (int) $stored->post_parent !== $parent_id && ! can_triage() ) {
+		$data['post_parent'] = (int) $stored->post_parent;
 	}
 
 	return $data;
@@ -661,9 +718,17 @@ function validate_page_url( mixed $value, WP_REST_Request $request, string $para
 	}
 
 	if ( ! is_same_site( (string) $value ) ) {
+		$home      = home_url();
+		$port      = effective_port( $home );
+		$authority = wp_parse_url( $home, PHP_URL_HOST ) . ( $port === default_port( (string) wp_parse_url( $home, PHP_URL_SCHEME ) ) ? '' : ':' . $port );
+
 		return new WP_Error(
 			'uat_checklist_page_url_foreign',
-			__( 'The page address must be on this site.', 'uat-checklist' ),
+			sprintf(
+				/* translators: %s: the host this site is set up to use, with its port when it is not the default, such as "example.com" or "localhost:8888". */
+				__( 'The page address must be on %s, the address this site is set up to use. Open the site at that address and send the report again.', 'uat-checklist' ),
+				$authority
+			),
 			[ 'status' => 400 ]
 		);
 	}
@@ -772,6 +837,19 @@ function sanitize_page_title( mixed $value ): string {
  */
 function encode_for_storage( string $text ): string {
 	return htmlspecialchars( $text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );
+}
+
+/**
+ * Escapes text a tester typed for HTML output, encoding an ampersand even when it starts what looks like an entity.
+ *
+ * Not esc_html(), which leaves an existing entity alone: describe() returns the text as typed, so a tester who typed
+ * `&lt;b&gt;` would see `<b>` after esc_html() decoded it in the browser.
+ *
+ * @param string $text Text as typed, from describe() or a page title.
+ * @return string Text safe to print between tags.
+ */
+function escape_text( string $text ): string {
+	return htmlspecialchars( $text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', true );
 }
 
 /**
@@ -1067,9 +1145,12 @@ function save_report( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 			wp_delete_file( $upload['file'] );
 		}
 
-		$report_id->add_data( [ 'status' => 500 ] );
-
-		return $report_id;
+		// The error can hold database text, which the tester must not see.
+		return new WP_Error(
+			'hm_uat_checklist_report_not_saved',
+			__( 'Your report could not be saved. Try again in a few seconds.', 'uat-checklist' ),
+			[ 'status' => 500 ]
+		);
 	}
 
 	$report = get_post( $report_id );
@@ -1080,9 +1161,13 @@ function save_report( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		if ( is_wp_error( $attached ) ) {
 			wp_delete_file( $upload['file'] );
 			wp_delete_post( $report_id, true );
-			$attached->add_data( [ 'status' => 500 ] );
 
-			return $attached;
+			// The error can hold database text, which the tester must not see.
+			return new WP_Error(
+				'hm_uat_checklist_screenshot_not_saved',
+				__( 'Your screenshot could not be saved, so the report was not sent. Try again, or send it without the screenshot.', 'uat-checklist' ),
+				[ 'status' => 500 ]
+			);
 		}
 	}
 
