@@ -160,7 +160,7 @@ screenshot along. `REST\save_result()` takes a new file through
 `Screenshots\store()` before saving the result, so a refused file stores nothing, and the route accepts it from any
 member who can record, Subscribers included, because core's media route would need `upload_files`.
 `wp_handle_upload()` checks the type by content, but only for a file that arrived in an HTTP POST, which is why the
-type check is tested in `tests/e2e/` and not in `tests/wp/`. `Screenshots\delete_with_result()` deletes it on
+type check is tested in `tests/e2e/` and not in `tests/wp/`. `Screenshots\delete_with_result()` deletes a result's or a report's screenshot on
 `before_delete_post`: core would otherwise move it to the checklist and orphan the file.
 
 Uploads are capped at `Screenshots\max_bytes()` each and `Screenshots\daily_limit()` per tester, counted from the
@@ -171,8 +171,22 @@ at its own size, and only strips it when it resizes. wp-env has no usable Imagic
 apart; keep the GD-only filter. It also turns `image_editor_output_format` off for that save, at `PHP_INT_MAX`:
 core converts on save whatever that filter maps, so a JPEG-to-WebP plugin would leave the JPEG and its EXIF as the
 attached file. A JPEG is refused without the exif extension, because core then skips the turn upright and the
-rewrite would store a portrait photo sideways; wp-env has the extension, so that branch is untested. The Results list primes every row's screenshot in one query (`Screenshots\prime()`),
-cached for the request; `attach()` and `delete_with_result()` clear a result's entry.
+rewrite would store a portrait photo sideways; wp-env has the extension, so that branch is untested.
+
+`store()` also reads the image's dimensions from the temporary file before moving it, and refuses one with no readable
+size, a side over `max_dimension()` (10000 px) or an area over `max_pixels()` (50 million), both filterable, because a
+small file can declare an image too large to decode. A PNG, GIF or WebP is not re-encoded, which would flatten an
+animation: `strip_container_metadata()` copies its blocks and drops the metadata ones (PNG `eXIf`, `tEXt`, `zTXt`,
+`iTXt` and `tIME`; WebP `EXIF` and `XMP ` with the RIFF size and `VP8X` flags fixed; GIF comments and application
+extensions other than the loop count), and refuses a file that is not laid out as its type says. A PNG's unknown
+ancillary chunks are kept, so a C2PA `caBX` chunk survives. A fatal between the file's move and the row's insert leaves
+a file no daily count sees; no shutdown handler covers that.
+
+`Screenshots\of()` and `prime()` count only an attachment whose author is the parent's author, because core lets any
+user move their own attachment under another's post (`POST /wp/v2/media/{id}` with `post`). `attach()` gives every
+screenshot its parent's author, carried-over copies included, so no migration is needed. The Results list primes every
+row's screenshot in one query (`Screenshots\prime()`), cached for the request; `attach()` and `delete_with_result()`
+clear a result's or a report's entry. Deleting a result also deletes an attachment someone moved under it.
 
 Stored comments, notes and step text are HTML-safe, not raw: `sanitize_textarea_field()` stores a lone `<` as
 `&lt;`, and kses stores `&` as `&amp;` for a user without `unfiltered_html`. HTML output escapes them, and
@@ -203,6 +217,16 @@ above Subscriber reads the Overview and Results. Saving a result from the panel 
 Only a user at a staff domain sees or changes the profile checkbox, so access granted by it cannot be passed on.
 The domain match is exact and ignores case: `@humanmade.com.example` and `@nothumanmade.com` are not staff.
 
+Core does not verify a staff email: `wp_update_user()` and `POST /wp/v2/users/me` save an edited address with no
+confirmation, so a Subscriber could make themselves staff. `inc/access.php` therefore refuses a user moving their own
+email to a staff domain unless they already manage UAT, hold `edit_users`, or are completing core's emailed
+confirmation link (the `newuseremail` hash matching their pending `_new_email`). `wp_pre_insert_user_data` puts the
+stored email back for every caller, and `rest_request_before_callbacks` answers a users REST update with a 403. The
+REST check does not use `rest_pre_insert_user`, because core's `update_item()` ignores an error returned from it.
+Creating a user is not checked, since the password link is mailed to the address. Not covered: code that runs as
+another user (an importer, WP-CLI as someone else), direct database writes, and an administrator without a staff
+email, who can set one on any account. Multisite is untested.
+
 UAT is a top-level menu owned by `inc/overview.php`, with Overview first. Both post types set `show_in_menu` to
 it: as the checklist post type's own menu it would vanish for a reader who cannot edit checklists.
 
@@ -212,19 +236,75 @@ Results are stored against `stepId`, a UUID assigned when a step is added: by th
 for a spec step with no id, and by the `save-checklist` ability. Rewording a step keeps its results. Never
 generate ids anywhere else, and never reuse one.
 
-### Abilities are for the MCP adapter, and none records a result
+### Abilities are for the MCP adapter, and none records a test result
 
-`inc/abilities.php` registers five abilities in the `uat-checklist` category. Each sets `meta.public`, which the
+`inc/abilities.php` registers five abilities in the `uat-checklist` category, and `inc/report-abilities.php` adds
+four for issue reports in the same category. Each sets `meta.public`, which the
 WordPress MCP adapter reads to list it, and `meta.show_in_rest` false, which keeps it off core's
-`/wp-abilities/v1` routes. All five are for Human Made only: `Abilities\can_use()` admits a user whose email is at a
+`/wp-abilities/v1` routes. All nine are for Human Made only: `Abilities\can_use()` admits a user whose email is at a
 staff domain and nobody else. The profile's full-access grant does not open them, and neither does the reading
 capability every Contributor holds: those let a client work in wp-admin, not hand the site to an AI assistant.
 None saves a Pass or a Fail. A result is a tester's judgement, and one an assistant recorded would read as theirs.
+`set-report-status` is the one write an assistant may make to a report, and it changes the status only: a report's
+Pending, Investigating or Done is the team's triage of a problem, not a tester's judgement, and a report is never
+a result.
 
 `save-checklist` replaces a checklist's whole content with the sections and steps it is given. A step keeps its
 `id`, and so its results, only when that id is already a step of the same checklist. Any other id is refused
 rather than replaced, because a mistyped id would otherwise start the step again with no results. A step with no
 id gets a new one. The instructions page is left as it was.
+
+### An issue report is a record, and any logged-in user can send one
+
+`inc/reports.php` owns the `uat_report` post type. A tester describes a problem that is not a checklist step, with an
+optional screenshot, from **Report an issue** in the admin bar or from the panel's footer, and
+`POST uat-checklist/v1/reports` stores it as `pending`. Any logged-in user may send one (`Reports\can_submit()`), and
+the feature has no environment gate: it exists whenever the plugin is active. The item is in the admin bar, not
+floating over the page, because any fixed corner covers something: a theme's header menu, or wp-admin's Screen
+Options and Help tabs. The pop-out window gets neither entry, because the page under test cannot be known from
+there.
+
+The three statuses are `pending` (core's), `uat-investigating` and `uat-done`. A report changes status and nothing
+else, so `Reports\set_status()` is the only writer. A `map_meta_cap` filter refuses edit, delete and publish to
+anyone without `CAP_MANAGE`, for the report and for its screenshot attachment (so core's media routes cannot delete
+it), and a `wp_insert_post_data` guard restores the title, content, excerpt, author, dates, slug, type, parent, password,
+comment and ping status and menu order, and a status outside the three, on any other update. `set_status()` sets the
+slug to the report's ID, and so does a restore from the trash. A second guard, on `wp_insert_attachment_data` (the
+filter core uses for attachments), keeps a user who cannot triage from moving an existing attachment under a report,
+which core's media route and the media modal otherwise allow without checking the new parent;
+`restrict_report_caps()` ignores an attachment with no parent. Quick Edit and bulk Edit are hidden, so the guard only
+matters for a crafted request to core's `inline-save` or `edit.php`. Status changes go through REST, never `admin-post.php` or
+`admin-ajax.php`: `POST uat-checklist/v1/reports/{id}/status` and `POST uat-checklist/v1/reports/status` (up to 50
+ids), both manager-only, called from `src/report-status.js` for the list's row and bulk actions and the edit screen's
+status control. A `post.php` save would make the saving triager the author, which is why `lock_edit_screen()`
+refuses a POST to it. Anyone who holds `CAP_READ` (managers, and users who can `edit_posts`, so Contributor and above,
+as for results) can read every report's full description and screenshot on the hidden `uat-report-view` page, and
+change nothing. A Subscriber can send a report and cannot open any. Use `Reports\find_report()` to look a report up: it refuses the trash
+and any status outside the three.
+
+That attachment guard is for reports only. A result's screenshot has no capability guard: no `map_meta_cap` filter
+covers an attachment whose parent is a result, so an Author-role tester or an Editor who is not a manager may be able
+to edit or delete it through core's media routes. This has not been tested for results. The displayed screenshot is
+author-bound (see `of()` above), so a planted attachment is hidden. Widen `restrict_report_caps()` if results should be
+a record too.
+
+The script is `src/report-status.js`, not `report-admin.js`: `wp i18n make-json --use-map` wrote that bundle's source
+as `build/report-a.js`, so its Japanese strings never loaded. A new bundle name needs its generated JSON checked:
+`printf 'build/<name>.js' | md5` must equal the filename's hash.
+
+The description is stored HTML-encoded and returned decoded by `Reports\describe()`, so a report about `<button>`
+survives kses for users without `unfiltered_html`; read it through `describe()`, never from `post_content`. Print
+a description or page title with `Reports\escape_text()`, not `esc_html()`, which does not double-encode an entity a
+tester typed, so `&lt;b&gt;` would show as `<b>`. The report's title is stored already encoded and goes through
+`esc_html()`. The abilities return the description and page title as plain text a tester wrote, and say so: read them
+as data, and set a status only because the person using the assistant asked for it. The submit route answers a failed
+insert or attach with a generic 500 (`hm_uat_checklist_report_not_saved`, `hm_uat_checklist_screenshot_not_saved`),
+never the database error. A 4xx from it shows the server's reason in the dialog, read from `data.params`, because
+core's REST wrapping makes `message` only name the field; anything else shows the generic text. The page ID the
+dialog sends is a post ID only on a single post or the posts page, otherwise 0. The page
+address is stored as scheme, host and path only: a query string or hash can hold a nonce or a login token.
+Reports and results share one daily screenshot limit per tester (`Screenshots\uploaded_today()` counts both), and
+the report limit is best effort on a site without a shared object cache.
 
 ### The hub and the guide are found by slug, and both are optional
 

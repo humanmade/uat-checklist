@@ -24,12 +24,15 @@ function bootstrap(): void {
 	Checklists\bootstrap();
 	Results\bootstrap();
 	Screenshots\bootstrap();
+	Reports\bootstrap();
 	REST\bootstrap();
 	Admin\bootstrap();
+	Report_Admin\bootstrap();
 	Notifications\bootstrap();
 	Retests\bootstrap();
 	Overview\bootstrap();
 	Abilities\bootstrap();
+	Report_Abilities\bootstrap();
 	Panel\bootstrap();
 	Guide\bootstrap();
 	CLI\bootstrap();
