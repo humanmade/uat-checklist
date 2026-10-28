@@ -239,7 +239,7 @@ function init() {
 		panel.classList.toggle('uat-panel--no-admin-bar', !barShown);
 
 		// Inline because only the rendered layout knows it: items that do not fit wrap onto a second row below
-		// the bar's fixed-height box. On the root, so the report button reads it as the panel does.
+		// the bar's fixed-height box.
 		document.documentElement.style.setProperty(
 			'--uat-admin-bar-depth',
 			barShown ? `${adminBarDepth(adminBar, adminBarItems)}px` : '0px'
@@ -421,8 +421,6 @@ function init() {
 		// The admin bar item shows the panel is open with a class: its aria-expanded belongs to core's dropdown.
 		onToggle: (open) => {
 			adminBarItem?.parentElement.classList.toggle('is-panel-open', open);
-			// src/report.scss hides the top-right report button while the panel is open.
-			document.documentElement.dataset.uatPanelOpen = String(open);
 			if (open) {
 				window.localStorage.setItem(SEEN_KEY, '1');
 			}

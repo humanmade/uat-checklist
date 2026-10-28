@@ -36,6 +36,8 @@ const HUB_NODE_ID = 'uat-hub';
 
 const GUIDE_NODE_ID = 'uat-guide';
 
+const REPORT_NODE_ID = 'uat-report';
+
 /**
  * Default slug of the optional top-level hub page that lists a site's UAT pages. Filtered by
  * `hm_uat_checklist_hub_slug`.
@@ -57,6 +59,7 @@ function bootstrap(): void {
 	add_action( 'admin_bar_menu', __NAMESPACE__ . '\\add_node', 80 );
 	add_action( 'admin_bar_menu', __NAMESPACE__ . '\\add_hub_node', 81 );
 	add_action( 'admin_bar_menu', __NAMESPACE__ . '\\add_guide_node', 82 );
+	add_action( 'admin_bar_menu', __NAMESPACE__ . '\\add_report_node', 83 );
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue' );
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue_report' );
@@ -78,33 +81,14 @@ function should_load(): bool {
  * Returns whether the Report an issue dialog loads: for anyone who may submit a report, whether or not the panel
  * loads for them, once the build exists.
  *
- * Not in the pop-out window, which cannot tell which page is under test, and not on a block editor screen the panel
- * does not load on, where the top-right button would be all there is to show and it would sit over the editor's
- * own toolbar.
+ * Not in the pop-out window, which cannot tell which page is under test.
  *
  * @return bool Whether to load.
  */
 function report_should_load(): bool {
 	return Reports\can_submit()
 		&& file_exists( UAT_Checklist\PATH . 'build/report.asset.php' )
-		&& ! Blocks\is_window_view()
-		&& ( should_load() || ! is_editor_screen() );
-}
-
-/**
- * Returns whether this is a block editor or site editor screen, whose toolbar sits where the Report an issue
- * button would.
- *
- * @return bool Whether this is an editor screen.
- */
-function is_editor_screen(): bool {
-	if ( ! is_admin() ) {
-		return false;
-	}
-
-	$screen = get_current_screen();
-
-	return $screen !== null && ( $screen->is_block_editor() || $screen->base === 'site-editor' );
+		&& ! Blocks\is_window_view();
 }
 
 /**
@@ -162,6 +146,27 @@ function add_guide_node( WP_Admin_Bar $admin_bar ): void {
 			guide_page_id()
 		);
 	}
+}
+
+/**
+ * Adds the Report an issue item to the admin bar, beside the UAT item; src/report.js makes it open the dialog.
+ *
+ * @param WP_Admin_Bar $admin_bar Admin bar.
+ * @return void
+ */
+function add_report_node( WP_Admin_Bar $admin_bar ): void {
+	if ( ! report_should_load() ) {
+		return;
+	}
+
+	$admin_bar->add_node(
+		[
+			'id'    => REPORT_NODE_ID,
+			'title' => '<span class="ab-icon" aria-hidden="true"></span>'
+				. '<span class="ab-label">' . esc_html__( 'Report an issue', 'uat-checklist' ) . '</span>',
+			'href'  => '#',
+		]
+	);
 }
 
 /**
@@ -251,7 +256,7 @@ function published_page_id( string $slug, int $parent_id ): int {
  * the front end.
  *
  * The rules only declare the face: the browser downloads a file when the panel's text needs it. A user who gets only
- * the report button needs them too, as the button is on screen from the start and is set in the theme's face.
+ * the report dialog needs them too.
  *
  * @return void
  */
@@ -368,16 +373,14 @@ function inline_data( array $data ): string {
  * Returns what the report dialog shows and checks: the screen's page, the signed-in user and the limits.
  *
  * The address and title the report records are read from the browser when the dialog opens, which is also what it
- * shows. Only the page's ID is the server's to give, from report_page_id(). `toggle` is whether the top-right button
- * is added; the panel's footer opens the dialog wherever the panel loads.
+ * shows. Only the page's ID is the server's to give, from report_page_id().
  *
- * @return array{page: array{id: int}, user: string, toggle: bool, maxBytes: int, maxSize: string, maxLength: int, maxTitle: int} Report data.
+ * @return array{page: array{id: int}, user: string, maxBytes: int, maxSize: string, maxLength: int, maxTitle: int} Report data.
  */
 function report_data(): array {
 	return [
 		'page'      => [ 'id' => report_page_id() ],
 		'user'      => wp_get_current_user()->display_name,
-		'toggle'    => ! is_editor_screen(),
 		'maxBytes'  => Screenshots\max_bytes(),
 		'maxSize'   => size_format( Screenshots\max_bytes() ),
 		'maxLength' => Reports\DESCRIPTION_MAX_LENGTH,

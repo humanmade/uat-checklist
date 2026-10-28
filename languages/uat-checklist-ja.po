@@ -73,7 +73,7 @@ msgstr "ステップ"
 #: inc/report-admin.php:310
 #: inc/report-admin.php:710
 #: src/checklist-editor.js:74
-#: src/report.js:106
+#: src/report.js:107
 msgid "Page"
 msgstr "ページ"
 
@@ -81,7 +81,7 @@ msgstr "ページ"
 msgid "Last saved"
 msgstr "最終保存日時"
 
-#: inc/panel.php:122
+#: inc/panel.php:106
 #: src/lib/checklist.js:77
 #: src/panel.js:57
 #: src/panel.js:131
@@ -91,7 +91,7 @@ msgstr "テストチェックリスト"
 #. translators: Admin bar label beside the tick icon. Keep it as short as the English.
 #: inc/checklists.php:58
 #: inc/overview.php:48
-#: inc/panel.php:124
+#: inc/panel.php:108
 msgid "UAT"
 msgstr "UAT"
 
@@ -196,7 +196,7 @@ msgid "Loading…"
 msgstr "読み込み中…"
 
 #: src/panel.js:74
-#: src/report.js:80
+#: src/report.js:81
 msgid "Close"
 msgstr "閉じる"
 
@@ -329,7 +329,7 @@ msgstr "%1$s（%2$d / %3$d）"
 msgid "Open the instructions"
 msgstr "使い方のページを開く"
 
-#: inc/panel.php:146
+#: inc/panel.php:130
 msgid "UAT hub page"
 msgstr "UAT ハブページ"
 
@@ -357,7 +357,7 @@ msgstr "必須"
 msgid "%1$s (%2$d / %3$d required)"
 msgstr "%1$s（必須 %2$d / %3$d）"
 
-#: inc/panel.php:161
+#: inc/panel.php:145
 msgid "How to use the checklist"
 msgstr "テストチェックリストの使い方"
 
@@ -902,7 +902,7 @@ msgstr "再テスト待ちのステップを読み込めませんでした。"
 #: inc/report-admin.php:312
 #: blocks/step/edit.js:130
 #: blocks/step/edit.js:163
-#: src/report.js:124
+#: src/report.js:125
 msgid "Screenshot"
 msgstr "スクリーンショット"
 
@@ -924,7 +924,7 @@ msgstr "画像を見られないテスターのために、スクリーンショ
 
 #. translators: %s: the largest file size the site accepts, such as 2 MB.
 #: blocks/step/render.php:203
-#: src/report.js:150
+#: src/report.js:151
 #, php-format,js-format
 msgid "Optional. A JPEG, PNG, GIF or WebP image of up to %s."
 msgstr "任意。%s までの JPEG、PNG、GIF、WebP 画像。"
@@ -966,14 +966,14 @@ msgid "The screenshot is too large. Choose a smaller image."
 msgstr "スクリーンショットが大きすぎます。もっと小さい画像を選択してください。"
 
 #: blocks/step/render.php:207
-#: src/report.js:130
+#: src/report.js:131
 msgid "Remove screenshot"
 msgstr "スクリーンショットを削除"
 
 #: blocks/step/render.php:210
 #: src/lib/report-screenshot.js:72
 #: src/lib/step-form.js:137
-#: src/report.js:142
+#: src/report.js:143
 msgid "Add a screenshot"
 msgstr "スクリーンショットを追加"
 
@@ -1246,9 +1246,9 @@ msgstr "直近1日間に %s 件のレポートを送信しました。これが�
 msgid "You have added %s screenshots in the last day, the most a tester can. Send the report without one, or add it tomorrow."
 msgstr "直近1日間に %s 枚のスクリーンショットを追加しました。これが上限です。スクリーンショットなしで送信するか、明日追加してください。"
 
+#: inc/panel.php:166
 #: src/panel.js:99
-#: src/report.js:75
-#: src/report.js:243
+#: src/report.js:76
 msgid "Report an issue"
 msgstr "問題を報告"
 
@@ -1280,35 +1280,35 @@ msgstr[0] "%1$d 件のレポートを %2$s に変更しました。"
 msgid "%1$s could not be moved: %2$s"
 msgstr "%1$s を変更できませんでした: %2$s"
 
-#: src/report.js:92
+#: src/report.js:93
 msgid "What went wrong?"
 msgstr "どのような問題が起きましたか？"
 
-#: src/report.js:115
+#: src/report.js:116
 msgid "Signed in as"
 msgstr "ログイン中のユーザー"
 
-#: src/report.js:167
+#: src/report.js:168
 msgid "Submit report"
 msgstr "レポートを送信"
 
-#: src/report.js:335
+#: src/report.js:333
 msgid "Describe the problem first."
 msgstr "先に問題の内容を記入してください。"
 
-#: src/report.js:356
+#: src/report.js:354
 msgid "Uploading the screenshot…"
 msgstr "スクリーンショットをアップロード中…"
 
-#: src/report.js:357
+#: src/report.js:355
 msgid "Sending the report…"
 msgstr "レポートを送信中…"
 
-#: src/report.js:367
+#: src/report.js:365
 msgid "Thank you. Your report was sent."
 msgstr "ありがとうございます。レポートを送信しました。"
 
-#: src/report.js:381
+#: src/report.js:379
 msgid "The report could not be sent. Check your connection and try again."
 msgstr "レポートを送信できませんでした。接続を確認して、もう一度お試しください。"
 
