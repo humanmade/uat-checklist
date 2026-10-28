@@ -1,6 +1,6 @@
 /*
- * Issue reports: the button at the top right and the dialog it opens, the panel's footer button, the places that get
- * neither, and the triage screens a manager moves reports through.
+ * Issue reports: the admin bar item and the dialog it opens, the panel's footer button, the places that get neither,
+ * and the triage screens a manager moves reports through.
  */
 import {
 	expect,
@@ -127,10 +127,10 @@ const test = base.extend({
 
 /**
  * @param {import('@playwright/test').Page} page Page.
- * @return {import('@playwright/test').Locator} The button at the top right.
+ * @return {import('@playwright/test').Locator} The Report an issue item in the admin bar.
  */
 function toggle(page) {
-	return page.locator('button.uat-report-toggle');
+	return page.locator('#wp-admin-bar-uat-report > .ab-item');
 }
 
 /**
@@ -150,7 +150,7 @@ function status(page) {
 }
 
 /**
- * Opens the dialog from the top-right button and waits for it.
+ * Opens the dialog from the admin bar item and waits for it.
  *
  * @param {import('@playwright/test').Page} page Page.
  */
@@ -259,21 +259,23 @@ for (const [where, path] of [
 	['the front end', null],
 	['wp-admin', '/wp-admin/'],
 ]) {
-	test(`the report button is at the top right on ${where}, and its dialog names the tester and the page`, async ({
+	test(`the report item is in the admin bar on ${where}, and its dialog names the tester and the page`, async ({
 		page,
 		site,
 	}) => {
 		const target = path ?? (await site.createPage('Report target')).link;
 
 		await page.goto(target);
-		await expect(toggle(page)).toBeVisible();
-
-		const box = await toggle(page).boundingBox();
-		const viewport = page.viewportSize();
-		expect(box.x).toBeGreaterThan(viewport.width / 2);
-		expect(box.y).toBeLessThan(viewport.height / 2);
+		await expect(
+			page.locator('#wpadminbar').getByRole('button', {
+				name: 'Report an issue',
+			})
+		).toBeVisible();
+		const address = page.url();
 
 		await openDialog(page);
+		// The item is a `#` link, which would otherwise jump to the top of the page and add a history entry.
+		expect(page.url()).toBe(address);
 		await expect(dialog(page).getByLabel('What went wrong?')).toBeFocused();
 		await expect(dialog(page).locator('.uat-report__detail')).toHaveText([
 			new RegExp(`^${await page.title()}`),
@@ -288,6 +290,20 @@ for (const [where, path] of [
 		await expect(toggle(page)).toBeFocused();
 	});
 }
+
+test('on a phone the report item stays in the admin bar, named by its hidden label', async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 375, height: 700 });
+	await page.goto('/');
+
+	await expect(
+		page.locator('#wpadminbar').getByRole('button', {
+			name: 'Report an issue',
+		})
+	).toBeVisible();
+	await openDialog(page);
+});
 
 test('the dialog refuses an empty description, and the description stops at its limit', async ({
 	page,
@@ -560,7 +576,7 @@ test('Tab stays inside the dialog and a report can be sent from the keyboard', a
 	await expect(toggle(page)).toBeFocused();
 });
 
-test('while the panel is open the button gives way to the panel footer, which stays in reach and opens the dialog above the panel', async ({
+test('while the panel is open its footer opens the dialog too, stays in reach and opens it above the panel', async ({
 	page,
 	site,
 }) => {
@@ -568,14 +584,11 @@ test('while the panel is open the button gives way to the panel footer, which st
 		'Long',
 		Array.from({ length: 25 }, (_, i) => `Step number ${i + 1}`)
 	);
-	const root = page.locator('html');
 	const footerButton = panel(page).locator('.uat-panel__report');
 
-	await page.goto('/');
-	await expect(toggle(page)).toBeVisible();
 	await openChecklist(page, id);
-	await expect(root).toHaveAttribute('data-uat-panel-open', 'true');
-	await expect(toggle(page)).toBeHidden();
+	// The admin bar sits above the panel, so its item stays in reach as well.
+	await expect(toggle(page)).toBeVisible();
 
 	// The list outruns the panel, so the footer is pinned over it rather than at its end.
 	expect(
@@ -599,10 +612,6 @@ test('while the panel is open the button gives way to the panel footer, which st
 	await page.keyboard.press('Escape');
 	await expect(dialog(page)).toBeHidden();
 	await expect(footerButton).toBeFocused();
-
-	await panel(page).getByRole('button', { name: 'Close' }).click();
-	await expect(root).toHaveAttribute('data-uat-panel-open', 'false');
-	await expect(toggle(page)).toBeVisible();
 });
 
 test('the pop-out window has neither the button nor the footer entry', async ({
@@ -636,14 +645,17 @@ test('the pop-out window has neither the button nor the footer entry', async ({
 test.describe('as the manager', () => {
 	test.use({ storageState: storageState(USERS.manager) });
 
-	test('the block editor has no report button', async ({ page }) => {
+	test('the block editor has the report item, and it opens the dialog', async ({
+		page,
+	}) => {
 		await page.goto('/wp-admin/post-new.php?post_type=page');
 		await expect(page.locator('[name="editor-canvas"]')).toBeVisible();
 		await page.waitForLoadState('load');
 
-		// The script did run: the dialog is on the page, and only the button was left out.
-		await expect(dialog(page)).toHaveCount(1);
-		await expect(toggle(page)).toHaveCount(0);
+		// Full-screen mode hides the admin bar, so the click is dispatched rather than made with the mouse.
+		await expect(toggle(page)).toHaveCount(1);
+		await toggle(page).dispatchEvent('click');
+		await expect(dialog(page)).toBeVisible();
 	});
 
 	test('a row action moves a report without a page load, and a filtered list drops the row and updates its counts', async ({

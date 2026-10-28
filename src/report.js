@@ -1,9 +1,8 @@
 /*
- * Report an issue: a button at the top right of every screen, and the modal it opens. A tester describes a problem,
+ * Report an issue: an admin bar item on every screen, and the modal it opens. A tester describes a problem,
  * attaches a screenshot and sends it without leaving the page; the site records who they are and where they were.
- * While the panel is open the button is hidden by src/report.scss and the panel's footer opens the same dialog,
- * through the event src/lib/report-open.js names. inc/panel.php passes the page, the user and the limits, and leaves
- * the button out where it would cover an editor's toolbar.
+ * The panel's footer opens the same dialog, through the event src/lib/report-open.js names. inc/panel.php adds the
+ * item and passes the page, the user and the limits.
  */
 
 import apiFetch from '@wordpress/api-fetch';
@@ -22,6 +21,8 @@ const ROUTE = '/uat-checklist/v1/reports';
 const SCREENSHOT_FIELD = 'screenshot';
 const ACCEPT = 'image/png,image/jpeg,image/webp,image/gif';
 const DATA = window.hmUatChecklist?.report;
+// Panel\REPORT_NODE_ID in inc/panel.php, which core prefixes.
+const ADMIN_BAR_ITEM = '#wp-admin-bar-uat-report > .ab-item';
 
 /**
  * Returns a new element with a class and, optionally, text.
@@ -221,7 +222,7 @@ function visibleOpener(opener) {
 }
 
 /**
- * Adds the dialog, and the top-right button unless inc/panel.php left it out, and wires them to the report form.
+ * Adds the dialog, and wires it and the admin bar item, where inc/panel.php added one, to the report form.
  */
 function init() {
 	if (!DATA) {
@@ -237,14 +238,11 @@ function init() {
 
 	document.body.append(dialog);
 
-	if (DATA.toggle) {
-		const toggle = createButton(
-			'uat-report-toggle',
-			__('Report an issue', 'uat-checklist')
-		);
+	const adminBarItem = document.querySelector(ADMIN_BAR_ITEM);
 
-		bindReportOpener(toggle);
-		document.body.append(toggle);
+	if (adminBarItem) {
+		adminBarItem.setAttribute('role', 'button');
+		bindReportOpener(adminBarItem);
 	}
 
 	// A tick after the region is on screen, as some screen readers miss text set in the same task.
