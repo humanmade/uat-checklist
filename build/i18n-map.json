@@ -32,6 +32,13 @@
 	"src/lib/panel.js": [
 		"build/panel.js"
 	],
+	"src/lib/report-open.js": [
+		"build/panel.js",
+		"build/report.js"
+	],
+	"src/lib/report-screenshot.js": [
+		"build/report.js"
+	],
 	"src/lib/retests.js": [
 		"build/panel.js"
 	],
@@ -49,5 +56,11 @@
 	],
 	"src/panel.js": [
 		"build/panel.js"
+	],
+	"src/report-status.js": [
+		"build/report-status.js"
+	],
+	"src/report.js": [
+		"build/report.js"
 	]
 }
